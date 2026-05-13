@@ -904,19 +904,30 @@ async function syncUp() {
     toast('Datos en Google Sheets actualizados.');
   } catch(e) { document.getElementById('syncst').textContent = 'Error: ' + e.message; }
 }
-async function syncDown() {
+function syncDown() {
   const u = localStorage.getItem('script-url');
   if (!u) { toast('Configurá la URL primero.'); return; }
   document.getElementById('syncst').textContent = 'Descargando...';
-  try {
-    const r = await fetch(u + '?action=get');
-    const j = await r.json();
+  // Usar JSONP para evitar bloqueo CORS del navegador
+  const cbName = 'cb_' + Date.now();
+  const script = document.createElement('script');
+  script.src = u + '?action=get&callback=' + cbName;
+  window[cbName] = function(j) {
+    document.body.removeChild(script);
+    delete window[cbName];
     db = j.data || [];
     if (j.cols && j.cols.length) { cols = j.cols; buildHead(); }
     saveDB(); populateFilters(); renderTable();
     document.getElementById('syncst').textContent = 'Actualizado correctamente.';
     toast('Datos descargados de Google Sheets.');
-  } catch(e) { document.getElementById('syncst').textContent = 'Error: ' + e.message; }
+  };
+  script.onerror = function() {
+    document.body.removeChild(script);
+    delete window[cbName];
+    document.getElementById('syncst').textContent = 'Error al conectar con Sheets.';
+    toast('Error de conexión.');
+  };
+  document.body.appendChild(script);
 }
 
 // ── ESTADÍSTICAS ──────────────────────────────────────────────────────────────

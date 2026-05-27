@@ -894,42 +894,100 @@ function exportExcel() {
 }
 
 // ── SYNC SHEETS ───────────────────────────────────────────────────────────────
-async function syncUp() {
+/* =========================
+   DESCARGAR DATOS
+========================= */
+
+async function syncDown() {
+
   const u = localStorage.getItem('script-url');
-  if (!u) { toast('Configurá la URL primero.'); return; }
-  document.getElementById('syncst').textContent = 'Subiendo...';
-  try {
-    await fetch(u, { method: 'POST', body: JSON.stringify({ action: 'set', data: db, cols }) });
-    document.getElementById('syncst').textContent = 'Subido correctamente.';
-    toast('Datos en Google Sheets actualizados.');
-  } catch(e) { document.getElementById('syncst').textContent = 'Error: ' + e.message; }
-}
-function syncDown() {
-  const u = localStorage.getItem('script-url');
-  if (!u) { toast('Configurá la URL primero.'); return; }
+
+  if (!u) {
+    toast('Configurá la URL primero.');
+    return;
+  }
+
   document.getElementById('syncst').textContent = 'Descargando...';
-  // Usar JSONP para evitar bloqueo CORS del navegador
-  const cbName = 'cb_' + Date.now();
-  const script = document.createElement('script');
-  script.src = u + '?action=get&callback=' + cbName;
-  window[cbName] = function(j) {
-    document.body.removeChild(script);
-    delete window[cbName];
+
+  try {
+
+    const r = await fetch(u + '?action=getAll');
+
+    const j = await r.json();
+
     db = j.data || [];
-    if (j.cols && j.cols.length) { cols = j.cols; buildHead(); }
-    saveDB(); populateFilters(); renderTable();
-    document.getElementById('syncst').textContent = 'Actualizado correctamente.';
-    toast('Datos descargados de Google Sheets.');
-  };
-  script.onerror = function() {
-    document.body.removeChild(script);
-    delete window[cbName];
-    document.getElementById('syncst').textContent = 'Error al conectar con Sheets.';
-    toast('Error de conexión.');
-  };
-  document.body.appendChild(script);
+
+    saveDB();
+
+    populateFilters();
+
+    renderTable();
+
+    renderStats();
+
+    document.getElementById('syncst').textContent =
+      'Actualizado correctamente.';
+
+    toast('Datos descargados.');
+
+  } catch(e){
+
+    document.getElementById('syncst').textContent =
+      'Error al conectar.';
+
+    toast('Error: ' + e.message);
+  }
 }
 
+/* =========================
+   GUARDAR CAMBIOS
+========================= */
+
+async function syncUp(){
+
+  const u = localStorage.getItem('script-url');
+
+  if (!u) {
+    toast('Configurá la URL primero.');
+    return;
+  }
+
+  document.getElementById('syncst').textContent =
+    'Guardando cambios...';
+
+  try {
+
+    for(let row of db){
+
+      await fetch(u, {
+
+        method:'POST',
+
+        body:JSON.stringify({
+
+          action:'update',
+
+          data:row
+
+        })
+
+      });
+
+    }
+
+    document.getElementById('syncst').textContent =
+      'Cambios guardados.';
+
+    toast('Datos actualizados.');
+
+  } catch(e){
+
+    document.getElementById('syncst').textContent =
+      'Error: ' + e.message;
+
+    toast('Error al guardar.');
+  }
+}
 // ── ESTADÍSTICAS ──────────────────────────────────────────────────────────────
 function renderStats() {
   populateFilters();

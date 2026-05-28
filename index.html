@@ -792,38 +792,35 @@ async function saveAlumno() {
 }
 async function guardarRegistro(obj){
 
-  const u = localStorage.getItem('script-url');
-
-  if(!u){
-    toast('Configurá la URL.');
-    return;
-  }
+  console.log('GUARDANDO...', obj);
 
   try{
 
-    const action = obj.ID ? 'update' : 'add';
-
-    if(!obj.ID){
-      obj.ID = Date.now();
-    }
-
-    await fetch(u, {
+    const r = await fetch(API_URL, {
 
       method:'POST',
 
       body:JSON.stringify({
-        action:action,
+        action:'save',
         data:obj
       })
 
     });
 
-  } catch(e){
+    const t = await r.text();
+
+    console.log('RESPUESTA:', t);
+
+    alert('Registro enviado correctamente');
+
+  }catch(e){
 
     console.error(e);
 
-    toast('Error guardando registro.');
+    alert('ERROR: ' + e.message);
+
   }
+
 }
 function deleteAlumno(idx) {
   if (!confirm(`¿Eliminar: ${db[idx]['Apellidos']} ${db[idx]['Nombres']}?`)) return;

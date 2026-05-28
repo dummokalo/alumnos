@@ -768,29 +768,73 @@ function buildForm(data, lockPersona) {
 }
 
 async function saveAlumno() {
+
   const obj = {};
+
   cols.filter(c => c !== 'Ord').forEach(c => {
+
     const el = document.getElementById('f_' + c.replace(/\s/g,'_'));
+
     obj[c] = el ? el.value.trim() : '';
+
   });
-  if (!obj['Apellidos'] && !obj['Nombres']) { toast('Ingresá Apellidos o Nombres.'); return; }
-  if (addingFor) {
-    const base = db.find(a => a[COL_DNI] === addingFor || a['Apellidos'] === addingFor);
-    if (base) PERSONA_COLS.forEach(c => obj[c] = base[c] || '');
-    obj['Ord'] = db.length ? Math.max(...db.map(a => Number(a['Ord'])||0)) + 1 : 1;
-    db.push(obj); saveDB(); renderTable(); toast('Curso agregado.');
-    const k = addingFor; closeModal();
-    setTimeout(() => openHistorial(k), 80);
+
+  if (!obj['Apellidos'] && !obj['Nombres']) {
+
+    toast('Ingresá Apellidos o Nombres.');
+
     return;
+
   }
-  if (editIdx !== null) {
-    obj['Ord'] = db[editIdx]['Ord'];
-    db[editIdx] = obj; saveDB(); renderTable(); toast('Registro actualizado.'); closeModal(); return;
+
+  if(!obj.ID){
+
+    obj.ID = Date.now();
+
   }
-  obj['Ord'] = db.length ? Math.max(...db.map(a => Number(a['Ord'])||0)) + 1 : 1;
-  db.push(obj); saveDB(); renderTable(); toast('Registro agregado.'); closeModal();
+
+  try{
+
+    await guardarRegistro(obj);
+
+    if (editIdx !== null) {
+
+      obj['Ord'] = db[editIdx]['Ord'];
+
+      db[editIdx] = obj;
+
+      renderTable();
+
+      toast('Registro actualizado.');
+
+      closeModal();
+
+      return;
+
+    }
+
+    obj['Ord'] = db.length
+      ? Math.max(...db.map(a => Number(a['Ord'])||0)) + 1
+      : 1;
+
+    db.push(obj);
+
+    renderTable();
+
+    toast('Registro agregado.');
+
+    closeModal();
+
+  }catch(e){
+
+    console.error(e);
+
+    toast('Error guardando.');
+
+  }
+
 }
-async function guardarRegistro(obj){
+  async function guardarRegistro(obj){
   
 alert('guardarRegistro ejecutado');
   

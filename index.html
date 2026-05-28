@@ -791,7 +791,9 @@ async function saveAlumno() {
   db.push(obj); saveDB(); renderTable(); toast('Registro agregado.'); closeModal();
 }
 async function guardarRegistro(obj){
-
+  
+alert('guardarRegistro ejecutado');
+  
   console.log('GUARDANDO...', obj);
 
   try{

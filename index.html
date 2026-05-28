@@ -767,7 +767,7 @@ function buildForm(data, lockPersona) {
   });
 }
 
-function saveAlumno() {
+async function saveAlumno() {
   const obj = {};
   cols.filter(c => c !== 'Ord').forEach(c => {
     const el = document.getElementById('f_' + c.replace(/\s/g,'_'));
@@ -790,7 +790,41 @@ function saveAlumno() {
   obj['Ord'] = db.length ? Math.max(...db.map(a => Number(a['Ord'])||0)) + 1 : 1;
   db.push(obj); saveDB(); renderTable(); toast('Registro agregado.'); closeModal();
 }
+async function guardarRegistro(obj){
 
+  const u = localStorage.getItem('script-url');
+
+  if(!u){
+    toast('Configurá la URL.');
+    return;
+  }
+
+  try{
+
+    const action = obj.ID ? 'update' : 'add';
+
+    if(!obj.ID){
+      obj.ID = Date.now();
+    }
+
+    await fetch(u, {
+
+      method:'POST',
+
+      body:JSON.stringify({
+        action:action,
+        data:obj
+      })
+
+    });
+
+  } catch(e){
+
+    console.error(e);
+
+    toast('Error guardando registro.');
+  }
+}
 function deleteAlumno(idx) {
   if (!confirm(`¿Eliminar: ${db[idx]['Apellidos']} ${db[idx]['Nombres']}?`)) return;
   db.splice(idx, 1); saveDB(); renderTable(); toast('Eliminado.');

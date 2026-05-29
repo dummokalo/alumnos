@@ -787,15 +787,35 @@ async function saveAlumno() {
 
   }
 
-  if(!obj.ID){
+  const u = localStorage.getItem('script-url');
 
-    obj.ID = Date.now();
+  if (!u) {
+
+    toast('Configurá la URL.');
+
+    return;
 
   }
 
-  try{
+  try {
 
-    await guardarRegistro(obj);
+    const r = await fetch(u, {
+
+      method:'POST',
+
+      body:JSON.stringify({
+
+        action:'update',
+
+        data:obj
+
+      })
+
+    });
+
+    const t = await r.text();
+
+    console.log(t);
 
     if (editIdx !== null) {
 
@@ -825,15 +845,15 @@ async function saveAlumno() {
 
     closeModal();
 
-  }catch(e){
+  } catch(e){
 
     console.error(e);
 
-    toast('Error guardando.');
+    toast('Error guardando: ' + e.message);
 
   }
 
-}
+} 
   async function guardarRegistro(obj){
   
 alert('guardarRegistro ejecutado');

@@ -769,6 +769,13 @@ function buildForm(data, lockPersona) {
 
 async function saveAlumno() {
 
+  const btn = document.getElementById('btnGuardar');
+
+  if(btn.disabled) return;
+
+  btn.disabled = true;
+  btn.innerText = 'Guardando...';
+
   const obj = {};
 
   cols.filter(c => c !== 'Ord').forEach(c => {
@@ -783,6 +790,9 @@ async function saveAlumno() {
 
     toast('Ingresá Apellidos o Nombres.');
 
+    btn.disabled = false;
+    btn.innerText = 'Guardar';
+
     return;
 
   }
@@ -792,6 +802,9 @@ async function saveAlumno() {
   if (!u) {
 
     toast('Configurá la URL.');
+
+    btn.disabled = false;
+    btn.innerText = 'Guardar';
 
     return;
 
@@ -829,6 +842,9 @@ async function saveAlumno() {
 
       closeModal();
 
+      btn.disabled = false;
+      btn.innerText = 'Guardar';
+
       return;
 
     }
@@ -845,11 +861,17 @@ async function saveAlumno() {
 
     closeModal();
 
+    btn.disabled = false;
+    btn.innerText = 'Guardar';
+
   } catch(e){
 
     console.error(e);
 
     toast('Error guardando: ' + e.message);
+
+    btn.disabled = false;
+    btn.innerText = 'Guardar';
 
   }
 

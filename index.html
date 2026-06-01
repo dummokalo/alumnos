@@ -778,7 +778,7 @@ async function saveAlumno() {
 
   const obj = {};
 
-  cols.filter(c => c !== 'ID').forEach(c => {
+  cols.filter(c => c !== 'Ord').forEach(c => {
 
     const el = document.getElementById('f_' + c.replace(/\s/g,'_'));
 

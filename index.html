@@ -810,9 +810,6 @@ async function saveAlumno() {
 
   }
 
-  if (editIdx !== null) {
-  obj['Ord'] = db[editIdx]['Ord'];
-}
   try {
 
     const r = await fetch(u, {
@@ -879,6 +876,7 @@ async function saveAlumno() {
   }
 
 } 
+  
   async function guardarRegistro(obj){
   
 alert('guardarRegistro ejecutado');

@@ -129,7 +129,6 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
   <header>
     <h1>Gestión de Alumnos</h1>
     <span class="rbadge" id="rbadge">Solo lectura</span>
-    <span id="sync-badge" style="font-size:11px;background:rgba(186,117,23,.4);padding:2px 8px;border-radius:20px;display:none"></span>
     <button class="btn btnsm" id="rbtn" style="font-size:12px" onclick="toggleRole()">Ingresar como editor</button>
   </header>
   <nav>
@@ -350,8 +349,6 @@ const CLRS=['#185FA5','#3B6D11','#BA7517','#A32D2D','#1D9E75','#534AB7','#D85A30
 
 // ── ESTADO ───────────────────────────────────────────────────────────────────
 let db = [];           // array de objetos, cada uno es un registro
-let pendingSync = [];  // registros pendientes de enviar al Sheet
-let autoSyncTimer = null; // timer de sincronización automática
 let cols = [];         // columnas detectadas dinámicamente (en orden del Excel)
 let isEditor = false;
 let currentPage = 1;
@@ -377,9 +374,8 @@ window.onload = () => {
   renderMetrics();
   renderTable();
   document.addEventListener('click', e => { if (!e.target.closest('#sbox')) hideSR(); });
-  // Cargar pendientes del localStorage
-  try { pendingSync = JSON.parse(localStorage.getItem('pending-sync') || '[]'); } catch(e) { pendingSync = []; }
   startAutoSync();
+  setTimeout(flushQueue, 2000); // reintentar pendientes al cargar
 };
 
 function saveDB() {
@@ -779,9 +775,9 @@ function saveAlumno() {
   if (btn) { btn.disabled = true; btn.innerText = 'Guardando...'; }
 
   const obj = {};
-  cols.filter(c => c !== 'Ord').forEach(c => {
-    const el = document.getElementById('f_' + c.replace(/\s/g,'_'));
-    obj[c] = el ? el.value.trim() : '';
+  cols.filter(col => col !== 'Ord').forEach(col => {
+    const el = document.getElementById('f_' + col.replace(/\s/g,'_'));
+    obj[col] = el ? el.value.trim() : '';
   });
 
   if (!obj['Apellidos'] && !obj['Nombres']) {
@@ -792,10 +788,10 @@ function saveAlumno() {
 
   if (addingFor) {
     const base = db.find(a => a[COL_DNI] === addingFor || a['Apellidos'] === addingFor);
-    if (base) PERSONA_COLS.forEach(c => obj[c] = base[c] || '');
+    if (base) PERSONA_COLS.forEach(col => obj[col] = base[col] || '');
     obj['Ord'] = db.length ? Math.max(...db.map(a => Number(a['Ord'])||0))+1 : 1;
     db.push(obj); saveDB(); renderTable();
-    queueSync({ action:'save', data:obj });
+    sendRecord({ action:'save', data:obj });
     toast('Curso agregado.');
     const k = addingFor; closeModal();
     setTimeout(() => openHistorial(k), 80);
@@ -806,7 +802,7 @@ function saveAlumno() {
   if (editIdx !== null) {
     obj['Ord'] = db[editIdx]['Ord'];
     db[editIdx] = obj; saveDB(); renderTable();
-    queueSync({ action:'update', data:obj });
+    sendRecord({ action:'update', data:obj });
     toast('Registro actualizado.'); closeModal();
     if (btn) { btn.disabled = false; btn.innerText = 'Guardar'; }
     return;
@@ -814,17 +810,16 @@ function saveAlumno() {
 
   obj['Ord'] = db.length ? Math.max(...db.map(a => Number(a['Ord'])||0))+1 : 1;
   db.push(obj); saveDB(); renderTable();
-  queueSync({ action:'save', data:obj });
+  sendRecord({ action:'save', data:obj });
   toast('Registro agregado.'); closeModal();
   if (btn) { btn.disabled = false; btn.innerText = 'Guardar'; }
 }
-  
-  
+
 function deleteAlumno(idx) {
   if (!confirm(`¿Eliminar: ${db[idx]['Apellidos']} ${db[idx]['Nombres']}?`)) return;
   const ord = db[idx]['Ord'];
   db.splice(idx, 1); saveDB(); renderTable();
-  queueSync({ action:'delete', id: ord });
+  sendRecord({ action:'delete', id: ord });
   toast('Eliminado.');
 }
 
@@ -927,144 +922,133 @@ function exportExcel() {
 
 // ── SYNC SHEETS ───────────────────────────────────────────────────────────────
 
-// Agrega una operación a la cola y la procesa inmediatamente
-function queueSync(op) {
+// Envía un registro individual al Sheet via form POST (evita CORS)
+function sendRecord(op) {
   const u = localStorage.getItem('script-url');
-  if (!u) return; // sin URL configurada, no hay sync
-  pendingSync.push(op);
-  localStorage.setItem('pending-sync', JSON.stringify(pendingSync));
-  processPendingSync();
+  if (!u) return;
+  // Guardar en cola por si falla
+  let queue = [];
+  try { queue = JSON.parse(localStorage.getItem('sync-queue') || '[]'); } catch(e) {}
+  queue.push(op);
+  localStorage.setItem('sync-queue', JSON.stringify(queue));
+  flushQueue();
 }
 
-// Procesa la cola de operaciones pendientes una por una
-function processPendingSync() {
+let _flushing = false;
+function flushQueue() {
+  if (_flushing) return;
   const u = localStorage.getItem('script-url');
-  if (!u || !pendingSync.length) return;
-  const op = pendingSync[0];
-  sendToSheet(op, () => {
-    pendingSync.shift();
-    localStorage.setItem('pending-sync', JSON.stringify(pendingSync));
-    if (pendingSync.length) setTimeout(processPendingSync, 300);
-    updateSyncIndicator();
+  if (!u) return;
+  let queue = [];
+  try { queue = JSON.parse(localStorage.getItem('sync-queue') || '[]'); } catch(e) {}
+  if (!queue.length) return;
+  _flushing = true;
+  const op = queue[0];
+  postToSheet(u, op, () => {
+    let q = [];
+    try { q = JSON.parse(localStorage.getItem('sync-queue') || '[]'); } catch(e) {}
+    q.shift();
+    localStorage.setItem('sync-queue', JSON.stringify(q));
+    _flushing = false;
+    updateSyncBadge();
+    if (q.length) setTimeout(flushQueue, 400);
   });
 }
 
-// Envía una operación al Sheet via form POST (evita CORS)
-function sendToSheet(op, onSuccess) {
-  const u = localStorage.getItem('script-url');
-  if (!u) return;
+function postToSheet(u, op, onDone) {
   const form = document.createElement('form');
   form.method = 'POST';
   form.action = u;
-  form.target = 'sync-iframe';
+  form.target = '_syncframe';
   form.style.display = 'none';
-  const input = document.createElement('input');
-  input.type = 'hidden';
-  input.name = 'payload';
-  input.value = JSON.stringify({ ...op, cols });
-  form.appendChild(input);
-  let iframe = document.getElementById('sync-iframe');
-  if (!iframe) {
-    iframe = document.createElement('iframe');
-    iframe.name = 'sync-iframe';
-    iframe.id = 'sync-iframe';
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
+  const inp = document.createElement('input');
+  inp.type = 'hidden';
+  inp.name = 'payload';
+  inp.value = JSON.stringify({ ...op, cols });
+  form.appendChild(inp);
+  let fr = document.getElementById('_syncframe');
+  if (!fr) {
+    fr = document.createElement('iframe');
+    fr.name = '_syncframe';
+    fr.id = '_syncframe';
+    fr.style.display = 'none';
+    document.body.appendChild(fr);
   }
-  iframe.onload = function() {
-    document.body.removeChild(form);
-    if (onSuccess) onSuccess();
-  };
+  fr.onload = () => { document.body.removeChild(form); if (onDone) onDone(); };
   document.body.appendChild(form);
   form.submit();
 }
 
-// Sincronización automática: baja cambios del Sheet cada 2 minutos
+function updateSyncBadge() {
+  let q = [];
+  try { q = JSON.parse(localStorage.getItem('sync-queue') || '[]'); } catch(e) {}
+  const el = document.getElementById('syncst');
+  if (el) el.textContent = q.length ? q.length + ' cambio(s) pendiente(s)...' : '';
+}
+
+// Auto-sync: baja cambios del Sheet cada 2 minutos silenciosamente
 function startAutoSync() {
-  if (autoSyncTimer) clearInterval(autoSyncTimer);
-  autoSyncTimer = setInterval(() => {
+  setInterval(() => {
     const u = localStorage.getItem('script-url');
-    if (!u) return;
-    syncDownSilent();
-  }, 120000); // 2 minutos
+    if (!u || !db.length) return;
+    const cbName = 'cb_' + Date.now();
+    const sc = document.createElement('script');
+    sc.src = u + '?action=getchanges&callback=' + cbName;
+    window[cbName] = function(j) {
+      try { document.body.removeChild(sc); } catch(e) {}
+      delete window[cbName];
+      if (!j.data || !j.data.length) return;
+      let changed = 0;
+      j.data.forEach(remote => {
+        const idx = db.findIndex(x => String(x['Ord']) === String(remote['Ord']));
+        if (idx >= 0) { db[idx] = { ...db[idx], ...remote }; changed++; }
+        else { db.push(remote); changed++; }
+      });
+      if (changed) { saveDB(); renderTable(); }
+    };
+    sc.onerror = () => { try { document.body.removeChild(sc); } catch(e) {} delete window[cbName]; };
+    document.body.appendChild(sc);
+  }, 120000);
 }
 
-// Baja cambios del Sheet sin reemplazar toda la base (solo actualiza/agrega)
-function syncDownSilent() {
-  const u = localStorage.getItem('script-url');
-  if (!u) return;
-  const cbName = 'cb_' + Date.now();
-  const script = document.createElement('script');
-  script.src = u + '?action=getchanges&callback=' + cbName;
-  window[cbName] = function(j) {
-    document.body.removeChild(script);
-    delete window[cbName];
-    if (!j.data || !j.data.length) return;
-    let changed = 0;
-    j.data.forEach(remote => {
-      const idx = db.findIndex(x => String(x['Ord']) === String(remote['Ord']));
-      if (idx >= 0) { db[idx] = { ...db[idx], ...remote }; changed++; }
-      else { db.push(remote); changed++; }
-    });
-    if (changed) {
-      saveDB(); populateFilters(); renderTable();
-      updateSyncIndicator(changed + ' cambios recibidos');
-    }
-  };
-  script.onerror = function() {
-    try { document.body.removeChild(script); } catch(e) {}
-    delete window[cbName];
-  };
-  document.body.appendChild(script);
-}
-
-// Baja TODOS los datos del Sheet (solo para primera carga o reset)
+// Baja TODOS los datos del Sheet (primera carga)
 function syncDown() {
   const u = localStorage.getItem('script-url');
   if (!u) { toast('Configurá la URL primero.'); return; }
-  updateSyncIndicator('Descargando...');
+  document.getElementById('syncst').textContent = 'Descargando...';
   const cbName = 'cb_' + Date.now();
-  const script = document.createElement('script');
-  script.src = u + '?action=get&callback=' + cbName;
+  const sc = document.createElement('script');
+  sc.src = u + '?action=get&callback=' + cbName;
   window[cbName] = function(j) {
-    document.body.removeChild(script);
+    try { document.body.removeChild(sc); } catch(e) {}
     delete window[cbName];
     db = j.data || [];
     if (j.cols && j.cols.length) { cols = j.cols; buildHead(); }
     saveDB(); populateFilters(); renderTable();
-    updateSyncIndicator('Descargado correctamente.');
-    toast('Datos descargados de Google Sheets.');
+    document.getElementById('syncst').textContent = 'Descargado correctamente.';
+    toast('Datos descargados.');
   };
-  script.onerror = function() {
-    try { document.body.removeChild(script); } catch(e) {}
+  sc.onerror = () => {
+    try { document.body.removeChild(sc); } catch(e) {}
     delete window[cbName];
-    updateSyncIndicator('Error al conectar.');
-    toast('Error de conexión.');
+    document.getElementById('syncst').textContent = 'Error de conexión.';
+    toast('Error al conectar.');
   };
-  document.body.appendChild(script);
+  document.body.appendChild(sc);
 }
 
-// Sube TODOS los datos al Sheet (para sincronización completa manual)
+// Sube TODOS los datos al Sheet (sync completo manual)
 function syncUp() {
   const u = localStorage.getItem('script-url');
   if (!u) { toast('Configurá la URL primero.'); return; }
-  if (!db.length) { toast('No hay datos para subir.'); return; }
-  updateSyncIndicator('Subiendo...');
-  sendToSheet({ action:'set', data:db }, () => {
-    updateSyncIndicator('Subido correctamente.');
+  if (!db.length) { toast('No hay datos.'); return; }
+  document.getElementById('syncst').textContent = 'Subiendo...';
+  postToSheet(u, { action:'set', data:db }, () => {
+    document.getElementById('syncst').textContent = 'Subido correctamente.';
     toast('Datos en Google Sheets actualizados.');
   });
 }
 
-function updateSyncIndicator(msg) {
-  const el = document.getElementById('syncst');
-  if (el && msg) el.textContent = msg;
-  const badge = document.getElementById('sync-badge');
-  if (badge) {
-    badge.textContent = pendingSync.length ? pendingSync.length + ' pendiente(s)' : '';
-    badge.style.display = pendingSync.length ? '' : 'none';
-  }
-}
 
 // ── ESTADÍSTICAS ──────────────────────────────────────────────────────────────
 function renderStats() {
@@ -1438,386 +1422,75 @@ function doGet(e) {
   const rows = sheet.getDataRange().getValues();
   const headers = rows[0].map(h => String(h).trim());
   let result;
+
   if (action === 'get') {
     const data = rows.slice(1).map(r => {
-      const obj = {}; headers.forEach((h,i) => obj[h]=r[i]); return obj;
+      const obj = {}; headers.forEach((h,i) => obj[h] = r[i]); return obj;
     });
     result = JSON.stringify({ data, cols: headers });
   } else if (action === 'getchanges') {
-    const data = rows.slice(1).slice(-100).map(r => {
-      const obj = {}; headers.forEach((h,i) => obj[h]=r[i]); return obj;
+    // Devuelve los últimos 200 registros para detectar cambios recientes
+    const data = rows.slice(1).slice(-200).map(r => {
+      const obj = {}; headers.forEach((h,i) => obj[h] = r[i]); return obj;
     });
     result = JSON.stringify({ data, cols: headers });
   } else {
     result = JSON.stringify({ ok: true });
   }
-  if (cb) return ContentService.createTextOutput(cb+'('+result+')').setMimeType(ContentService.MimeType.JAVASCRIPT);
-  return ContentService.createTextOutput(result).setMimeType(ContentService.MimeType.JSON);
+
+  if (cb) return ContentService.createTextOutput(cb + '(' + result + ')')
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  return ContentService.createTextOutput(result)
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function doPost(e) {
   let body;
   try { body = JSON.parse(e.postData.contents); }
   catch(err) { body = JSON.parse(e.parameter.payload || '{}'); }
+
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
   const rows = sheet.getDataRange().getValues();
   const headers = rows[0].map(h => String(h).trim());
   const ordIdx = headers.indexOf('Ord');
 
   if (body.action === 'save') {
+    // Nuevo registro
     const cls = body.cols || headers;
-    sheet.appendRow(cls.map(c => body.data[c] || ''));
+    sheet.appendRow(cls.map(c => (body.data && body.data[c] !== undefined) ? body.data[c] : ''));
 
   } else if (body.action === 'update') {
-    const ord = String(body.data['Ord'] || '');
+    // Actualizar fila existente por Ord
+    const ord = String(body.data && body.data['Ord'] ? body.data['Ord'] : '');
     for (let i = 1; i < rows.length; i++) {
       if (String(rows[i][ordIdx]) === ord) {
-        headers.forEach((h,j) => { if (body.data[h]!==undefined) sheet.getRange(i+1,j+1).setValue(body.data[h]||''); });
+        headers.forEach((h, j) => {
+          if (body.data[h] !== undefined)
+            sheet.getRange(i+1, j+1).setValue(body.data[h] !== null ? body.data[h] : '');
+        });
         break;
       }
     }
 
   } else if (body.action === 'delete') {
+    // Eliminar fila por Ord
     const ord = String(body.id || '');
     for (let i = 1; i < rows.length; i++) {
       if (String(rows[i][ordIdx]) === ord) { sheet.deleteRow(i+1); break; }
     }
 
   } else if (body.action === 'set') {
-    const cls = body.cols || Object.keys((body.data||[])[0]||{});
+    // Sync completo
+    const cls = body.cols || Object.keys((body.data || [])[0] || {});
     sheet.clearContents();
     sheet.appendRow(cls);
-    (body.data||[]).forEach(a => sheet.appendRow(cls.map(c => a[c]||'')));
+    (body.data || []).forEach(a => sheet.appendRow(cls.map(c => a[c] || '')));
   }
 
-  return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify({ ok: true }))
+    .setMimeType(ContentService.MimeType.JSON);
 }`;
 }
-DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestión de Alumnos</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-<style>
-:root{--p:#185FA5;--pl:#E6F1FB;--pd:#0C447C;--ok:#3B6D11;--okl:#EAF3DE;--err:#A32D2D;--errl:#FCEBEB;--warn:#BA7517;--warnl:#FAEEDA;--g:#5F5E5A;--gl:#F1EFE8;--t:#2C2C2A;--tm:#888780;--bg:#fff;--bg2:#F1EFE8;--bd:#D3D1C7;--r:8px;--rl:12px}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;background:var(--bg2);color:var(--t);font-size:15px}
-#app{display:flex;flex-direction:column;min-height:100vh}
-header{background:var(--pd);color:#fff;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px;gap:10px}
-header h1{font-size:17px;font-weight:500;flex:1}
-.rbadge{font-size:12px;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;white-space:nowrap}
-nav{background:var(--p);display:flex;overflow-x:auto}
-nav button{color:rgba(255,255,255,.8);background:none;border:none;padding:10px 18px;font-size:14px;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all .15s}
-nav button.active,nav button:hover{color:#fff;border-bottom-color:#fff;background:rgba(255,255,255,.1)}
-main{flex:1;padding:1.5rem;max-width:1300px;margin:0 auto;width:100%}
-.card{background:var(--bg);border:.5px solid var(--bd);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
-.card-title{font-size:15px;font-weight:500;margin-bottom:1rem}
-.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1rem}
-.metric{background:var(--bg2);border-radius:var(--r);padding:.75rem 1rem}
-.mlabel{font-size:12px;color:var(--tm);margin-bottom:4px}
-.mval{font-size:22px;font-weight:500}
-.twrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:var(--bg2);font-weight:500;text-align:left;padding:8px 10px;border-bottom:1px solid var(--bd);white-space:nowrap;cursor:pointer;user-select:none}
-th:hover{background:#e5e3dc}
-td{padding:7px 10px;border-bottom:.5px solid var(--bd);vertical-align:middle;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-tr:hover td{background:var(--pl)}
-.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500}
-.bok{background:var(--okl);color:var(--ok)}.berr{background:var(--errl);color:var(--err)}.bgray{background:var(--gl);color:var(--g)}.bwarn{background:var(--warnl);color:var(--warn)}
-.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem;align-items:center}
-input,select,textarea{border:.5px solid var(--bd);border-radius:var(--r);padding:7px 10px;font-size:14px;background:var(--bg);color:var(--t);outline:none;font-family:inherit;width:100%}
-input:focus,select:focus,textarea:focus{border-color:var(--p);box-shadow:0 0 0 2px rgba(24,95,165,.15)}
-.sbox{position:relative}
-.sbox input{padding-right:28px}
-.sclear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--tm);font-size:18px;line-height:1;padding:0;width:auto}
-#sr{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg);border:.5px solid var(--bd);border-radius:var(--r);z-index:50;max-height:300px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.12);display:none}
-.sri{padding:10px 12px;cursor:pointer;border-bottom:.5px solid var(--bd);font-size:13px}
-.sri:hover{background:var(--pl)}.sri:last-child{border:none}
-.sri-name{font-weight:500}.sri-sub{color:var(--tm);font-size:12px;margin-top:2px}
-.btn{border:.5px solid var(--bd);border-radius:var(--r);padding:7px 14px;font-size:14px;cursor:pointer;background:var(--bg);color:var(--t);transition:all .15s;font-family:inherit;white-space:nowrap}
-.btn:hover{background:var(--bg2)}.btn:active{transform:scale(.98)}
-.btnp{background:var(--p);color:#fff;border-color:var(--p)}.btnp:hover{background:var(--pd)}
-.btnerr{background:var(--err);color:#fff;border-color:var(--err)}
-.btnsm{padding:4px 10px;font-size:12px}
-.bico{padding:4px 7px;font-size:15px;line-height:1;border:none;background:none;cursor:pointer;border-radius:var(--r)}.bico:hover{background:var(--bg2)}
-.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center;padding:1rem}
-.mbg.open{display:flex}
-.modal{background:var(--bg);border-radius:var(--rl);padding:1.5rem;width:100%;max-width:680px;max-height:92vh;overflow-y:auto}
-.mhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
-.mtitle{font-size:16px;font-weight:500}
-.mclose{background:none;border:none;font-size:22px;cursor:pointer;color:var(--tm);padding:0 4px;line-height:1}
-.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.fg{display:flex;flex-direction:column;gap:4px}.fg.full{grid-column:1/-1}
-label{font-size:11px;font-weight:500;color:var(--tm);text-transform:uppercase;letter-spacing:.03em}
-textarea{resize:vertical;min-height:60px}
-.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem}
-.cbox{position:relative;height:260px}
-.dzone{border:2px dashed var(--bd);border-radius:var(--rl);padding:2rem;text-align:center;color:var(--tm);cursor:pointer;transition:all .15s}
-.dzone:hover,.dzone.drag{border-color:var(--p);background:var(--pl)}
-#loginscr{display:none;position:fixed;inset:0;background:var(--bg2);z-index:200;align-items:center;justify-content:center}
-#loginscr.show{display:flex}
-.lbox{background:var(--bg);border-radius:var(--rl);padding:2rem;width:320px;border:.5px solid var(--bd)}
-.hhdr{display:flex;align-items:center;gap:16px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:.5px solid var(--bd)}
-.avatar{width:52px;height:52px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;color:var(--p);flex-shrink:0}
-.pdatos{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:1.25rem;padding:1rem;background:var(--bg2);border-radius:var(--r)}
-.dato{font-size:13px}.dkey{font-size:11px;color:var(--tm);text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}.dval{font-weight:500;word-break:break-word}
-.arow{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:1rem}
-.csect{margin-bottom:1.5rem}
-.csect h3{font-size:12px;font-weight:500;margin-bottom:8px;color:var(--tm);text-transform:uppercase;letter-spacing:.03em}
-code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);font-size:12px;overflow-x:auto;white-space:pre;line-height:1.6;border:.5px solid var(--bd);font-family:monospace}
-.step{display:flex;gap:12px;align-items:flex-start;margin-bottom:1rem}
-.snum{min-width:24px;height:24px;background:var(--p);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0}
-.step p{font-size:14px;line-height:1.6}
-#toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#2C2C2A;color:#fff;padding:10px 18px;border-radius:var(--r);font-size:14px;transform:translateY(80px);opacity:0;transition:all .3s;z-index:300;max-width:300px}
-#toast.show{transform:translateY(0);opacity:1}
-.tm{color:var(--tm);font-size:13px}
-.flex{display:flex}.g8{gap:8px}
-.estate{text-align:center;padding:3rem;color:var(--tm)}
-.sarr{font-size:10px;margin-left:3px}
-.info-box{padding:.6rem .75rem;background:var(--warnl);border-radius:var(--r);color:var(--warn);font-size:13px;margin-bottom:1rem}
-@media(max-width:600px){.fgrid{grid-template-columns:1fr};main{padding:1rem}}
-</style>
-</head>
-<body>
-
-<div id="loginscr">
-  <div class="lbox">
-    <h2 style="margin-bottom:1.25rem;font-size:17px">Acceso editor</h2>
-    <div class="fg" style="margin-bottom:1rem">
-      <label>Contraseña</label>
-      <input type="password" id="pwdi" placeholder="Ingresá la contraseña" onkeydown="if(event.key==='Enter')checkPwd()">
-    </div>
-    <div class="flex g8">
-      <button class="btn btnp" style="flex:1" onclick="checkPwd()">Ingresar</button>
-      <button class="btn" onclick="closeLogin()">Cancelar</button>
-    </div>
-    <p id="pwderr" style="color:var(--err);font-size:13px;margin-top:8px;display:none">Contraseña incorrecta.</p>
-  </div>
-</div>
-
-<div class="mbg" id="amodal">
-  <div class="modal">
-    <div class="mhdr"><span class="mtitle" id="mtitle">Nuevo registro</span><button class="mclose" onclick="closeModal()">&times;</button></div>
-    <div class="fgrid" id="aform"></div>
-    <div class="flex g8" style="justify-content:flex-end;margin-top:1.5rem">
-      <button class="btn" onclick="closeModal()">Cancelar</button>
-      <button class="btn btnp" onclick="saveAlumno()">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<div class="mbg" id="hmodal">
-  <div class="modal" style="max-width:820px">
-    <div class="mhdr"><span class="mtitle">Historial del alumno</span><button class="mclose" onclick="closeHistorial()">&times;</button></div>
-    <div id="hcontent"></div>
-    <div class="flex g8" style="justify-content:flex-end;margin-top:1.25rem;flex-wrap:wrap">
-      <button class="btn" onclick="exportHistExcel()">&#8595; Exportar Excel</button>
-      <button class="btn btnp editor-only" onclick="addCursoHist()">+ Agregar curso</button>
-    </div>
-  </div>
-</div>
-
-<div id="app">
-  <header>
-    <h1>Gestión de Alumnos</h1>
-    <span class="rbadge" id="rbadge">Solo lectura</span>
-    <span id="sync-badge" style="font-size:11px;background:rgba(186,117,23,.4);padding:2px 8px;border-radius:20px;display:none"></span>
-    <button class="btn btnsm" id="rbtn" style="font-size:12px" onclick="toggleRole()">Ingresar como editor</button>
-  </header>
-  <nav>
-    <button class="active" onclick="showTab('alumnos',this)">Alumnos</button>
-    <button onclick="showTab('estadisticas',this)">Estadísticas</button>
-    <button onclick="showTab('importar',this)">Importar</button>
-    <button onclick="showTab('sincronizar',this)">Sincronizar</button>
-    <button onclick="showTab('duplicados',this)">Duplicados</button>
-    <button onclick="showTab('config',this)">Configuración</button>
-  </nav>
-  <main>
-
-    <!-- ALUMNOS -->
-    <div id="tab-alumnos">
-      <div class="metrics" id="metrics"></div>
-      <div class="card" style="margin-bottom:1rem">
-        <div class="card-title">Buscar alumno</div>
-        <div class="sbox" id="sbox">
-          <input type="text" id="psearch" placeholder="Apellido, nombre o DNI..." oninput="searchPersona(this.value)" autocomplete="off">
-          <button class="sclear" onclick="clearPS()">&times;</button>
-          <div id="sr"></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="arow">
-          <div class="filters">
-            <input type="text" id="fi" placeholder="Filtrar tabla..." oninput="currentPage=1;renderTable()" style="min-width:160px;width:auto">
-            <select id="fano" onchange="currentPage=1;renderTable()" style="width:auto"><option value="">Todos los años</option></select>
-            <select id="fcurso" onchange="currentPage=1;renderTable()" style="width:auto;max-width:200px"><option value="">Todos los cursos</option></select>
-            <select id="fnota" onchange="currentPage=1;renderTable()" style="width:auto">
-              <option value="">Todas las notas</option>
-              <option value="Aprobado">Aprobado</option>
-              <option value="Desaprobado">Desaprobado</option>
-              <option value="Cursado">Cursado</option>
-            </select>
-            <select id="fdictado" onchange="currentPage=1;renderTable()" style="width:auto;max-width:180px" title="Filtrar por dictado"><option value="">Todos los dictados</option></select>
-            <select id="ffuerza" onchange="currentPage=1;renderTable()" style="width:auto;max-width:180px" title="Filtrar por fuerza"><option value="">Todas las fuerzas</option></select>
-          </div>
-          <div class="flex g8" style="flex-wrap:wrap">
-            <button class="btn" onclick="exportExcel()">&#8595; Excel completo</button>
-            <button class="btn btnp editor-only" onclick="openModalNuevo()" style="display:none">+ Agregar</button>
-          </div>
-        </div>
-        <div class="twrap">
-          <table><thead id="thead"></thead><tbody id="tbody"></tbody></table>
-          <div id="emsg" class="estate" style="display:none">Sin resultados.</div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:8px">
-          <span class="tm" id="tcount"></span>
-          <div class="flex g8" style="align-items:center;font-size:13px;color:var(--tm)">
-            <button class="btn btnsm" id="pbtn" onclick="changePage(-1)">&#8249;</button>
-            <span id="pinfo"></span>
-            <button class="btn btnsm" id="nbtn" onclick="changePage(1)">&#8250;</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ESTADÍSTICAS -->
-    <div id="tab-estadisticas" style="display:none">
-      <div class="metrics" id="smetrics"></div>
-
-      <!-- Controles -->
-      <div class="card" style="margin-bottom:1rem">
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <span style="font-size:14px;font-weight:500">Ver:</span>
-          <select id="s-selector" onchange="renderStats()" style="width:auto;min-width:200px">
-            <option value="cursos">Top cursos</option>
-            <option value="dictado">Por dictado</option>
-            <option value="año">Por año</option>
-            <option value="nota">Nota</option>
-            <option value="jerarquia">Por jerarquía</option>
-            <option value="provincia">Por provincia / país</option>
-            <option value="becados">Becados vs no becados</option>
-            <option value="fuerza">Por fuerza</option>
-          </select>
-          <span style="font-size:14px;font-weight:500">Año:</span>
-          <select id="s-fano" onchange="renderStats()" style="width:auto">
-            <option value="">Todos</option>
-          </select>
-          <span id="s-count" class="tm"></span>
-          <button class="btn btnsm" id="s-dl-btn" onclick="downloadCurrent()" style="margin-left:auto">&#8595; Descargar</button>
-        </div>
-      </div>
-
-      <!-- Tablas (cursos y dictado) -->
-      <div class="card" id="s-tabla-wrap" style="display:none">
-        <div class="card-title" id="s-tabla-title"></div>
-        <div id="s-tabla-content"></div>
-      </div>
-
-      <!-- Gráfico único -->
-      <div class="card" id="s-chart-wrap">
-        <div class="card-title" id="s-chart-title"></div>
-        <div style="position:relative" id="s-chart-container">
-          <canvas id="s-chart"></canvas>
-        </div>
-      </div>
-
-      <!-- canvas ocultos para descarga PNG de tablas -->
-      <canvas id="s-hidden-canvas" style="display:none"></canvas>
-    </div>
-
-    <!-- IMPORTAR -->
-    <div id="tab-importar" style="display:none">
-      <div class="card">
-        <div class="card-title">Importar desde Excel / CSV</div>
-        <p class="tm" style="margin-bottom:.75rem">La app detecta automáticamente las columnas del archivo. Si agregás columnas nuevas al Excel, aparecerán solas en la app al reimportar.</p>
-        <div class="info-box">Si un registro con el mismo DNI + Curso + Año ya existe, se <strong>actualiza</strong> en lugar de duplicarse. Podés reimportar el Excel completo sin problema.</div>
-        <div class="dzone" onclick="document.getElementById('fi2').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
-          <input type="file" id="fi2" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(event)">
-          <div style="font-size:36px;margin-bottom:8px">&#128194;</div>
-          <p style="font-weight:500">Clic o arrastrar archivo</p>
-          <p class="tm" style="font-size:13px;margin-top:4px">.xlsx · .xls · .csv</p>
-        </div>
-        <div id="iprev" style="margin-top:1rem;display:none">
-          <p style="font-size:14px;margin-bottom:4px" id="imsg"></p>
-          <p style="font-size:13px;color:var(--tm);margin-bottom:10px" id="icols"></p>
-          <div class="flex g8"><button class="btn btnp" onclick="confirmImport()">Confirmar</button><button class="btn" onclick="cancelImport()">Cancelar</button></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SINCRONIZAR -->
-    <div id="tab-sincronizar" style="display:none">
-      <div class="card">
-        <div class="card-title">Sincronizar con Google Sheets</div>
-        <p class="tm" style="margin-bottom:1rem">Los datos viven en tu Google Sheet. Subí cambios locales o bajá la versión más reciente.</p>
-        <div class="flex g8" style="flex-wrap:wrap">
-          <button class="btn btnp editor-only" onclick="syncUp()">&#8593; Subir mis cambios a Sheets</button>
-          <button class="btn" onclick="syncDown()">&#8595; Bajar datos de Sheets</button>
-        </div>
-        <p id="syncst" class="tm" style="margin-top:8px"></p>
-      </div>
-      <div class="card">
-        <div class="card-title" style="color:var(--tm)">Cómo funciona</div>
-        <p style="font-size:14px;line-height:1.7">Los <strong>editores</strong> suben cambios con "Subir". Los <strong>lectores</strong> bajan la versión actualizada con "Bajar". Si dos editores trabajan a la vez, el último en subir sobreescribe al anterior — coordiná con tus colaboradores. Para configurar la conexión, ir a <strong>Configuración</strong>.</p>
-      </div>
-    </div>
-
-    <!-- CONFIGURACIÓN -->
-    <div id="tab-config" style="display:none">
-      <div class="card">
-        <div class="card-title">Google Sheets — Apps Script</div>
-        <div class="csect">
-          <h3>URL del script</h3>
-          <div class="flex g8" style="margin-bottom:.75rem">
-            <input type="text" id="surl" placeholder="https://script.google.com/macros/s/..." style="flex:1;width:auto">
-            <button class="btn btnp" onclick="saveUrl()">Guardar</button>
-          </div>
-        </div>
-        <div class="csect">
-          <h3>Instrucciones (una sola vez)</h3>
-          <div class="step"><div class="snum">1</div><p>Creá una Google Sheet en tu Drive personal con una fila de encabezados que coincida con las columnas de tu Excel.</p></div>
-          <div class="step"><div class="snum">2</div><p>Menú <strong>Extensiones → Apps Script</strong>, borrá el código por defecto y pegá el de abajo.</p></div>
-          <div class="step"><div class="snum">3</div><p><strong>Implementar → Nueva implementación</strong>. Tipo: Aplicación web. Ejecutar como: Yo. Acceso: Cualquier persona. Autorizá cuando te lo pida.</p></div>
-          <div class="step"><div class="snum">4</div><p>Copiá la URL resultante y pegala en el campo de arriba.</p></div>
-          <code id="ascode"></code>
-          <button class="btn" style="margin-top:8px" onclick="copyScript()">Copiar código</button>
-        </div>
-      </div>
-      <div class="card editor-only" style="display:none">
-        <div class="card-title">Contraseña de editor</div>
-        <div class="flex g8"><input type="password" id="npwd" placeholder="Nueva contraseña" style="flex:1;width:auto"><button class="btn btnp" onclick="changePwd()">Cambiar</button></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Datos locales</div>
-        <div class="flex g8" style="flex-wrap:wrap">
-          <button class="btn" onclick="exportExcel()">&#8595; Descargar Excel completo</button>
-          <button class="btn btnerr editor-only" style="display:none" onclick="clearData()">Borrar todos los datos</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- DUPLICADOS -->
-    <div id="tab-duplicados" style="display:none">
-      <div class="metrics" id="dup-metrics"></div>
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
-          <div>
-            <div class="card-title" style="margin:0">Registros duplicados</div>
-            <p class="tm" style="margin-top:4px">Grupos con mismo DNI + Curso + Año. Revisá cada grupo y eliminá el registro incorrecto.</p>
-          </div>
-          <button class="btn btnsm" onclick="renderDuplicados()">&#8635; Actualizar</button>
-        </div>
-        <div id="dup-content"><div class="estate">Cargando...</div></div>
-      </div>
-    </div>
-
-  </main>
-</div>
-<div id="toast"></div>
-
-
+</script>
 </body>
 </html>

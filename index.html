@@ -30,7 +30,7 @@ th{background:var(--bg2);font-weight:500;text-align:left;padding:8px 10px;border
 td{padding:7px 10px;border-bottom:.5px solid var(--bd);vertical-align:middle;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 tr:hover td{background:var(--pl)}
 .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500}
-.bok{background:var(--okl);color:var(--ok)}.berr{background:var(--errl);color:var(--err)}.bgray{background:var(--gl);color:var(--g)}
+.bok{background:var(--okl);color:var(--ok)}.berr{background:var(--errl);color:var(--err)}.bgray{background:var(--gl);color:var(--g)}.bwarn{background:var(--warnl);color:var(--warn)}
 .filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem;align-items:center}
 input,select,textarea{border:.5px solid var(--bd);border-radius:var(--r);padding:7px 10px;font-size:14px;background:var(--bg);color:var(--t);outline:none;font-family:inherit;width:100%}
 input:focus,select:focus,textarea:focus{border-color:var(--p);box-shadow:0 0 0 2px rgba(24,95,165,.15)}
@@ -49,7 +49,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--p);box-shadow:0 0 0 2
 .bico{padding:4px 7px;font-size:15px;line-height:1;border:none;background:none;cursor:pointer;border-radius:var(--r)}.bico:hover{background:var(--bg2)}
 .mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center;padding:1rem}
 .mbg.open{display:flex}
-.modal{background:var(--bg);border-radius:var(--rl);padding:1.5rem;width:100%;max-width:700px;max-height:92vh;overflow-y:auto}
+.modal{background:var(--bg);border-radius:var(--rl);padding:1.5rem;width:95vw;max-width:820px;max-height:92vh;overflow-y:auto}
 .mhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
 .mtitle{font-size:16px;font-weight:500}
 .mclose{background:none;border:none;font-size:22px;cursor:pointer;color:var(--tm);padding:0 4px;line-height:1}
@@ -57,7 +57,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--p);box-shadow:0 0 0 2
 .fg{display:flex;flex-direction:column;gap:4px}.fg.full{grid-column:1/-1}
 label{font-size:11px;font-weight:500;color:var(--tm);text-transform:uppercase;letter-spacing:.03em}
 textarea{resize:vertical;min-height:60px}
-.cbox{position:relative;height:260px}
 #loginscr{display:none;position:fixed;inset:0;background:var(--bg2);z-index:200;align-items:center;justify-content:center}
 #loginscr.show{display:flex}
 .lbox{background:var(--bg);border-radius:var(--rl);padding:2rem;width:320px;border:.5px solid var(--bd)}
@@ -77,16 +76,17 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
 .tm{color:var(--tm);font-size:13px}
 .flex{display:flex}.g8{gap:8px}
 .estate{text-align:center;padding:3rem;color:var(--tm)}
-.spin{display:inline-block;width:18px;height:18px;border:2px solid var(--bd);border-top-color:var(--p);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-left:6px}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--bd);border-top-color:var(--p);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-left:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .progress-bar{background:var(--bg2);border-radius:20px;height:8px;overflow:hidden;margin-top:8px}
 .progress-fill{height:100%;background:var(--p);border-radius:20px;transition:width .3s}
 .info-box{padding:.6rem .75rem;background:var(--pl);border-radius:var(--r);font-size:13px;color:var(--pd);margin-bottom:1rem}
+.dup-group{margin-bottom:1.5rem;border:.5px solid var(--errl);border-radius:var(--r);overflow:hidden}
+.dup-header{background:var(--errl);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 @media(max-width:600px){.fgrid{grid-template-columns:1fr};main{padding:1rem}}
 </style>
 </head>
 <body>
-
 <div id="loginscr">
   <div class="lbox">
     <h2 style="margin-bottom:1.25rem;font-size:17px">Acceso editor</h2>
@@ -98,12 +98,12 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
       <button class="btn btnp" style="flex:1" onclick="checkPwd()">Ingresar</button>
       <button class="btn" onclick="closeLogin()">Cancelar</button>
     </div>
-    <p id="pwderr" style="color:var(--err);font-size:13px;margin-top:8px;display:none">Contraseña incorrecta.</p>
+    <p id="pwderr" style="color:var(--err);font-size:13px;margin-top:8px;display:none">Contrasena incorrecta.</p>
   </div>
 </div>
 
 <div class="mbg" id="amodal">
-  <div class="modal">
+  <div class="modal" style="max-width:700px">
     <div class="mhdr"><span class="mtitle" id="mtitle">Nuevo registro</span><button class="mclose" onclick="closeModal()">&times;</button></div>
     <div class="fgrid" id="aform"></div>
     <div class="flex g8" style="justify-content:flex-end;margin-top:1.5rem">
@@ -114,11 +114,11 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
 </div>
 
 <div class="mbg" id="hmodal">
-  <div class="modal" style="max-width:820px">
+  <div class="modal">
     <div class="mhdr"><span class="mtitle">Historial del alumno</span><button class="mclose" onclick="closeHistorial()">&times;</button></div>
     <div id="hcontent"></div>
     <div class="flex g8" style="justify-content:flex-end;margin-top:1.25rem;flex-wrap:wrap">
-      <button class="btn" onclick="exportHistExcel()">&#8595; Exportar Excel</button>
+      <button class="btn" onclick="exportHistExcel()">Exportar Excel</button>
       <button class="btn btnp editor-only" style="display:none" onclick="addCursoHist()">+ Agregar curso</button>
     </div>
   </div>
@@ -126,24 +126,25 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
 
 <div id="app">
   <header>
-    <h1>Gestión de Alumnos</h1>
+    <h1>Gestion de Alumnos</h1>
     <span class="rbadge" id="rbadge">Solo lectura</span>
     <button class="btn btnsm" id="rbtn" style="font-size:12px" onclick="toggleRole()">Ingresar como editor</button>
   </header>
   <nav>
     <button class="active" onclick="showTab('alumnos',this)">Alumnos</button>
-    <button onclick="showTab('estadisticas',this)">Estadísticas</button>
-    <button onclick="showTab('descargar',this)">Descargar</button>
+    <button onclick="showTab('estadisticas',this)">Estadisticas</button>
     <button onclick="showTab('duplicados',this)">Duplicados</button>
-    <button onclick="showTab('config',this)">Configuración</button>
+    <button onclick="showTab('descargar',this)">Descargar</button>
+    <button onclick="showTab('config',this)">Configuracion</button>
   </nav>
   <main>
 
+    <!-- ALUMNOS -->
     <div id="tab-alumnos">
       <div class="card" style="margin-bottom:1rem">
         <div class="card-title">Buscar alumno</div>
         <div class="sbox" id="sbox">
-          <input type="text" id="psearch" placeholder="Apellido, nombre o DNI..." oninput="searchPersona(this.value)" onkeyup="searchPersona(this.value)" autocomplete="off" style="width:100%">
+          <input type="text" id="psearch" placeholder="Apellido, nombre o DNI..." oninput="searchPersona(this.value)" autocomplete="off" style="width:100%">
           <button class="sclear" onclick="clearPS()">&times;</button>
           <div id="sr"></div>
         </div>
@@ -158,9 +159,9 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
           </div>
         </div>
         <div class="filters">
-          <select id="fano" style="width:auto"><option value="">Todos los años</option></select>
+          <select id="fano" style="width:auto"><option value="">Todos los anos</option></select>
           <select id="fcurso" style="width:auto;max-width:200px"><option value="">Todos los cursos</option></select>
-          <select id="fnota" style="width:auto"><option value="">Todas las notas</option><option>Aprobado</option><option>Desaprobado</option><option>Cursado</option></select>
+          <select id="fnota" style="width:auto"><option value="">Todas las notas</option></select>
           <select id="fdictado" style="width:auto;max-width:180px"><option value="">Todos los dictados</option></select>
           <select id="ffuerza" style="width:auto;max-width:180px"><option value="">Todas las fuerzas</option></select>
         </div>
@@ -176,25 +177,26 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
       </div>
     </div>
 
+    <!-- ESTADISTICAS -->
     <div id="tab-estadisticas" style="display:none">
-      <div class="metrics" id="smetrics"><div class="estate">Cargando estadísticas...<span class="spin"></span></div></div>
+      <div class="metrics" id="smetrics"></div>
       <div class="card" style="margin-bottom:1rem">
         <div class="flex g8" style="align-items:center;flex-wrap:wrap">
           <span style="font-size:14px;font-weight:500">Ver:</span>
           <select id="s-selector" onchange="renderChart()" style="width:auto;min-width:200px">
             <option value="porCurso">Top cursos</option>
             <option value="porDictado">Por dictado</option>
-            <option value="porAno">Por año</option>
+            <option value="porAno">Por ano</option>
             <option value="nota">Nota</option>
-            <option value="porJerarquia">Por jerarquía</option>
-            <option value="porProvincia">Por provincia / país</option>
+            <option value="porJerarquia">Por jerarquia</option>
+            <option value="porProvincia">Por provincia/pais</option>
             <option value="porBecado">Becados vs no becados</option>
             <option value="porFuerza">Por fuerza</option>
           </select>
           <span style="font-size:14px;font-weight:500">Ano:</span>
-          <select id="s-fano" onchange="loadStats()" style="width:auto"><option value="">Todos</option></select>
+          <select id="s-fano" onchange="renderStats()" style="width:auto"><option value="">Todos</option></select>
           <span id="s-count" class="tm"></span>
-          <button class="btn btnsm" id="s-dl-btn" onclick="downloadCurrentChart()" style="margin-left:auto">&#8595; PNG</button>
+          <button class="btn btnsm" id="s-dl-btn" onclick="downloadCurrentChart()" style="margin-left:auto">Descargar</button>
         </div>
       </div>
       <div class="card" id="s-tabla-wrap" style="display:none">
@@ -207,36 +209,39 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
       </div>
     </div>
 
-    <div id="tab-descargar" style="display:none">
-      <div class="card">
-        <div class="card-title">Descargar base completa</div>
-        <p class="tm" style="margin-bottom:.75rem">Descarga todos los registros en Excel. Con bases grandes puede tardar varios minutos.</p>
-        <div class="info-box">También podés descargar directamente desde Google Sheets: <strong>Archivo → Descargar → Microsoft Excel (.xlsx)</strong> — es más rápido.</div>
-        <button class="btn btnp" id="dl-btn" onclick="startDownload()">&#8595; Descargar Excel completo</button>
-        <div id="dl-progress" style="display:none;margin-top:1rem">
-          <p class="tm" id="dl-msg">Descargando...</p>
-          <div class="progress-bar"><div class="progress-fill" id="dl-fill" style="width:0%"></div></div>
-        </div>
-      </div>
-    </div>
-
+    <!-- DUPLICADOS -->
     <div id="tab-duplicados" style="display:none">
       <div class="metrics" id="dup-metrics"></div>
       <div class="card">
         <div class="arow">
           <div>
             <div class="card-title" style="margin:0">Registros duplicados</div>
-            <p class="tm" style="margin-top:4px">Grupos con mismo DNI + Curso + Ano. Revisá cada grupo y eliminá el registro incorrecto.</p>
+            <p class="tm" style="margin-top:4px">Mismo DNI + Curso + Ano. Revisa cada grupo y elimina el registro incorrecto.</p>
           </div>
-          <button class="btn btnsm" onclick="loadDuplicados()">&#8635; Actualizar</button>
+          <button class="btn btnsm" onclick="loadDuplicados()">Actualizar</button>
         </div>
         <div id="dup-content"><div class="estate">Cargando...<span class="spin"></span></div></div>
       </div>
     </div>
 
+    <!-- DESCARGAR -->
+    <div id="tab-descargar" style="display:none">
+      <div class="card">
+        <div class="card-title">Descargar base completa</div>
+        <p class="tm" style="margin-bottom:.75rem">Descarga todos los registros en Excel. Con bases grandes puede tardar varios minutos.</p>
+        <div class="info-box">Tambien podes descargar directamente desde Google Sheets: <strong>Archivo → Descargar → Microsoft Excel (.xlsx)</strong></div>
+        <button class="btn btnp" id="dl-btn" onclick="startDownload()">Descargar Excel completo</button>
+        <div id="dl-progress" style="display:none;margin-top:1rem">
+          <p class="tm" id="dl-msg"></p>
+          <div class="progress-bar"><div class="progress-fill" id="dl-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIG -->
     <div id="tab-config" style="display:none">
       <div class="card">
-        <div class="card-title">Conexión con Google Sheets</div>
+        <div class="card-title">Conexion con Google Sheets</div>
         <div class="csect">
           <h3>URL del Apps Script</h3>
           <div class="flex g8" style="margin-bottom:.75rem">
@@ -247,263 +252,215 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
         <div class="csect">
           <h3>Instrucciones</h3>
           <div class="step"><div class="snum">1</div><p>En tu Google Sheet: <strong>Extensiones → Apps Script</strong></p></div>
-          <div class="step"><div class="snum">2</div><p>Borrá todo el codigo y pegá el codigo de abajo.</p></div>
-          <div class="step"><div class="snum">3</div><p><strong>Implementar → Nueva implementacion</strong> → Aplicacion web → Cualquier usuario → Implementar</p></div>
-          <div class="step"><div class="snum">4</div><p>Copiá la URL y pegála arriba.</p></div>
+          <div class="step"><div class="snum">2</div><p>Borra todo el codigo y pega el codigo de abajo.</p></div>
+          <div class="step"><div class="snum">3</div><p><strong>Implementar → Nueva implementacion</strong> → Aplicacion web → Cualquier usuario</p></div>
+          <div class="step"><div class="snum">4</div><p>Copia la URL y pegala arriba.</p></div>
           <code id="ascode"></code>
-          <button class="btn" style="margin-top:8px" onclick="copyScript()">Copiar código</button>
+          <button class="btn" style="margin-top:8px" onclick="copyScript()">Copiar codigo</button>
         </div>
       </div>
       <div class="card editor-only" style="display:none">
-        <div class="card-title">Contraseña de editor</div>
+        <div class="card-title">Contrasena de editor</div>
         <div class="flex g8"><input type="password" id="npwd" placeholder="Nueva contrasena" style="flex:1;width:auto"><button class="btn btnp" onclick="changePwd()">Cambiar</button></div>
       </div>
     </div>
-
   </main>
 </div>
 <div id="toast"></div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVFOcgTT55iKE2wFLtH1dhq5v7wx8Cff1ECawzbdkQTi4dWib9sd47U3DoBsvHohbq/exec';
+// ── CONFIGURACION ──────────────────────────────────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLtnTZgNNESIYPToZme7LUyMGydLXn99xg1FmZJftnuVJ2xLRAbWwMmhHKcEV1Lxwn/exec';
 const EDITOR_PWD = 'ADMIN123';
-const KNOWN_COLS = ['Ord','Apellidos','Nombres','DNI','Jerarquía','Destino','Teléfono','Mail','Nota','Nota numérica','Curso','Observación','Año','Dictado','Becado','Provincia/País','Fuerza'];
-const PERSONA_COLS = ['Apellidos','Nombres','DNI','Jerarquía','Destino','Teléfono','Mail','Provincia/País','Fuerza'];
-const COL_DNI = 'DNI';
-const COL_CURSO = 'Curso';
-const COL_ANO = 'Año';
-const COL_NOTA = 'Nota';
-const COL_NOTA_NUM = 'Nota numérica';
-const COL_BECADO = 'Becado';
-const CLRS = ['#185FA5','#3B6D11','#BA7517','#A32D2D','#1D9E75','#534AB7','#D85A30','#639922','#D4537E','#5F5E5A'];
+const PERSONA_COLS = ['Apellidos','Nombres','DNI','Jerarquia','Destino','Telefono','Mail','Provincia/Pais','Fuerza'];
+const COL_DNI='DNI',COL_CURSO='Curso',COL_ANO='Ano',COL_NOTA='Nota',COL_NOTA_NUM='Nota numerica',COL_BECADO='Becado';
+const CLRS=['#185FA5','#3B6D11','#BA7517','#A32D2D','#1D9E75','#534AB7','#D85A30','#639922','#D4537E','#5F5E5A'];
 
-let isEditor = false;
-let cols = [...KNOWN_COLS];
-let editIdx = null;
-let historialData = null;
-let addingFor = null;
-let filterCurrentPage = 1;
-let filterTotal = 0;
-let statsData = null;
-let _flushing = false;
-const CH = {};
+// ── ESTADO ─────────────────────────────────────────────────
+let isEditor=false,cols=[],editIdx=null,historialData=null,addingFor=null;
+let filterCurrentPage=1,filterTotal=0;
+let statsRaw=null; // datos crudos de estadísticas (todos los años)
+let _flushing=false;
+const CH={};
 
-window.onload = () => {
-  const u = localStorage.getItem('script-url') || SCRIPT_URL;
-  if (u && u !== 'PEGAR_URL_AQUI') {
-    localStorage.setItem('script-url', u);
-    document.getElementById('surl').value = u;
-  }
-  document.getElementById('ascode').textContent = ascode();
+// ── INIT ───────────────────────────────────────────────────
+window.onload=()=>{
+  const u=localStorage.getItem('script-url')||SCRIPT_URL;
+  if(u&&u!=='PEGAR_URL_AQUI'){localStorage.setItem('script-url',u);document.getElementById('surl').value=u;}
+  document.getElementById('ascode').textContent=ascode();
   loadFilterOptions();
-  document.addEventListener('click', e => { if (!e.target.closest('#sbox')) hideSR(); });
-  setTimeout(flushQueue, 2000);
+  document.addEventListener('click',e=>{if(!e.target.closest('#sbox'))hideSR();});
+  setTimeout(flushQueue,2000);
 };
+function getUrl(){return localStorage.getItem('script-url')||SCRIPT_URL;}
 
-function getUrl() { return localStorage.getItem('script-url') || SCRIPT_URL; }
-
-function toggleRole() {
-  if (isEditor) { isEditor = false; updateRoleUI(); toast('Modo solo lectura.'); return; }
+// ── ROL ────────────────────────────────────────────────────
+function toggleRole(){
+  if(isEditor){isEditor=false;updateRoleUI();toast('Modo solo lectura.');return;}
   document.getElementById('loginscr').classList.add('show');
-  document.getElementById('pwdi').value = '';
-  document.getElementById('pwderr').style.display = 'none';
-  setTimeout(() => document.getElementById('pwdi').focus(), 100);
+  document.getElementById('pwdi').value='';
+  document.getElementById('pwderr').style.display='none';
+  setTimeout(()=>document.getElementById('pwdi').focus(),100);
 }
-function checkPwd() {
-  const pwd = localStorage.getItem('editor-pwd') || EDITOR_PWD;
-  if (document.getElementById('pwdi').value === pwd) {
-    isEditor = true; updateRoleUI(); closeLogin(); toast('Modo editor activado.');
-  } else { document.getElementById('pwderr').style.display = 'block'; }
+function checkPwd(){
+  const pwd=localStorage.getItem('editor-pwd')||EDITOR_PWD;
+  if(document.getElementById('pwdi').value===pwd){isEditor=true;updateRoleUI();closeLogin();toast('Modo editor activado.');}
+  else document.getElementById('pwderr').style.display='block';
 }
-function closeLogin() { document.getElementById('loginscr').classList.remove('show'); }
-function updateRoleUI() {
-  document.getElementById('rbadge').textContent = isEditor ? 'Editor' : 'Solo lectura';
-  document.getElementById('rbadge').style.background = isEditor ? 'rgba(59,109,17,.4)' : 'rgba(255,255,255,.2)';
-  document.getElementById('rbtn').textContent = isEditor ? 'Salir como editor' : 'Ingresár como editor';
-  document.querySelectorAll('.editor-only').forEach(el => el.style.display = isEditor ? '' : 'none');
+function closeLogin(){document.getElementById('loginscr').classList.remove('show');}
+function updateRoleUI(){
+  document.getElementById('rbadge').textContent=isEditor?'Editor':'Solo lectura';
+  document.getElementById('rbadge').style.background=isEditor?'rgba(59,109,17,.4)':'rgba(255,255,255,.2)';
+  document.getElementById('rbtn').textContent=isEditor?'Salir como editor':'Ingresar como editor';
+  document.querySelectorAll('.editor-only').forEach(el=>el.style.display=isEditor?'':'none');
 }
 
-function jsonp(url, onSuccess, onError) {
-  const cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*99999);
-  const sc = document.createElement('script');
-  sc.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
-  let done = false;
-  window[cb] = function(j) {
-    done = true;
-    try { document.body.removeChild(sc); } catch(e) {}
-    delete window[cb];
-    onSuccess(j);
-  };
-  sc.onerror = function() {
-    if (!done) {
-      try { document.body.removeChild(sc); } catch(e) {}
-      delete window[cb];
-      if (onError) onError('error');
-    }
-  };
-  setTimeout(() => {
-    if (!done) {
-      try { document.body.removeChild(sc); } catch(e) {}
-      delete window[cb];
-      if (onError) onError('timeout');
-    }
-  }, 30000);
+// ── JSONP ──────────────────────────────────────────────────
+function jsonp(url,onSuccess,onError){
+  const cb='cb_'+Date.now()+'_'+Math.floor(Math.random()*99999);
+  const sc=document.createElement('script');
+  sc.src=url+(url.includes('?')?'&':'?')+'callback='+cb;
+  let done=false;
+  window[cb]=function(j){done=true;try{document.body.removeChild(sc);}catch(e){}delete window[cb];onSuccess(j);};
+  sc.onerror=function(){if(!done){try{document.body.removeChild(sc);}catch(e){}delete window[cb];if(onError)onError('error');}};
+  setTimeout(()=>{if(!done){try{document.body.removeChild(sc);}catch(e){}delete window[cb];if(onError)onError('timeout');}},60000);
   document.body.appendChild(sc);
 }
 
-let searchTimer = null;
-function searchPersona(q) {
-  const box = document.getElementById('sr');
-  if (!q || q.length < 2) { box.style.display = 'none'; return; }
+// ── BUSCADOR ───────────────────────────────────────────────
+let searchTimer=null;
+function searchPersona(q){
+  const box=document.getElementById('sr');
+  if(!q||q.length<2){box.style.display='none';return;}
   clearTimeout(searchTimer);
-  box.innerHTML = '<div class="sri" style="color:var(--tm)">Buscando...<span class="spin"></span></div>';
-  box.style.display = 'block';
-  searchTimer = setTimeout(() => {
-    const u = getUrl();
-    if (!u || u === 'PEGAR_URL_AQUI') {
-      box.innerHTML = '<div class="sri" style="color:var(--err)">Configura la URL del script primero.</div>';
-      return;
-    }
-    jsonp(u + '?action=search&q=' + encodeURIComponent(q) + '&limit=15', j => {
-      if (!j.data || !j.data.length) {
-        box.innerHTML = '<div class="sri" style="color:var(--tm)">Sin resultados.</div>';
-        box.style.display = 'block'; return;
-      }
-      box.innerHTML = j.data.map(p => `
+  box.innerHTML='<div class="sri" style="color:var(--tm)">Buscando...<span class="spin"></span></div>';
+  box.style.display='block';
+  searchTimer=setTimeout(()=>{
+    const u=getUrl();
+    if(!u||u==='PEGAR_URL_AQUI'){box.innerHTML='<div class="sri" style="color:var(--err)">Configura la URL primero.</div>';return;}
+    const currentQ=document.getElementById('psearch').value;
+    if(currentQ!==q)return;
+    jsonp(u+'?action=search&q='+encodeURIComponent(q)+'&limit=15',j=>{
+      if(!j.data||!j.data.length){box.innerHTML='<div class="sri" style="color:var(--tm)">Sin resultados.</div>';box.style.display='block';return;}
+      box.innerHTML=j.data.map(p=>`
         <div class="sri" onclick="openHistorial('${escQ(String(p.DNI||''))}','${escQ(p.Apellidos||'')}');clearPS()">
           <div class="sri-name">${p.Apellidos||''}, ${p.Nombres||''}</div>
           <div class="sri-sub">DNI: ${p.DNI||'-'} &middot; ${(p.cursos||[]).join(', ')||'Sin cursos'}</div>
         </div>`).join('');
-      box.style.display = 'block';
-    }, () => {
-      box.innerHTML = '<div class="sri" style="color:var(--err)">Error de conexión.</div>';
+      box.style.display='block';
+    },()=>{box.innerHTML='<div class="sri" style="color:var(--err)">Error de conexion. Intenta de nuevo.</div>';});
+  },800);
+}
+function hideSR(){document.getElementById('sr').style.display='none';}
+function clearPS(){document.getElementById('psearch').value='';hideSR();}
+
+// ── FILTROS ────────────────────────────────────────────────
+function loadFilterOptions(){
+  const u=getUrl();if(!u||u==='PEGAR_URL_AQUI')return;
+  jsonp(u+'?action=getoptions',j=>{
+    if(!j)return;
+    if(j.cols)cols=j.cols;
+    populateSelects(j);
+  });
+}
+function populateSelects(uv){
+  const map={fano:'anos',fcurso:'cursos',fnota:'notas',fdictado:'dictados',ffuerza:'fuerzas'};
+  const labels={fano:'Todos los anos',fcurso:'Todos los cursos',fnota:'Todas las notas',fdictado:'Todos los dictados',ffuerza:'Todas las fuerzas'};
+  Object.entries(map).forEach(([id,field])=>{
+    const sel=document.getElementById(id);
+    if(!sel||!uv[field])return;
+    const cur=sel.value;
+    sel.innerHTML=`<option value="">${labels[id]}</option>`+uv[field].map(v=>`<option ${v==cur?'selected':''}>${v}</option>`).join('');
+    if(cur)sel.value=cur;
+  });
+}
+
+function applyFilter(page){
+  filterCurrentPage=page||1;
+  const u=getUrl();if(!u||u==='PEGAR_URL_AQUI'){toast('Configura la URL primero.');return;}
+  const p=new URLSearchParams({action:'filter',page:filterCurrentPage,
+    ano:document.getElementById('fano').value,
+    curso:document.getElementById('fcurso').value,
+    nota:document.getElementById('fnota').value,
+    dictado:document.getElementById('fdictado').value,
+    fuerza:document.getElementById('ffuerza').value});
+  document.getElementById('filter-results').innerHTML='<div class="estate">Cargando...<span class="spin"></span></div>';
+  jsonp(u+'?'+p.toString(),j=>{
+    if(!j||!j.data){document.getElementById('filter-results').innerHTML='<div class="estate">Error al cargar datos.</div>';return;}
+    filterTotal=j.total;if(j.cols)cols=j.cols;
+    renderFilterResults(j.data,j.total,j.page,j.pageSize);
+  },()=>{document.getElementById('filter-results').innerHTML='<div class="estate">Error de conexion.</div>';});
+}
+function clearFilter(){
+  ['fano','fcurso','fnota','fdictado','ffuerza'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('filter-results').innerHTML='<div class="estate">Usa el buscador o los filtros para ver registros.</div>';
+  document.getElementById('filter-pagination').style.display='none';
+}
+function filterPage(d){applyFilter(filterCurrentPage+d);}
+
+function renderFilterResults(data,total,page,pageSize){
+  if(!data.length){document.getElementById('filter-results').innerHTML='<div class="estate">Sin resultados.</div>';document.getElementById('filter-pagination').style.display='none';return;}
+  const dc=cols.filter(c=>['Apellidos','Nombres','DNI','Curso','Ano','Nota','Nota numerica','Jerarquia','Becado'].includes(c));
+  let html='<div class="twrap"><table><thead><tr>';
+  dc.forEach(c=>html+=`<th>${c}</th>`);
+  html+='<th>Acciones</th></tr></thead><tbody>';
+  data.forEach(a=>{
+    html+='<tr>';
+    dc.forEach(c=>{
+      let v=a[c]||'';
+      if(c===COL_NOTA)v=notaBadge(v);
+      else if(c===COL_NOTA_NUM)v=notaNumBadge(v);
+      else if(c===COL_BECADO)v=v?`<span class="badge ${String(v).toLowerCase()==='si'?'bok':'bgray'}">${v}</span>`:'';
+      html+=`<td title="${a[c]||''}">${v}</td>`;
     });
-  }, 400);
-}
-function hideSR() { document.getElementById('sr').style.display = 'none'; }
-function clearPS() { document.getElementById('psearch').value = ''; hideSR(); }
-
-function loadFilterOptions() {
-  const u = getUrl();
-  if (!u || u === 'PEGAR_URL_AQUI') return;
-  jsonp(u + '?action=filter&page=1', j => {
-    if (!j.uniqueVals) return;
-    if (j.cols) cols = j.cols;
-    populateSelects(j.uniqueVals);
+    const ajs=escQ(JSON.stringify(a));
+    html+=`<td><button class="bico" onclick="openHistorial('${escQ(String(a[COL_DNI]||''))}','${escQ(a['Apellidos']||'')}')">&#128065;</button>`;
+    if(isEditor)html+=` <button class="bico" onclick="openModalEditarDirect('${ajs}')">&#9999;</button>`;
+    html+='</td></tr>';
   });
+  html+='</tbody></table></div>';
+  document.getElementById('filter-results').innerHTML=html;
+  const tp=Math.ceil(total/pageSize);
+  document.getElementById('filter-pagination').style.display='flex';
+  document.getElementById('filter-count').textContent=`${total} registro${total!==1?'s':''} (${(page-1)*pageSize+1}-${Math.min(page*pageSize,total)})`;
+  document.getElementById('fpage').textContent=`${page} / ${tp}`;
+  document.getElementById('fprev').disabled=page<=1;
+  document.getElementById('fnext').disabled=page>=tp;
 }
 
-function populateSelects(uv) {
-  const map = { fano:'Año', fcurso:'Curso', fnota:'Nota', fdictado:'Dictado', ffuerza:'Fuerza' };
-  Object.entries(map).forEach(([id, field]) => {
-    const sel = document.getElementById(id);
-    if (!sel || !uv[field]) return;
-    const cur = sel.value;
-    const first = sel.options[0].outerHTML;
-    sel.innerHTML = first + uv[field].map(v => `<option ${v==cur?'selected':''}>${v}</option>`).join('');
-    if (cur) sel.value = cur;
-  });
-}
-
-function applyFilter(page) {
-  filterCurrentPage = page || 1;
-  const u = getUrl();
-  if (!u || u === 'PEGAR_URL_AQUI') { toast('Configurá la URL primero.'); return; }
-  const p = new URLSearchParams({
-    action:'filter', page:filterCurrentPage,
-    ano: document.getElementById('fano').value,
-    curso: document.getElementById('fcurso').value,
-    nota: document.getElementById('fnota').value,
-    dictado: document.getElementById('fdictado').value,
-    fuerza: document.getElementById('ffuerza').value,
-  });
-  document.getElementById('filter-results').innerHTML = '<div class="estate">Cargando...<span class="spin"></span></div>';
-  jsonp(u + '?' + p.toString(), j => {
-    if (!j.data) { document.getElementById('filter-results').innerHTML = '<div class="estate">Error al cargar datos.</div>'; return; }
-    filterTotal = j.total;
-    if (j.cols) cols = j.cols;
-    if (j.uniqueVals) populateSelects(j.uniqueVals);
-    renderFilterResults(j.data, j.total, j.page, j.pageSize);
-  }, () => { document.getElementById('filter-results').innerHTML = '<div class="estate">Error de conexión.</div>'; });
-}
-
-function clearFilter() {
-  ['fano','fcurso','fnota','fdictado','ffuerza'].forEach(id => { const el=document.getElementById(id); if(el)el.value=''; });
-  document.getElementById('filter-results').innerHTML = '<div class="estate">Usa el buscador o los filtros para ver registros.</div>';
-  document.getElementById('filter-pagination').style.display = 'none';
-}
-
-function filterPage(d) { applyFilter(filterCurrentPage + d); }
-
-function renderFilterResults(data, total, page, pageSize) {
-  if (!data.length) {
-    document.getElementById('filter-results').innerHTML = '<div class="estate">Sin resultados.</div>';
-    document.getElementById('filter-pagination').style.display = 'none';
-    return;
-  }
-  const dc = cols.filter(c => ['Apellidos','Nombres','DNI','Curso','Año','Nota','Nota numérica','Jerarquía','Becado'].includes(c));
-  let html = '<div class="twrap"><table><thead><tr>';
-  dc.forEach(c => html += `<th>${c}</th>`);
-  html += '<th>Acciones</th></tr></thead><tbody>';
-  data.forEach(a => {
-    html += '<tr>';
-    dc.forEach(c => {
-      let v = a[c] || '';
-      if (c === COL_NOTA) v = notaBadge(v);
-      else if (c === COL_NOTA_NUM) v = notaNumBadge(v);
-      else if (c === COL_BECADO) v = v ? `<span class="badge ${String(v).toLowerCase()==='si'?'bok':'bgray'}">${v}</span>` : '';
-      html += `<td title="${a[c]||''}">${v}</td>`;
-    });
-    const qs = 'dni=' + encodeURIComponent(String(a[COL_DNI]||'')) + '&apellido=' + encodeURIComponent(a['Apellidos']||'');
-    const ajs = escQ(JSON.stringify(a));
-    html += `<td><button class="bico" title="Ver historial" onclick="openHistorial('${escQ(String(a[COL_DNI]||''))}','${escQ(a['Apellidos']||'')}')">&#128065;</button>`;
-    if (isEditor) html += ` <button class="bico" title="Editar" onclick="openModalEditarDirect('${ajs}')">&#9999;</button>`;
-    html += '</td></tr>';
-  });
-  html += '</tbody></table></div>';
-  document.getElementById('filter-results').innerHTML = html;
-  const tp = Math.ceil(total/pageSize);
-  const pag = document.getElementById('filter-pagination');
-  pag.style.display = 'flex';
-  document.getElementById('filter-count').textContent = `${total} registro${total!==1?'s':''} (${(page-1)*pageSize+1}-${Math.min(page*pageSize,total)})`;
-  document.getElementById('fpage').textContent = `${page} / ${tp}`;
-  document.getElementById('fprev').disabled = page <= 1;
-  document.getElementById('fnext').disabled = page >= tp;
-}
-
-function openHistorial(dni, apellido) {
-  const u = getUrl();
-  if (!u || u === 'PEGAR_URL_AQUI') { toast('Configurá la URL primero.'); return; }
-  document.getElementById('hcontent').innerHTML = '<div class="estate">Cargando historial...<span class="spin"></span></div>';
+// ── HISTORIAL ──────────────────────────────────────────────
+function openHistorial(dni,apellido){
+  const u=getUrl();if(!u||u==='PEGAR_URL_AQUI'){toast('Configura la URL primero.');return;}
+  document.getElementById('hcontent').innerHTML='<div class="estate">Cargando historial...<span class="spin"></span></div>';
   document.getElementById('hmodal').classList.add('open');
-  document.querySelectorAll('#hmodal .editor-only').forEach(el => el.style.display = isEditor ? '' : 'none');
-  const params = dni ? 'action=gethistorial&dni=' + encodeURIComponent(dni) : 'action=gethistorial&apellido=' + encodeURIComponent(apellido);
-  jsonp(u + '?' + params, j => {
-    if (!j.data || !j.data.length) { document.getElementById('hcontent').innerHTML = '<div class="estate">Sin registros.</div>'; return; }
-    historialData = j;
-    if (j.cols) cols = j.cols;
-    renderHistorial(j.data, j.cols || cols);
-  }, () => { document.getElementById('hcontent').innerHTML = '<div class="estate">Error de conexión.</div>'; });
+  document.querySelectorAll('#hmodal .editor-only').forEach(el=>el.style.display=isEditor?'':'none');
+  const params=dni?'action=gethistorial&dni='+encodeURIComponent(dni):'action=gethistorial&apellido='+encodeURIComponent(apellido);
+  jsonp(u+'?'+params,j=>{
+    if(!j||!j.data||!j.data.length){document.getElementById('hcontent').innerHTML='<div class="estate">Sin registros.</div>';return;}
+    historialData=j;if(j.cols)cols=j.cols;
+    renderHistorial(j.data,j.cols||cols);
+  },()=>{document.getElementById('hcontent').innerHTML='<div class="estate">Error de conexion. Intenta de nuevo.</div>';});
 }
 
-function renderHistorial(regs, hcols) {
-  const p = regs[0];
-  const ini = ((p['Apellidos']||'').charAt(0)+(p['Nombres']||'').charAt(0)).toUpperCase();
-  const total = regs.length;
-  const ap = regs.filter(a=>notaR(a[COL_NOTA])==='ok').length;
-  const des = regs.filter(a=>notaR(a[COL_NOTA])==='err').length;
-  const bec = regs.filter(a=>String(a[COL_BECADO]||'').toLowerCase()==='si').length;
-  const pct = total?Math.round(ap/total*100):0;
-  const barColor = pct>=70?'var(--ok)':pct>=50?'var(--warn)':'var(--err)';
-  const notasNum = [...regs].sort((a,b)=>String(a[COL_ANO]||'').localeCompare(String(b[COL_ANO]||''))).filter(a=>!isNaN(+a[COL_NOTA_NUM])&&String(a[COL_NOTA_NUM]).trim()!=='');
-  const chartId = 'hch_'+Date.now();
-  const datosCurso = hcols.filter(c=>!PERSONA_COLS.includes(c)&&c!=='Ord');
-  const datosPersona = PERSONA_COLS.filter(c=>hcols.includes(c)&&p[c]&&c!=='Apellidos'&&c!=='Nombres');
+function renderHistorial(regs,hcols){
+  const p=regs[0];
+  const ini=((p['Apellidos']||'').charAt(0)+(p['Nombres']||'').charAt(0)).toUpperCase();
+  const total=regs.length;
+  const ap=regs.filter(a=>notaR(a[COL_NOTA])==='ok').length;
+  const des=regs.filter(a=>notaR(a[COL_NOTA])==='err').length;
+  const bec=regs.filter(a=>String(a[COL_BECADO]||'').toLowerCase()==='si').length;
+  const pct=total?Math.round(ap/total*100):0;
+  const barColor=pct>=70?'var(--ok)':pct>=50?'var(--warn)':'var(--err)';
+  const notasNum=[...regs].sort((a,b)=>String(a[COL_ANO]||'').localeCompare(String(b[COL_ANO]||''))).filter(a=>!isNaN(+a[COL_NOTA_NUM])&&String(a[COL_NOTA_NUM]).trim()!=='');
+  const chartId='hch_'+Date.now();
+  const datosCurso=(hcols||cols).filter(c=>!PERSONA_COLS.includes(c)&&c!=='Ord');
+  const datosPersona=PERSONA_COLS.filter(c=>(hcols||cols).includes(c)&&p[c]&&c!=='Apellidos'&&c!=='Nombres');
 
-  let html = `<div class="hhdr"><div class="avatar">${ini}</div><div><div style="font-size:17px;font-weight:500">${p['Apellidos']||''}, ${p['Nombres']||''}</div></div></div>
+  let html=`<div class="hhdr"><div class="avatar">${ini}</div><div>
+    <div style="font-size:17px;font-weight:500">${p['Apellidos']||''}, ${p['Nombres']||''}</div></div></div>
     <div class="pdatos">${datosPersona.map(c=>`<div class="dato"><div class="dkey">${c}</div><div class="dval">${p[c]||'-'}</div></div>`).join('')}</div>
     <div style="margin-bottom:1.25rem">
-      <div style="font-size:12px;font-weight:500;color:var(--tm);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.75rem">Estadísticas</div>
+      <div style="font-size:12px;font-weight:500;color:var(--tm);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.75rem">Estadisticas</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:1rem">
         <div class="metric"><div class="mlabel">Cursos</div><div class="mval">${total}</div></div>
         <div class="metric"><div class="mlabel">Aprobados</div><div class="mval" style="color:var(--ok)">${ap}</div></div>
@@ -511,102 +468,94 @@ function renderHistorial(regs, hcols) {
         <div class="metric"><div class="mlabel">Sin nota/otro</div><div class="mval">${total-ap-des}</div></div>
         <div class="metric"><div class="mlabel">Becado en</div><div class="mval">${bec}</div></div>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <span style="font-size:12px;color:var(--tm)">Tasa de aprobación</span>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:12px;color:var(--tm)">Tasa de aprobacion</span>
         <span style="font-size:13px;font-weight:500;color:${barColor}">${pct}%</span>
       </div>
       <div style="background:var(--bg2);border-radius:20px;height:8px;overflow:hidden">
         <div style="width:${pct}%;height:100%;background:${barColor};border-radius:20px"></div>
       </div>
-      ${notasNum.length>=2?`<div style="margin-top:1rem"><div style="font-size:12px;color:var(--tm);margin-bottom:.5rem">Evolución nota numérica</div><div style="position:relative;height:180px"><canvas id="${chartId}"></canvas></div></div>`:''}
+      ${notasNum.length>=2?`<div style="margin-top:1rem"><div style="font-size:12px;color:var(--tm);margin-bottom:.5rem">Evolucion nota numerica</div>
+        <div style="position:relative;height:180px"><canvas id="${chartId}"></canvas></div></div>`:''}
     </div>
     <div style="font-size:12px;font-weight:500;color:var(--tm);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.75rem">Cursos realizados</div>
     <div class="twrap"><table style="width:100%;border-collapse:collapse;font-size:13px">
-      <thead><tr style="background:var(--bg2)">${datosCurso.map(c=>`<th style="padding:8px 10px;text-align:left;border-bottom:1px solid var(--bd);font-weight:500">${c}</th>`).join('')}${isEditor?'<th style="padding:8px 10px;border-bottom:1px solid var(--bd)"></th>':''}</tr></thead>
-      <tbody>${[...regs].sort((a,b)=>String(b[COL_ANO]||'').localeCompare(String(a[COL_ANO]||''))).map(a=>`<tr>${datosCurso.map(c=>{
-        let v=a[c]||'-';
-        if(c===COL_NOTA)v=notaBadge(a[c]);
-        else if(c===COL_NOTA_NUM)v=notaNumBadge(a[c]);
-        else if(c===COL_BECADO&&a[c])v=`<span class="badge ${String(a[c]).toLowerCase()==='si'?'bok':'bgray'}">${a[c]}</span>`;
-        else if(c===COL_CURSO)v=`<span style="background:var(--pl);color:var(--pd);font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500">${a[c]||'-'}</span>`;
-        return `<td style="padding:7px 10px;border-bottom:.5px solid var(--bd);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a[c]||''}">${v}</td>`;
-      }).join('')}${isEditor?`<td style="padding:7px 10px;border-bottom:.5px solid var(--bd);white-space:nowrap"><button class="bico" onclick="openModalEditarDirect('${escQ(JSON.stringify(a))}')">&#9999;</button> <button class="bico" onclick="deleteDesdeH('${escQ(JSON.stringify(a))}')">&#128465;</button></td>`:''}</tr>`).join('')}</tbody>
-    </table></div>`;
+      <thead><tr style="background:var(--bg2)">
+        ${datosCurso.map(c=>`<th style="padding:8px 10px;text-align:left;border-bottom:1px solid var(--bd);font-weight:500">${c}</th>`).join('')}
+        ${isEditor?'<th style="padding:8px 10px;border-bottom:1px solid var(--bd)"></th>':''}
+      </tr></thead><tbody>
+      ${[...regs].sort((a,b)=>String(b[COL_ANO]||'').localeCompare(String(a[COL_ANO]||''))).map(a=>`<tr>
+        ${datosCurso.map(c=>{
+          let v=a[c]||'-';
+          if(c===COL_NOTA)v=notaBadge(a[c]);
+          else if(c===COL_NOTA_NUM)v=notaNumBadge(a[c]);
+          else if(c===COL_BECADO&&a[c])v=`<span class="badge ${String(a[c]).toLowerCase()==='si'?'bok':'bgray'}">${a[c]}</span>`;
+          else if(c===COL_CURSO)v=`<span style="background:var(--pl);color:var(--pd);font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500">${a[c]||'-'}</span>`;
+          return `<td style="padding:7px 10px;border-bottom:.5px solid var(--bd);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a[c]||''}">${v}</td>`;
+        }).join('')}
+        ${isEditor?`<td style="padding:7px 10px;border-bottom:.5px solid var(--bd);white-space:nowrap">
+          <button class="bico" onclick="openModalEditarDirect('${escQ(JSON.stringify(a))}')">&#9999;</button>
+          <button class="bico" onclick="deleteDesdeH('${escQ(JSON.stringify(a))}')">&#128465;</button>
+        </td>`:''}
+      </tr>`).join('')}
+      </tbody></table></div>`;
 
-  document.getElementById('hcontent').innerHTML = html;
+  document.getElementById('hcontent').innerHTML=html;
 
-  if (notasNum.length >= 2) {
-    const ctx = document.getElementById(chartId);
-    if (ctx) {
-      if (CH['hchart']) CH['hchart'].destroy();
-      CH['hchart'] = new Chart(ctx.getContext('2d'), {
+  if(notasNum.length>=2){
+    const ctx=document.getElementById(chartId);
+    if(ctx){
+      if(CH['hchart'])CH['hchart'].destroy();
+      CH['hchart']=new Chart(ctx.getContext('2d'),{
         type:'line',
         data:{labels:notasNum.map(a=>{const c=String(a[COL_CURSO]||'');return c.length>15?c.substring(0,15)+'...':c;}),
           datasets:[{data:notasNum.map(a=>+a[COL_NOTA_NUM]),borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,.1)',
           pointBackgroundColor:notasNum.map(a=>+a[COL_NOTA_NUM]>=6?'#3B6D11':'#A32D2D'),pointRadius:5,tension:.3,fill:true}]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
-          tooltip:{callbacks:{title:i=>String(notasNum[i[0].dataIndex][COL_CURSO]||''),label:i=>'Nota: '+i.raw}}},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{callbacks:{title:i=>String(notasNum[i[0].dataIndex][COL_CURSO]||''),label:i=>'Nota: '+i.raw}}},
           scales:{y:{min:0,max:100,ticks:{font:{size:11}}},x:{ticks:{font:{size:10}}}}}
       });
     }
   }
 }
 
-function closeHistorial() { document.getElementById('hmodal').classList.remove('open'); historialData=null; }
-
-function addCursoHist() {
-  if (!historialData||!historialData.data.length) return;
-  const base = historialData.data[0];
-  addingFor = { dni:String(base[COL_DNI]||''), apellido:base['Apellidos']||'' };
-  editIdx = null;
-  closeHistorial();
-  document.getElementById('mtitle').textContent = 'Agregar curso - '+(base['Apellidos']||'')+', '+(base['Nombres']||'');
-  buildForm(base, true);
+function closeHistorial(){document.getElementById('hmodal').classList.remove('open');historialData=null;}
+function addCursoHist(){
+  if(!historialData||!historialData.data.length)return;
+  const base=historialData.data[0];
+  addingFor={dni:String(base[COL_DNI]||''),apellido:base['Apellidos']||''};
+  editIdx=null;closeHistorial();
+  document.getElementById('mtitle').textContent='Agregar curso - '+(base['Apellidos']||'')+', '+(base['Nombres']||'');
+  buildForm(base,true);
   document.getElementById('amodal').classList.add('open');
 }
-
-function exportHistExcel() {
-  if (!historialData||!historialData.data.length) return;
-  const ws = XLSX.utils.json_to_sheet(historialData.data,{header:cols});
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Historial');
+function exportHistExcel(){
+  if(!historialData||!historialData.data.length){toast('No hay datos.');return;}
+  const ws=XLSX.utils.json_to_sheet(historialData.data,{header:historialData.cols||cols});
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Historial');
   XLSX.writeFile(wb,`historial_${historialData.data[0]['Apellidos']}_${historialData.data[0]['Nombres']}.xlsx`);
 }
-
-function deleteDesdeH(jsonStr) {
-  const a = JSON.parse(jsonStr);
-  if (!confirm('Eliminar: '+a['Apellidos']+' '+a['Nombres']+' - '+a[COL_CURSO]+' '+a[COL_ANO]+'?')) return;
-  sendRecord({action:'delete', id:a['Ord']});
+function deleteDesdeH(jsonStr){
+  const a=JSON.parse(jsonStr);
+  if(!confirm('Eliminar: '+a['Apellidos']+' '+a['Nombres']+' - '+a[COL_CURSO]+' '+a[COL_ANO]+'?'))return;
+  sendRecord({action:'delete',id:a['Ord']});
   toast('Eliminado. Se reflejara en el Sheet en segundos.');
-  const dni=String(a[COL_DNI]||''), ape=a['Apellidos']||'';
-  setTimeout(()=>openHistorial(dni,ape), 1500);
+  const dni=String(a[COL_DNI]||''),ape=a['Apellidos']||'';
+  setTimeout(()=>openHistorial(dni,ape),1500);
 }
 
-function openModalNuevo() {
-  editIdx=null; addingFor=null;
-  document.getElementById('mtitle').textContent='Nuevo registro';
-  buildForm({},false);
-  document.getElementById('amodal').classList.add('open');
-}
+// ── MODAL FORM ─────────────────────────────────────────────
+function openModalNuevo(){editIdx=null;addingFor=null;document.getElementById('mtitle').textContent='Nuevo registro';buildForm({},false);document.getElementById('amodal').classList.add('open');}
+function openModalEditarDirect(jsonStr){const a=JSON.parse(jsonStr);editIdx=a;addingFor=null;document.getElementById('mtitle').textContent='Editar registro';buildForm(a,false);document.getElementById('amodal').classList.add('open');}
+function closeModal(){document.getElementById('amodal').classList.remove('open');editIdx=null;addingFor=null;}
 
-function openModalEditarDirect(jsonStr) {
-  const a = JSON.parse(jsonStr);
-  editIdx=a; addingFor=null;
-  document.getElementById('mtitle').textContent='Editar registro';
-  buildForm(a,false);
-  document.getElementById('amodal').classList.add('open');
-}
-
-function closeModal() { document.getElementById('amodal').classList.remove('open'); editIdx=null; addingFor=null; }
-
-function buildForm(data, lockPersona) {
-  const container = document.getElementById('aform');
-  container.innerHTML='';
+function buildForm(data,lockPersona){
+  const container=document.getElementById('aform');container.innerHTML='';
   cols.filter(c=>c!=='Ord').forEach(c=>{
     const div=document.createElement('div');
-    const isLong=['Observación','Mail','Destino'].includes(c);
+    const isLong=['Observacion','Mail','Destino'].includes(c);
     div.className='fg'+(isLong?' full':'');
-    const lbl=document.createElement('label'); lbl.textContent=c;
+    const lbl=document.createElement('label');lbl.textContent=c;
     let inp;
     if(c===COL_BECADO){inp=document.createElement('select');inp.innerHTML='<option value="">-</option><option value="Si">Si</option><option value="No">No</option>';inp.value=data[c]||'';}
     else if(isLong){inp=document.createElement('textarea');inp.value=data[c]||'';}
@@ -617,66 +566,49 @@ function buildForm(data, lockPersona) {
   });
 }
 
-function saveAlumno() {
+function saveAlumno(){
   const btn=document.getElementById('btnGuardar');
-  if(btn&&btn.disabled)return;
-  if(btn){btn.disabled=true;btn.innerText='Guardando...';}
+  if(btn&&btn.disabled)return;if(btn){btn.disabled=true;btn.innerText='Guardando...';}
   const obj={};
-  cols.filter(c=>c!=='Ord').forEach(c=>{
-    const el=document.getElementById('f_'+c.replace(/\s/g,'_'));
-    obj[c]=el?el.value.trim():'';
-  });
-  if(!obj['Apellidos']&&!obj['Nombres']){toast('Ingresá Apellidos o Nombres.');if(btn){btn.disabled=false;btn.innerText='Guardar';}return;}
+  cols.filter(c=>c!=='Ord').forEach(c=>{const el=document.getElementById('f_'+c.replace(/\s/g,'_'));obj[c]=el?el.value.trim():'';});
+  if(!obj['Apellidos']&&!obj['Nombres']){toast('Ingresa Apellidos o Nombres.');if(btn){btn.disabled=false;btn.innerText='Guardar';}return;}
 
   if(addingFor){
-    const u=getUrl();
-    jsonp(u+'?action=gethistorial&dni='+encodeURIComponent(addingFor.dni)+'&apellido='+encodeURIComponent(addingFor.apellido),j=>{
+    jsonp(getUrl()+'?action=gethistorial&dni='+encodeURIComponent(addingFor.dni)+'&apellido='+encodeURIComponent(addingFor.apellido),j=>{
       const base=(j.data||[])[0]||{};
       PERSONA_COLS.forEach(c=>obj[c]=base[c]||obj[c]||'');
-      obj['Ord']=Date.now();
-      sendRecord({action:'save',data:obj});
-      toast('Curso agregado al Sheet.');
-      closeModal();
+      obj['Ord']=Date.now();sendRecord({action:'save',data:obj});
+      toast('Curso agregado al Sheet.');closeModal();
       if(btn){btn.disabled=false;btn.innerText='Guardar';}
       setTimeout(()=>openHistorial(addingFor.dni,addingFor.apellido),1500);
-    });
-    return;
+    });return;
   }
-
   if(editIdx!==null&&typeof editIdx==='object'){
-    obj['Ord']=editIdx['Ord'];
-    sendRecord({action:'update',data:obj});
-    toast('Registro actualizado en el Sheet.');
-    closeModal();
-    if(btn){btn.disabled=false;btn.innerText='Guardar';}
-    return;
+    obj['Ord']=editIdx['Ord'];sendRecord({action:'update',data:obj});
+    toast('Actualizado en el Sheet.');closeModal();
+    if(btn){btn.disabled=false;btn.innerText='Guardar';}return;
   }
-
-  obj['Ord']=Date.now();
-  sendRecord({action:'save',data:obj});
-  toast('Registro agregado al Sheet.');
-  closeModal();
+  obj['Ord']=Date.now();sendRecord({action:'save',data:obj});
+  toast('Agregado al Sheet.');closeModal();
   if(btn){btn.disabled=false;btn.innerText='Guardar';}
 }
 
-function sendRecord(op) {
+// ── ESCRITURA ──────────────────────────────────────────────
+function sendRecord(op){
   let q=[];try{q=JSON.parse(localStorage.getItem('sync-queue')||'[]');}catch(e){}
   q.push(op);localStorage.setItem('sync-queue',JSON.stringify(q));flushQueue();
 }
-
-function flushQueue() {
+function flushQueue(){
   if(_flushing)return;
   const u=getUrl();if(!u||u==='PEGAR_URL_AQUI')return;
   let q=[];try{q=JSON.parse(localStorage.getItem('sync-queue')||'[]');}catch(e){}
-  if(!q.length)return;
-  _flushing=true;
+  if(!q.length)return;_flushing=true;
   postToSheet(u,q[0],()=>{
     let q2=[];try{q2=JSON.parse(localStorage.getItem('sync-queue')||'[]');}catch(e){}
     q2.shift();localStorage.setItem('sync-queue',JSON.stringify(q2));
     _flushing=false;if(q2.length)setTimeout(flushQueue,500);
   });
 }
-
 function postToSheet(u,op,onDone){
   const form=document.createElement('form');
   form.method='POST';form.action=u;form.target='_syncfr';form.style.display='none';
@@ -688,72 +620,139 @@ function postToSheet(u,op,onDone){
   document.body.appendChild(form);form.submit();
 }
 
-function notaR(n){if(!n)return'none';const s=String(n).toLowerCase().trim();if(s==='aprobado')return'ok';if(s==='desaprobado')return'err';return'neutro';}
+// ── NOTAS ──────────────────────────────────────────────────
+function notaR(n){
+  if(!n)return'none';const s=String(n).toLowerCase().trim();
+  if(s==='aprobado')return'ok';if(s==='desaprobado')return'err';return'neutro';
+}
 function notaBadge(n){if(!n)return'-';const r=notaR(n);return`<span class="badge ${r==='ok'?'bok':r==='err'?'berr':'bgray'}">${n}</span>`;}
 function notaNumBadge(n){if(!n)return'-';const s=String(n).trim();if(!isNaN(+s)&&s!=='')return`<span class="badge ${+s>=6?'bok':'berr'}">${s}</span>`;return`<span class="badge bgray">${s}</span>`;}
 
+// ── ESTADISTICAS ───────────────────────────────────────────
+// Carga todos los datos de estadísticas de una vez (sin filtro de año)
+// El filtro por año se aplica localmente
 function loadStats(){
-  const u=getUrl();
-  if(!u||u==='PEGAR_URL_AQUI'){toast('Configurá la URL primero.');return;}
-  const ano=document.getElementById('s-fano').value;
-  document.getElementById('smetrics').innerHTML='<div class="estate">Cargando...<span class="spin"></span></div>';
-  jsonp(u+'?action=getstats&ano='+encodeURIComponent(ano),j=>{
-    statsData=j;
-    const sfa=document.getElementById('s-fano');const sv=sfa.value;
+  const u=getUrl();if(!u||u==='PEGAR_URL_AQUI'){toast('Configura la URL primero.');return;}
+  document.getElementById('smetrics').innerHTML='<div class="estate">Cargando estadisticas...<span class="spin"></span></div>';
+  jsonp(u+'?action=getstats',j=>{
+    statsRaw=j;
+    // Poblar selector de años
+    const sfa=document.getElementById('s-fano');
+    const sv=sfa.value;
     sfa.innerHTML='<option value="">Todos</option>'+(j.anos||[]).map(a=>`<option ${a==sv?'selected':''}>${a}</option>`).join('');
     if(sv)sfa.value=sv;
-    document.getElementById('smetrics').innerHTML=`
-      <div class="metric"><div class="mlabel">Total registros</div><div class="mval">${j.total||0}</div></div>
-      <div class="metric"><div class="mlabel">Personas únicas</div><div class="mval">${j.personas||0}</div></div>
-      <div class="metric"><div class="mlabel">% aprobados</div><div class="mval">${j.total?Math.round((j.nota?.Aprobado||0)/j.total*100):0}%</div></div>
-      <div class="metric"><div class="mlabel">Años con datos</div><div class="mval">${(j.anos||[]).length}</div></div>`;
-    const sc=document.getElementById('s-count');
-    if(sc)sc.textContent=ano?`${j.total} registros para ${ano}`:`${j.total} registros totales`;
-    renderChart();
-  },()=>{document.getElementById('smetrics').innerHTML='<div class="estate">Error al cargar estadisticas.</div>';});
+    renderStats();
+  },()=>{document.getElementById('smetrics').innerHTML='<div class="estate">Error al cargar estadisticas. Intenta de nuevo.</div>';});
 }
 
-function renderChart(){
-  if(!statsData){loadStats();return;}
+// Filtra statsRaw por año localmente y renderiza
+function renderStats(){
+  if(!statsRaw){loadStats();return;}
+  const ano=document.getElementById('s-fano').value;
+  // Calcular métricas filtradas por año
+  let stats;
+  if(!ano){
+    stats=statsRaw;
+  } else {
+    // Filtrar cada campo por año
+    const filterByAno=(obj)=>{
+      if(!obj||!obj[ano])return{};
+      // Si el objeto tiene años como clave
+      if(typeof obj[ano]==='object')return obj[ano];
+      return obj;
+    };
+    // statsRaw.porAnoDetalle contiene los datos desagregados por año
+    const det=statsRaw.porAnoDetalle&&statsRaw.porAnoDetalle[ano];
+    if(det){
+      stats={
+        total:det.total||0,
+        personas:det.personas||0,
+        anos:statsRaw.anos,
+        porAno:statsRaw.porAno,
+        porCurso:det.porCurso||{},
+        porJerarquia:det.porJerarquia||{},
+        porProvincia:det.porProvincia||{},
+        porBecado:det.porBecado||{},
+        porFuerza:det.porFuerza||{},
+        porDictado:det.porDictado||{},
+        nota:det.nota||{}
+      };
+    } else {
+      stats=statsRaw;
+    }
+  }
+
+  const notaTotal=Object.values(stats.nota||{}).reduce((a,b)=>a+b,0);
+  const ap=(stats.nota&&stats.nota['Aprobado'])||0;
+  document.getElementById('smetrics').innerHTML=`
+    <div class="metric"><div class="mlabel">Total registros</div><div class="mval">${stats.total||0}</div></div>
+    <div class="metric"><div class="mlabel">Personas unicas</div><div class="mval">${stats.personas||0}</div></div>
+    <div class="metric"><div class="mlabel">% aprobados</div><div class="mval">${stats.total?Math.round(ap/stats.total*100):0}%</div></div>
+    <div class="metric"><div class="mlabel">Anos con datos</div><div class="mval">${(stats.anos||[]).length}</div></div>`;
+  const sc=document.getElementById('s-count');
+  if(sc)sc.textContent=ano?`Filtrando por ${ano}: ${stats.total} registros`:`${stats.total} registros totales`;
+  renderChart(stats);
+}
+
+function renderChart(stats){
+  if(!stats&&!statsRaw){loadStats();return;}
+  if(!stats){
+    const ano=document.getElementById('s-fano').value;
+    const det=statsRaw.porAnoDetalle&&ano&&statsRaw.porAnoDetalle[ano];
+    stats=det?{...statsRaw,...det,anos:statsRaw.anos,porAno:statsRaw.porAno}:statsRaw;
+  }
   const sel=document.getElementById('s-selector').value;
   const isTbl=sel==='porCurso'||sel==='porDictado';
   document.getElementById('s-tabla-wrap').style.display=isTbl?'':'none';
   document.getElementById('s-chart-wrap').style.display=isTbl?'none':'';
   const dlBtn=document.getElementById('s-dl-btn');
-  if(dlBtn)dlBtn.textContent=isTbl?'↓ Excel':'↓ PNG';
+  if(dlBtn)dlBtn.textContent=isTbl?'Descargar Excel':'Descargar PNG';
+
+  const dataMap={porCurso:stats.porCurso,porDictado:stats.porDictado,porAno:stats.porAno,nota:stats.nota,porJerarquia:stats.porJerarquia,porProvincia:stats.porProvincia,porBecado:stats.porBecado,porFuerza:stats.porFuerza};
+  const rawData=dataMap[sel]||{};
+  const configs={
+    porCurso:{title:'Top cursos',horiz:false,byKey:false,tbl:true},
+    porDictado:{title:'Por dictado',horiz:false,byKey:false,tbl:true},
+    porAno:{title:'Por ano',horiz:false,byKey:true},
+    nota:{title:'Nota',horiz:true,byKey:false},
+    porJerarquia:{title:'Por jerarquia',horiz:true,byKey:false,min:10},
+    porProvincia:{title:'Por provincia/pais',horiz:true,byKey:false},
+    porBecado:{title:'Becados vs no becados',horiz:true,byKey:false},
+    porFuerza:{title:'Por fuerza',horiz:true,byKey:false},
+  };
+  const cfg=configs[sel];if(!cfg)return;
 
   if(isTbl){
-    const title=sel==='porCurso'?'Top cursos':'Por dictado';
-    document.getElementById('s-tabla-title').textContent=title;
-    const data=statsData[sel]||{};
-    const entries=Object.entries(data).sort((a,b)=>b[1]-a[1]);
-    const maxV=entries[0]?.[1]||1;
+    document.getElementById('s-tabla-title').textContent=cfg.title;
+    let entries=Object.entries(rawData).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+    if(!entries.length){document.getElementById('s-tabla-content').innerHTML='<div class="estate">Sin datos.</div>';return;}
+    const maxV=entries[0][1]||1;
     let html='<table style="width:100%;border-collapse:collapse;font-size:13px"><tr style="background:var(--bg2)"><th style="padding:7px 10px;text-align:left;border-bottom:1px solid var(--bd)">Nombre</th><th style="padding:7px 10px;border-bottom:1px solid var(--bd);width:60%"></th><th style="padding:7px 10px;text-align:right;border-bottom:1px solid var(--bd)">Cant.</th></tr>';
     entries.forEach(([lbl,cnt])=>{
       const pct=Math.round(cnt/maxV*100);
-      html+=`<tr><td style="padding:7px 10px;border-bottom:.5px solid var(--bd);white-space:nowrap;max-width:250px;overflow:hidden;text-overflow:ellipsis" title="${lbl}">${lbl}</td><td style="padding:7px 10px;border-bottom:.5px solid var(--bd)"><div style="background:var(--bg2);border-radius:20px;height:8px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--p);border-radius:20px"></div></div></td><td style="padding:7px 10px;border-bottom:.5px solid var(--bd);text-align:right;font-weight:500">${cnt}</td></tr>`;
+      html+=`<tr><td style="padding:7px 10px;border-bottom:.5px solid var(--bd);white-space:nowrap;max-width:250px;overflow:hidden;text-overflow:ellipsis" title="${lbl}">${lbl}</td>
+        <td style="padding:7px 10px;border-bottom:.5px solid var(--bd)"><div style="background:var(--bg2);border-radius:20px;height:8px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--p);border-radius:20px"></div></div></td>
+        <td style="padding:7px 10px;border-bottom:.5px solid var(--bd);text-align:right;font-weight:500">${cnt}</td></tr>`;
     });
     document.getElementById('s-tabla-content').innerHTML=html+'</table>';
     return;
   }
 
-  const configs={
-    porAno:{title:'Por año',key:'porAno',horiz:false,byKey:true},
-    nota:{title:'Nota',key:'nota',horiz:true},
-    porJerarquia:{title:'Por jerarquía',key:'porJerarquia',horiz:true,min:10},
-    porProvincia:{title:'Por provincia / país',key:'porProvincia',horiz:true},
-    porBecado:{title:'Becados vs no becados',key:'porBecado',horiz:true},
-    porFuerza:{title:'Por fuerza',key:'porFuerza',horiz:true},
-  };
-  const cfg=configs[sel];if(!cfg)return;
-  document.getElementById('s-chart-title').textContent=cfg.title;
-  let entries=Object.entries(statsData[cfg.key]||{});
+  let entries=Object.entries(rawData).filter(([,v])=>v>0);
   if(cfg.min)entries=entries.filter(([,v])=>v>=cfg.min);
   if(cfg.byKey)entries.sort((a,b)=>a[0].localeCompare(b[0]));
   else entries.sort((a,b)=>b[1]-a[1]);
   const labels=entries.map(e=>e[0]),data=entries.map(e=>e[1]);
+
+  if(!labels.length){
+    const cont=document.getElementById('s-chart-container');
+    cont.innerHTML='<div class="estate">Sin datos para mostrar.</div>';return;
+  }
+  // Restaurar canvas si fue reemplazado
+  const cont=document.getElementById('s-chart-container');
+  if(!document.getElementById('s-chart'))cont.innerHTML='<canvas id="s-chart"></canvas>';
   const h=cfg.horiz?Math.max(260,labels.length*30+40):320;
-  document.getElementById('s-chart-container').style.height=h+'px';
+  cont.style.height=h+'px';
   if(CH['smain'])CH['smain'].destroy();
   const el=document.getElementById('s-chart');
   CH['smain']=new Chart(el.getContext('2d'),{
@@ -775,39 +774,97 @@ function renderChart(){
 }
 
 function downloadCurrentChart(){
+  if(!statsRaw){toast('Carga las estadisticas primero.');return;}
   const sel=document.getElementById('s-selector').value;
   const isTbl=sel==='porCurso'||sel==='porDictado';
+  const ano=document.getElementById('s-fano').value;
+  const det=statsRaw.porAnoDetalle&&ano&&statsRaw.porAnoDetalle[ano];
+  const stats=det?{...statsRaw,...det}:statsRaw;
+  const dataMap={porCurso:stats.porCurso,porDictado:stats.porDictado,porAno:stats.porAno,nota:stats.nota,porJerarquia:stats.porJerarquia,porProvincia:stats.porProvincia,porBecado:stats.porBecado,porFuerza:stats.porFuerza};
   if(isTbl){
-    const data=statsData[sel]||{};
-    const rows=Object.entries(data).sort((a,b)=>b[1]-a[1]).map(([n,c])=>({Nombre:n,Cantidad:c}));
+    const rows=Object.entries(dataMap[sel]||{}).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).map(([n,c])=>({Nombre:n,Cantidad:c}));
+    if(!rows.length){toast('No hay datos.');return;}
     const ws=XLSX.utils.json_to_sheet(rows,{header:['Nombre','Cantidad']});
     ws['!cols']=[{wch:60},{wch:12}];
     const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,sel);
-    XLSX.writeFile(wb,`estadistica_${sel}.xlsx`);toast('Excel descargado.');
+    XLSX.writeFile(wb,`estadistica_${sel}${ano?'_'+ano:''}.xlsx`);toast('Excel descargado.');
   }else{
     const el=document.getElementById('s-chart');if(!el)return;
     const cv=document.createElement('canvas');cv.width=el.width;cv.height=el.height;
     const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);ctx.drawImage(el,0,0);
-    const link=document.createElement('a');link.download=`estadistica_${sel}.png`;link.href=cv.toDataURL('image/png');link.click();
+    const link=document.createElement('a');link.download=`estadistica_${sel}${ano?'_'+ano:''}.png`;link.href=cv.toDataURL('image/png');link.click();
     toast('PNG descargado.');
   }
 }
 
+// ── DUPLICADOS ─────────────────────────────────────────────
+function loadDuplicados(){
+  const u=getUrl();if(!u||u==='PEGAR_URL_AQUI'){toast('Configura la URL primero.');return;}
+  document.getElementById('dup-content').innerHTML='<div class="estate">Buscando duplicados...<span class="spin"></span></div>';
+  jsonp(u+'?action=getduplicados',j=>{
+    if(!j){document.getElementById('dup-content').innerHTML='<div class="estate">Error al cargar.</div>';return;}
+    const grupos=j.grupos||[];
+    const totalExtra=grupos.reduce((s,g)=>s+g.length-1,0);
+    document.getElementById('dup-metrics').innerHTML=`
+      <div class="metric"><div class="mlabel">Grupos duplicados</div><div class="mval" style="color:${grupos.length?'var(--err)':'var(--ok)'}">${grupos.length}</div></div>
+      <div class="metric"><div class="mlabel">Registros extra</div><div class="mval" style="color:${totalExtra?'var(--err)':'var(--ok)'}">${totalExtra}</div></div>`;
+    if(!grupos.length){document.getElementById('dup-content').innerHTML='<div class="estate" style="color:var(--ok)">No se encontraron duplicados.</div>';return;}
+    const hcols=j.cols||cols;
+    const showCols=hcols.filter(c=>c!=='Ord').slice(0,10);
+    let html='';
+    grupos.forEach((grupo,gi)=>{
+      const p=grupo[0];
+      html+=`<div class="dup-group">
+        <div class="dup-header">
+          <span style="font-size:13px;font-weight:500;color:var(--err)">${p['Apellidos']||''}, ${p['Nombres']||''} — ${p[COL_CURSO]||''} — ${p[COL_ANO]||''}</span>
+          <span style="font-size:12px;color:var(--err)">${grupo.length} registros</span>
+        </div>
+        <div class="twrap"><table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="background:var(--bg2)">
+            ${showCols.map(c=>`<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--bd);font-weight:500">${c}</th>`).join('')}
+            <th style="padding:6px 8px;border-bottom:1px solid var(--bd)"></th>
+          </tr></thead><tbody>
+          ${grupo.map((a,ri)=>`<tr style="${ri===0?'background:var(--okl)':''}">
+            ${showCols.map(c=>{
+              let v=a[c]||'-';
+              if(c===COL_NOTA)v=notaBadge(a[c]);
+              return `<td style="padding:6px 8px;border-bottom:.5px solid var(--bd);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a[c]||''}">${v}</td>`;
+            }).join('')}
+            <td style="padding:6px 8px;border-bottom:.5px solid var(--bd);white-space:nowrap">
+              ${ri===0?'<span style="font-size:11px;color:var(--ok);font-weight:500">Original</span>':
+                `<button class="btn btnsm btnerr" onclick="eliminarDuplicado('${escQ(JSON.stringify(a))}')">Eliminar</button>`}
+            </td>
+          </tr>`).join('')}
+          </tbody></table></div>
+      </div>`;
+    });
+    document.getElementById('dup-content').innerHTML=html;
+  },()=>{document.getElementById('dup-content').innerHTML='<div class="estate">Error de conexion.</div>';});
+}
+
+function eliminarDuplicado(jsonStr){
+  const a=JSON.parse(jsonStr);
+  if(!confirm('Eliminar este registro?'))return;
+  sendRecord({action:'delete',id:a['Ord']});
+  toast('Eliminado. Actualizando...');
+  setTimeout(loadDuplicados,1500);
+}
+
+// ── DESCARGA COMPLETA ──────────────────────────────────────
 let dlData=[],dlTotalPages=0,dlCurrentPage=0,dlCols=[];
 function startDownload(){
-  const u=getUrl();if(!u||u==='PEGAR_URL_AQUI'){toast('Configurá la URL primero.');return;}
+  const u=getUrl();if(!u||u==='PEGAR_URL_AQUI'){toast('Configura la URL primero.');return;}
   dlData=[];dlTotalPages=0;dlCurrentPage=0;dlCols=[];
   document.getElementById('dl-btn').disabled=true;
   document.getElementById('dl-progress').style.display='block';
-  document.getElementById('dl-msg').textContent='Iniciando descarga...';
   document.getElementById('dl-fill').style.width='0%';
   downloadPage(1);
 }
 function downloadPage(page){
   const u=getUrl();
-  document.getElementById('dl-msg').textContent=`Descargando página ${page}${dlTotalPages?'/'+dlTotalPages:''}...`;
+  document.getElementById('dl-msg').textContent=`Descargando pagina ${page}${dlTotalPages?'/'+dlTotalPages:''}...`;
   jsonp(u+'?action=getpage&page='+page,j=>{
-    if(!j.data){downloadError('Error en respuesta.');return;}
+    if(!j||!j.data){downloadError('Error en respuesta.');return;}
     if(j.cols&&!dlCols.length)dlCols=j.cols;
     dlData=dlData.concat(j.data);dlTotalPages=j.totalPages;dlCurrentPage=j.page;
     const pct=Math.round(dlCurrentPage/dlTotalPages*100);
@@ -815,7 +872,7 @@ function downloadPage(page){
     document.getElementById('dl-msg').textContent=`Descargando... ${dlData.length} de ${j.total} registros (${pct}%)`;
     if(dlCurrentPage<dlTotalPages)setTimeout(()=>downloadPage(dlCurrentPage+1),300);
     else finishDownload();
-  },()=>downloadError('Error de conexión.'));
+  },()=>downloadError('Error de conexion.'));
 }
 function finishDownload(){
   const ws=XLSX.utils.json_to_sheet(dlData,{header:dlCols});
@@ -825,22 +882,22 @@ function finishDownload(){
   document.getElementById('dl-progress').style.display='none';
   toast('Excel descargado con '+dlData.length+' registros.');
 }
-function downloadError(msg){
-  document.getElementById('dl-msg').textContent='Error: '+msg;
-  document.getElementById('dl-btn').disabled=false;
-}
+function downloadError(msg){document.getElementById('dl-msg').textContent='Error: '+msg;document.getElementById('dl-btn').disabled=false;}
 
+// ── CONFIG ─────────────────────────────────────────────────
 function saveUrl(){const v=document.getElementById('surl').value.trim();localStorage.setItem('script-url',v);toast('URL guardada.');}
-function changePwd(){const v=document.getElementById('npwd').value;if(!v){toast('Ingresá una contrasena.');return;}localStorage.setItem('editor-pwd',v);toast('Contrasena actualizada.');}
-function copyScript(){navigator.clipboard.writeText(document.getElementById('ascode').textContent).then(()=>toast('Código copiado.'));}
+function changePwd(){const v=document.getElementById('npwd').value;if(!v){toast('Ingresa una contrasena.');return;}localStorage.setItem('editor-pwd',v);toast('Contrasena actualizada.');}
+function copyScript(){navigator.clipboard.writeText(document.getElementById('ascode').textContent).then(()=>toast('Codigo copiado.'));}
 
+// ── TABS ───────────────────────────────────────────────────
 function showTab(n,btn){
-  ['alumnos','estadisticas','descargar','duplicados','config'].forEach(t=>document.getElementById('tab-'+t).style.display=t===n?'':'none');
+  ['alumnos','estadisticas','duplicados','descargar','config'].forEach(t=>document.getElementById('tab-'+t).style.display=t===n?'':'none');
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
-  if(n==='estadisticas'&&!statsData)loadStats();
+  if(n==='estadisticas'&&!statsRaw)loadStats();
   if(n==='duplicados')loadDuplicados();
 }
 
+// ── UTILS ──────────────────────────────────────────────────
 function escQ(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
 document.addEventListener('keydown',e=>{
@@ -848,105 +905,33 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&document.getElementById('loginscr').classList.contains('show'))checkPwd();
 });
 
-function loadDuplicados(){
-  const u=getUrl();
-  if(!u||u==='PEGAR_URL_AQUI'){toast('Configurá la URL primero.');return;}
-  document.getElementById('dup-content').innerHTML='<div class="estate">Cargando...<span class="spin"></span></div>';
-  document.getElementById('dup-metrics').innerHTML='';
-
-  // Traer todos los registros paginados para detectar duplicados
-  let allData=[], totalPages=0, currentPage=0;
-
-  function fetchPage(page){
-    jsonp(u+'?action=getpage&page='+page, j=>{
-      if(!j.data){renderDupError();return;}
-      allData=allData.concat(j.data);
-      totalPages=j.totalPages; currentPage=j.page;
-      if(currentPage<totalPages){
-        setTimeout(()=>fetchPage(currentPage+1),300);
-      } else {
-        processDuplicados(allData);
-      }
-    },()=>renderDupError());
-  }
-  fetchPage(1);
-}
-
-function renderDupError(){
-  document.getElementById('dup-content').innerHTML='<div class="estate">Error al cargar datos.</div>';
-}
-
-function processDuplicados(data){
-  // Agrupar por DNI+Curso+Ano
-  const grupos={};
-  data.forEach(a=>{
-    const dni=String(a['DNI']||'').trim();
-    const key=dni+'||'+(a['Curso']||'')+'||'+String(a['Año']||'');
-    if(!grupos[key])grupos[key]=[];
-    grupos[key].push(a);
-  });
-  const dupGrupos=Object.values(grupos).filter(g=>g.length>1);
-  const totalExtra=dupGrupos.reduce((s,g)=>s+g.length-1,0);
-
-  document.getElementById('dup-metrics').innerHTML=`
-    <div class="metric"><div class="mlabel">Grupos duplicados</div><div class="mval" style="color:${dupGrupos.length>0?'var(--err)':'var(--ok)'}">${dupGrupos.length}</div></div>
-    <div class="metric"><div class="mlabel">Registros extra</div><div class="mval" style="color:${totalExtra>0?'var(--err)':'var(--ok)'}">${totalExtra}</div></div>
-    <div class="metric"><div class="mlabel">Total en base</div><div class="mval">${data.length}</div></div>`;
-
-  if(!dupGrupos.length){
-    document.getElementById('dup-content').innerHTML='<div class="estate" style="color:var(--ok)">No se encontraron duplicados.</div>';
-    return;
-  }
-
-  const showCols=['Apellidos','Nombres','DNI','Curso','Año','Nota','Dictado','Becado','Observación'].filter(c=>cols.includes(c));
-  let html='';
-  dupGrupos.forEach((grupo,gi)=>{
-    const p=grupo[0];
-    html+=`<div style="margin-bottom:1.5rem;border:.5px solid var(--errl);border-radius:var(--r);overflow:hidden">
-      <div style="background:var(--errl);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-        <span style="font-size:13px;font-weight:500;color:var(--err)">${p['Apellidos']||''}, ${p['Nombres']||''} — ${p['Curso']||''} — ${p['Año']||''}</span>
-        <span style="font-size:12px;color:var(--err)">${grupo.length} registros</span>
-      </div>
-      <div class="twrap"><table style="width:100%;border-collapse:collapse;font-size:12px">
-        <thead><tr style="background:var(--bg2)">${showCols.map(c=>`<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--bd);font-weight:500">${c}</th>`).join('')}<th style="padding:6px 8px;border-bottom:1px solid var(--bd)"></th></tr></thead>
-        <tbody>${grupo.map((a,ri)=>`<tr style="${ri===0?'background:var(--okl)':''}">
-          ${showCols.map(col=>{
-            let v=a[col]||'-';
-            if(col==='Nota')v=notaBadge(a[col]);
-            return`<td style="padding:6px 8px;border-bottom:.5px solid var(--bd);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a[col]||''}">${v}</td>`;
-          }).join('')}
-          <td style="padding:6px 8px;border-bottom:.5px solid var(--bd)">
-            ${ri===0?'<span style="font-size:11px;color:var(--ok);font-weight:500">Original</span>':
-              `<button class="btn btnsm btnerr" onclick="eliminarDup('${escQ(JSON.stringify(a))}')">Eliminar</button>`}
-          </td>
-        </tr>`).join('')}</tbody>
-      </table></div>
-    </div>`;
-  });
-  document.getElementById('dup-content').innerHTML=html;
-}
-
-function eliminarDup(jsonStr){
-  const a=JSON.parse(jsonStr);
-  if(!confirm('Eliminar este registro?'))return;
-  sendRecord({action:'delete',id:a['Ord']});
-  toast('Eliminado. Actualizando lista...');
-  setTimeout(loadDuplicados,1500);
-}
-
+// ── APPS SCRIPT ────────────────────────────────────────────
 function ascode(){
 return `const SHEET_NAME = 'Alumnos';
+
 function getSheet(){return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);}
-function getHeadersAndRows(){const sheet=getSheet();const rows=sheet.getDataRange().getValues();const headers=rows[0].map(h=>String(h).trim());return{headers,rows:rows.slice(1)};}
-function rowToObj(headers,row){const o={};headers.forEach((h,i)=>o[h]=row[i]!==undefined?row[i]:'');return o;}
+
+function getHeadersAndRows(){
+  const sheet=getSheet();
+  const rows=sheet.getDataRange().getValues();
+  const headers=rows[0].map(h=>String(h).trim());
+  return{headers,rows:rows.slice(1)};
+}
+
+function rowToObj(headers,row){
+  const o={};headers.forEach((h,i)=>o[h]=row[i]!==undefined?row[i]:'');return o;
+}
 
 function doGet(e){
-  const cb=e.parameter.callback,action=e.parameter.action;let result;
+  const cb=e.parameter.callback,action=e.parameter.action;
+  let result;
   try{
     if(action==='search')result=handleSearch(e.parameter);
     else if(action==='filter')result=handleFilter(e.parameter);
     else if(action==='gethistorial')result=handleHistorial(e.parameter);
-    else if(action==='getstats')result=handleStats(e.parameter);
+    else if(action==='getstats')result=handleStats();
+    else if(action==='getoptions')result=handleOptions();
+    else if(action==='getduplicados')result=handleDuplicados();
     else if(action==='getpage')result=handleGetPage(e.parameter);
     else{const{headers}=getHeadersAndRows();result=JSON.stringify({cols:headers});}
   }catch(err){result=JSON.stringify({error:err.message});}
@@ -954,6 +939,25 @@ function doGet(e){
   return ContentService.createTextOutput(result).setMimeType(ContentService.MimeType.JSON);
 }
 
+// OPCIONES para selectores (anos, cursos, notas, etc.)
+function handleOptions(){
+  const{headers,rows}=getHeadersAndRows();
+  function uniq(field){
+    const idx=headers.indexOf(field);
+    if(idx<0)return[];
+    return[...new Set(rows.map(r=>String(r[idx]||'').trim()).filter(Boolean))].sort();
+  }
+  return JSON.stringify({
+    cols:headers,
+    anos:uniq('Ano').sort().reverse(),
+    cursos:uniq('Curso'),
+    notas:uniq('Nota'),
+    dictados:uniq('Dictado'),
+    fuerzas:uniq('Fuerza')
+  });
+}
+
+// BÚSQUEDA optimizada con índice en memoria
 function handleSearch(params){
   const q=String(params.q||'').toLowerCase().trim();
   if(!q||q.length<2)return JSON.stringify({data:[]});
@@ -962,56 +966,119 @@ function handleSearch(params){
   const personas={};
   rows.forEach(row=>{
     const dni=String(row[dniIdx]||''),ape=String(row[apIdx]||''),nom=String(row[nomIdx]||'');
+    if(!ape&&!nom&&!dni)return;
     const key=dni||(ape+'|'+nom);
     if(!personas[key])personas[key]={dni,ape,nom,cursos:[]};
     if(curIdx>=0)personas[key].cursos.push(String(row[curIdx]||''));
   });
-  const results=Object.values(personas).filter(p=>p.ape.toLowerCase().includes(q)||p.nom.toLowerCase().includes(q)||p.dni.toLowerCase().includes(q))
-    .slice(0,parseInt(params.limit||'15')).map(p=>({Apellidos:p.ape,Nombres:p.nom,DNI:p.dni,cursos:[...new Set(p.cursos)].filter(Boolean).slice(0,3)}));
+  const results=Object.values(personas)
+    .filter(p=>p.ape.toLowerCase().includes(q)||p.nom.toLowerCase().includes(q)||p.dni.toLowerCase().includes(q))
+    .slice(0,parseInt(params.limit||'15'))
+    .map(p=>({Apellidos:p.ape,Nombres:p.nom,DNI:p.dni,cursos:[...new Set(p.cursos)].filter(Boolean).slice(0,3)}));
   return JSON.stringify({data:results});
 }
 
+// FILTRO paginado
 function handleFilter(params){
   const{headers,rows}=getHeadersAndRows();
   const page=parseInt(params.page||'1'),pageSize=50;
-  const filters={'Año':params.ano||'','Curso':params.curso||'','Nota':params.nota||'','Dictado':params.dictado||'','Fuerza':params.fuerza||''};
-  const filtered=rows.filter(row=>Object.entries(filters).every(([field,val])=>{
-    if(!val)return true;
-    const idx=headers.indexOf(field);
-    return idx>=0&&String(row[idx]||'').toLowerCase()===val.toLowerCase();
-  }));
+  const filters={
+    'Ano':params.ano||'',
+    'Curso':params.curso||'',
+    'Nota':params.nota||'',
+    'Dictado':params.dictado||'',
+    'Fuerza':params.fuerza||''
+  };
+  const filtered=rows.filter(row=>
+    Object.entries(filters).every(([field,val])=>{
+      if(!val)return true;
+      const idx=headers.indexOf(field);
+      return idx>=0&&String(row[idx]||'').trim()===val;
+    })
+  );
   const total=filtered.length;
-  const page_rows=filtered.slice((page-1)*pageSize,page*pageSize).map(r=>rowToObj(headers,r));
-  const uniqueVals={};
-  ['Año','Curso','Nota','Dictado','Fuerza'].forEach(field=>{
-    const idx=headers.indexOf(field);
-    if(idx>=0)uniqueVals[field]=[...new Set(rows.map(r=>String(r[idx]||'')).filter(Boolean))].sort();
-  });
-  return JSON.stringify({data:page_rows,total,page,pageSize,cols:headers,uniqueVals});
+  const pageRows=filtered.slice((page-1)*pageSize,page*pageSize).map(r=>rowToObj(headers,r));
+  return JSON.stringify({data:pageRows,total,page,pageSize,cols:headers});
 }
 
+// HISTORIAL por DNI o apellido
 function handleHistorial(params){
   const dni=String(params.dni||'').trim(),apellido=String(params.apellido||'').trim();
   if(!dni&&!apellido)return JSON.stringify({data:[]});
   const{headers,rows}=getHeadersAndRows();
   const dniIdx=headers.indexOf('DNI'),apeIdx=headers.indexOf('Apellidos');
-  const regs=rows.filter(row=>dni?String(row[dniIdx]||'').trim()===dni:String(row[apeIdx]||'').trim()===apellido).map(r=>rowToObj(headers,r));
+  const regs=rows
+    .filter(row=>dni?String(row[dniIdx]||'').trim()===dni:String(row[apeIdx]||'').trim()===apellido)
+    .map(r=>rowToObj(headers,r));
   return JSON.stringify({data:regs,cols:headers});
 }
 
-function handleStats(params){
+// ESTADÍSTICAS completas de todos los años + detalle por año
+function handleStats(){
   const{headers,rows}=getHeadersAndRows();
-  const fAno=params.ano||'';
-  const filteredRows=fAno?rows.filter(r=>String(r[headers.indexOf('Año')]||'')===fAno):rows;
-  function countBy(field){const idx=headers.indexOf(field);if(idx<0)return{};const m={};filteredRows.forEach(r=>{const v=String(r[idx]||'').trim()||'Sin dato';m[v]=(m[v]||0)+1;});return m;}
-  function notaRes(n){if(!n)return'none';const s=String(n).toLowerCase().trim();if(s==='aprobado')return'ok';if(s==='desaprobado')return'err';return'neutro';}
-  let ap=0,des=0,neu=0,sn=0;const notaIdx=headers.indexOf('Nota');
-  filteredRows.forEach(r=>{const res=notaRes(r[notaIdx]);if(res==='ok')ap++;else if(res==='err')des++;else if(res==='neutro')neu++;else sn++;});
-  const anos=[...new Set(rows.map(r=>String(r[headers.indexOf('Año')]||'')).filter(Boolean))].sort();
+  const anoIdx=headers.indexOf('Ano');
+  const anos=[...new Set(rows.map(r=>String(r[anoIdx]||'').trim()).filter(Boolean))].sort();
   const personas=new Set(rows.map(r=>String(r[headers.indexOf('DNI')]||r[headers.indexOf('Apellidos')]||'')).filter(Boolean)).size;
-  return JSON.stringify({total:filteredRows.length,personas,anos,porAno:countBy('Año'),porCurso:countBy('Curso'),porJerarquia:countBy('Jerarquía'),porProvincia:countBy('Provincia/País'),porBecado:countBy('Becado'),porFuerza:countBy('Fuerza'),porDictado:countBy('Dictado'),nota:{Aprobado:ap,Desaprobado:des,'Cursado/Participativo':neu,'Sin nota':sn}});
+
+  function countByField(src,field){
+    const idx=headers.indexOf(field);if(idx<0)return{};
+    const m={};
+    src.forEach(r=>{const v=String(r[idx]||'').trim();if(v)m[v]=(m[v]||0)+1;});
+    return m;
+  }
+
+  // Totales globales
+  const global={
+    total:rows.length,personas,anos,
+    porAno:countByField(rows,'Ano'),
+    porCurso:countByField(rows,'Curso'),
+    porJerarquia:countByField(rows,'Jerarquia'),
+    porProvincia:countByField(rows,'Provincia/Pais'),
+    porBecado:countByField(rows,'Becado'),
+    porFuerza:countByField(rows,'Fuerza'),
+    porDictado:countByField(rows,'Dictado'),
+    nota:countByField(rows,'Nota')
+  };
+
+  // Detalle por año (para filtrado local en la app)
+  const porAnoDetalle={};
+  anos.forEach(ano=>{
+    const subset=rows.filter(r=>String(r[anoIdx]||'').trim()===ano);
+    const personasAno=new Set(subset.map(r=>String(r[headers.indexOf('DNI')]||r[headers.indexOf('Apellidos')]||'')).filter(Boolean)).size;
+    porAnoDetalle[ano]={
+      total:subset.length,
+      personas:personasAno,
+      porCurso:countByField(subset,'Curso'),
+      porJerarquia:countByField(subset,'Jerarquia'),
+      porProvincia:countByField(subset,'Provincia/Pais'),
+      porBecado:countByField(subset,'Becado'),
+      porFuerza:countByField(subset,'Fuerza'),
+      porDictado:countByField(subset,'Dictado'),
+      nota:countByField(subset,'Nota')
+    };
+  });
+
+  global.porAnoDetalle=porAnoDetalle;
+  return JSON.stringify(global);
 }
 
+// DUPLICADOS por DNI+Curso+Ano
+function handleDuplicados(){
+  const{headers,rows}=getHeadersAndRows();
+  const dniIdx=headers.indexOf('DNI'),apeIdx=headers.indexOf('Apellidos'),nomIdx=headers.indexOf('Nombres');
+  const curIdx=headers.indexOf('Curso'),anoIdx=headers.indexOf('Ano');
+  const grupos={};
+  rows.forEach(row=>{
+    const dni=String(row[dniIdx]||'').trim(),ape=String(row[apeIdx]||'').trim(),nom=String(row[nomIdx]||'').trim();
+    const key=(dni||(ape+nom))+'||'+(String(row[curIdx]||'').trim())+'||'+(String(row[anoIdx]||'').trim());
+    if(!grupos[key])grupos[key]=[];
+    grupos[key].push(rowToObj(headers,row));
+  });
+  const duplicados=Object.values(grupos).filter(g=>g.length>1);
+  return JSON.stringify({grupos:duplicados,cols:headers});
+}
+
+// DESCARGA paginada
 function handleGetPage(params){
   const page=parseInt(params.page||'1'),pageSize=500;
   const{headers,rows}=getHeadersAndRows();
@@ -1021,11 +1088,26 @@ function handleGetPage(params){
 }
 
 function doPost(e){
-  let body;try{body=JSON.parse(e.postData.contents);}catch(err){body=JSON.parse(e.parameter.payload||'{}');}
-  const sheet=getSheet();const rows=sheet.getDataRange().getValues();const headers=rows[0].map(h=>String(h).trim());const ordIdx=headers.indexOf('Ord');
-  if(body.action==='save'){const cls=body.cols||headers;sheet.appendRow(cls.map(c=>body.data[c]!==undefined?body.data[c]:''));}
-  else if(body.action==='update'){const ord=String(body.data['Ord']||'');for(let i=1;i<rows.length;i++){if(String(rows[i][ordIdx])===ord){headers.forEach((h,j)=>{if(body.data[h]!==undefined)sheet.getRange(i+1,j+1).setValue(body.data[h]||'');});break;}}}
-  else if(body.action==='delete'){const ord=String(body.id||'');for(let i=1;i<rows.length;i++){if(String(rows[i][ordIdx])===ord){sheet.deleteRow(i+1);break;}}}
+  let body;
+  try{body=JSON.parse(e.postData.contents);}catch(err){body=JSON.parse(e.parameter.payload||'{}');}
+  const sheet=getSheet();
+  const rows=sheet.getDataRange().getValues();
+  const headers=rows[0].map(h=>String(h).trim());
+  const ordIdx=headers.indexOf('Ord');
+  if(body.action==='save'){
+    const cls=body.cols||headers;
+    sheet.appendRow(cls.map(c=>body.data[c]!==undefined?body.data[c]:''));
+  }else if(body.action==='update'){
+    const ord=String(body.data['Ord']||'');
+    for(let i=1;i<rows.length;i++){
+      if(String(rows[i][ordIdx])===ord){
+        headers.forEach((h,j)=>{if(body.data[h]!==undefined)sheet.getRange(i+1,j+1).setValue(body.data[h]||'');});break;
+      }
+    }
+  }else if(body.action==='delete'){
+    const ord=String(body.id||'');
+    for(let i=1;i<rows.length;i++){if(String(rows[i][ordIdx])===ord){sheet.deleteRow(i+1);break;}}
+  }
   return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
 }`;
 }

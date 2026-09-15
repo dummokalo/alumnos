@@ -270,10 +270,10 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
 
 <script>
 // ── CONFIGURACION ──────────────────────────────────────────
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxggVziaAXKOlVXjMq62Jy512D4-PTUWYXO9uUDVHjPQieX-OpDRO0Ll7dJcUSL2pj_/exec';
-const EDITOR_PWD = 'ADMIN123';
-const PERSONA_COLS = ['Apellidos','Nombres','DNI','Jerarquia','Destino','Telefono','Mail','Provincia/Pais','Fuerza'];
-const COL_DNI='DNI',COL_CURSO='Curso',COL_ANO='Ano',COL_NOTA='Nota',COL_NOTA_NUM='Nota numerica',COL_BECADO='Becado';
+const SCRIPT_URL = 'PEGAR_URL_AQUI';
+const EDITOR_PWD = 'PEGAR_CONTRASENA_AQUI';
+const PERSONA_COLS = ['Apellidos','Nombres','DNI','Jerarquía','Destino','Teléfono','Mail','Provincia/País','Fuerza'];
+const COL_DNI='DNI',COL_CURSO='Nombre de curso',COL_ANO='Año',COL_NOTA='Nota',COL_NOTA_NUM='Nota numérica',COL_BECADO='Becado';
 const CLRS=['#185FA5','#3B6D11','#BA7517','#A32D2D','#1D9E75','#534AB7','#D85A30','#639922','#D4537E','#5F5E5A'];
 
 // ── ESTADO ─────────────────────────────────────────────────
@@ -400,7 +400,7 @@ function filterPage(d){applyFilter(filterCurrentPage+d);}
 
 function renderFilterResults(data,total,page,pageSize){
   if(!data.length){document.getElementById('filter-results').innerHTML='<div class="estate">Sin resultados.</div>';document.getElementById('filter-pagination').style.display='none';return;}
-  const dc=cols.filter(c=>['Apellidos','Nombres','DNI','Curso','Ano','Nota','Nota numerica','Jerarquia','Becado'].includes(c));
+  const dc=cols.filter(c=>['Apellidos','Nombres','DNI','Nombre de curso','Año','Nota','Nota numérica','Jerarquía','Becado'].includes(c));
   let html='<div class="twrap"><table><thead><tr>';
   dc.forEach(c=>html+=`<th>${c}</th>`);
   html+='<th>Acciones</th></tr></thead><tbody>';
@@ -908,6 +908,8 @@ document.addEventListener('keydown',e=>{
 // ── APPS SCRIPT ────────────────────────────────────────────
 function ascode(){
 return `const SHEET_NAME = 'Alumnos';
+const INDEX_NAME = 'Indice';
+const INDEX_MAX_AGE_MS = 60 * 60 * 1000; // 1 hora
 
 function getSheet(){return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);}
 
@@ -922,6 +924,46 @@ function rowToObj(headers,row){
   const o={};headers.forEach((h,i)=>o[h]=row[i]!==undefined?row[i]:'');return o;
 }
 
+// ── ÍNDICE DE BÚSQUEDA ────────────────────────────────────
+// Crea o actualiza la hoja Indice con una fila por persona única
+function buildIndex(){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  let idxSheet=ss.getSheetByName(INDEX_NAME);
+  if(!idxSheet)idxSheet=ss.insertSheet(INDEX_NAME);
+  else idxSheet.clearContents();
+
+  const{headers,rows}=getHeadersAndRows();
+  const dniIdx=headers.indexOf('DNI'),apeIdx=headers.indexOf('Apellidos'),nomIdx=headers.indexOf('Nombres'),curIdx=headers.indexOf('Curso');
+  const personas={};
+  rows.forEach(row=>{
+    const dni=String(row[dniIdx]||'').trim(),ape=String(row[apeIdx]||'').trim(),nom=String(row[nomIdx]||'').trim();
+    const key=dni||(ape+'|'+nom);
+    if(!key)return;
+    if(!personas[key])personas[key]={dni,ape,nom,cursos:new Set()};
+    if(curIdx>=0&&row[curIdx])personas[key].cursos.add(String(row[curIdx]).trim());
+  });
+
+  // Escribir índice: timestamp en A1, datos desde A2
+  idxSheet.getRange(1,1).setValue(Date.now());
+  const indexRows=Object.values(personas).map(p=>[p.dni,p.ape,p.nom,[...p.cursos].slice(0,5).join(', ')]);
+  if(indexRows.length>0){
+    idxSheet.getRange(2,1,indexRows.length,4).setValues(indexRows);
+  }
+  return indexRows.length;
+}
+
+// Lee el índice si está vigente, lo regenera si expiró
+function getIndex(){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  const idxSheet=ss.getSheetByName(INDEX_NAME);
+  if(!idxSheet){buildIndex();return getIndex();}
+  const lastUpdate=Number(idxSheet.getRange(1,1).getValue()||0);
+  if(Date.now()-lastUpdate>INDEX_MAX_AGE_MS){buildIndex();return getIndex();}
+  const data=idxSheet.getDataRange().getValues();
+  if(data.length<2)return[];
+  return data.slice(1); // [dni, apellidos, nombres, cursos]
+}
+
 function doGet(e){
   const cb=e.parameter.callback,action=e.parameter.action;
   let result;
@@ -933,18 +975,35 @@ function doGet(e){
     else if(action==='getoptions')result=handleOptions();
     else if(action==='getduplicados')result=handleDuplicados();
     else if(action==='getpage')result=handleGetPage(e.parameter);
+    else if(action==='rebuildindex'){const n=buildIndex();result=JSON.stringify({ok:true,personas:n});}
     else{const{headers}=getHeadersAndRows();result=JSON.stringify({cols:headers});}
   }catch(err){result=JSON.stringify({error:err.message});}
   if(cb)return ContentService.createTextOutput(cb+'('+result+')').setMimeType(ContentService.MimeType.JAVASCRIPT);
   return ContentService.createTextOutput(result).setMimeType(ContentService.MimeType.JSON);
 }
 
-// OPCIONES para selectores (anos, cursos, notas, etc.)
+// BÚSQUEDA usando el índice (rápida)
+function handleSearch(params){
+  const q=String(params.q||'').toLowerCase().trim();
+  if(!q||q.length<2)return JSON.stringify({data:[]});
+  const index=getIndex();
+  const results=[];
+  for(let i=0;i<index.length;i++){
+    const row=index[i];
+    const dni=String(row[0]||''),ape=String(row[1]||''),nom=String(row[2]||''),curs=String(row[3]||'');
+    if(ape.toLowerCase().includes(q)||nom.toLowerCase().includes(q)||dni.toLowerCase().includes(q)){
+      results.push({DNI:dni,Apellidos:ape,Nombres:nom,cursos:curs?curs.split(', '):[]});
+      if(results.length>=parseInt(params.limit||'15'))break;
+    }
+  }
+  return JSON.stringify({data:results});
+}
+
+// OPCIONES para selectores
 function handleOptions(){
   const{headers,rows}=getHeadersAndRows();
   function uniq(field){
-    const idx=headers.indexOf(field);
-    if(idx<0)return[];
+    const idx=headers.indexOf(field);if(idx<0)return[];
     return[...new Set(rows.map(r=>String(r[idx]||'').trim()).filter(Boolean))].sort();
   }
   return JSON.stringify({
@@ -957,45 +1016,16 @@ function handleOptions(){
   });
 }
 
-// BÚSQUEDA optimizada con índice en memoria
-function handleSearch(params){
-  const q=String(params.q||'').toLowerCase().trim();
-  if(!q||q.length<2)return JSON.stringify({data:[]});
-  const{headers,rows}=getHeadersAndRows();
-  const apIdx=headers.indexOf('Apellidos'),nomIdx=headers.indexOf('Nombres'),dniIdx=headers.indexOf('DNI'),curIdx=headers.indexOf('Curso');
-  const personas={};
-  rows.forEach(row=>{
-    const dni=String(row[dniIdx]||''),ape=String(row[apIdx]||''),nom=String(row[nomIdx]||'');
-    if(!ape&&!nom&&!dni)return;
-    const key=dni||(ape+'|'+nom);
-    if(!personas[key])personas[key]={dni,ape,nom,cursos:[]};
-    if(curIdx>=0)personas[key].cursos.push(String(row[curIdx]||''));
-  });
-  const results=Object.values(personas)
-    .filter(p=>p.ape.toLowerCase().includes(q)||p.nom.toLowerCase().includes(q)||p.dni.toLowerCase().includes(q))
-    .slice(0,parseInt(params.limit||'15'))
-    .map(p=>({Apellidos:p.ape,Nombres:p.nom,DNI:p.dni,cursos:[...new Set(p.cursos)].filter(Boolean).slice(0,3)}));
-  return JSON.stringify({data:results});
-}
-
 // FILTRO paginado
 function handleFilter(params){
   const{headers,rows}=getHeadersAndRows();
   const page=parseInt(params.page||'1'),pageSize=50;
-  const filters={
-    'Ano':params.ano||'',
-    'Curso':params.curso||'',
-    'Nota':params.nota||'',
-    'Dictado':params.dictado||'',
-    'Fuerza':params.fuerza||''
-  };
-  const filtered=rows.filter(row=>
-    Object.entries(filters).every(([field,val])=>{
-      if(!val)return true;
-      const idx=headers.indexOf(field);
-      return idx>=0&&String(row[idx]||'').trim()===val;
-    })
-  );
+  const filters={'Ano':params.ano||'','Curso':params.curso||'','Nota':params.nota||'','Dictado':params.dictado||'','Fuerza':params.fuerza||''};
+  const filtered=rows.filter(row=>Object.entries(filters).every(([field,val])=>{
+    if(!val)return true;
+    const idx=headers.indexOf(field);
+    return idx>=0&&String(row[idx]||'').trim()===val;
+  }));
   const total=filtered.length;
   const pageRows=filtered.slice((page-1)*pageSize,page*pageSize).map(r=>rowToObj(headers,r));
   return JSON.stringify({data:pageRows,total,page,pageSize,cols:headers});
@@ -1007,57 +1037,38 @@ function handleHistorial(params){
   if(!dni&&!apellido)return JSON.stringify({data:[]});
   const{headers,rows}=getHeadersAndRows();
   const dniIdx=headers.indexOf('DNI'),apeIdx=headers.indexOf('Apellidos');
-  const regs=rows
-    .filter(row=>dni?String(row[dniIdx]||'').trim()===dni:String(row[apeIdx]||'').trim()===apellido)
-    .map(r=>rowToObj(headers,r));
+  const regs=rows.filter(row=>dni?String(row[dniIdx]||'').trim()===dni:String(row[apeIdx]||'').trim()===apellido).map(r=>rowToObj(headers,r));
   return JSON.stringify({data:regs,cols:headers});
 }
 
-// ESTADÍSTICAS completas de todos los años + detalle por año
+// ESTADÍSTICAS completas + detalle por año
 function handleStats(){
   const{headers,rows}=getHeadersAndRows();
   const anoIdx=headers.indexOf('Ano');
   const anos=[...new Set(rows.map(r=>String(r[anoIdx]||'').trim()).filter(Boolean))].sort();
   const personas=new Set(rows.map(r=>String(r[headers.indexOf('DNI')]||r[headers.indexOf('Apellidos')]||'')).filter(Boolean)).size;
-
   function countByField(src,field){
     const idx=headers.indexOf(field);if(idx<0)return{};
-    const m={};
-    src.forEach(r=>{const v=String(r[idx]||'').trim();if(v)m[v]=(m[v]||0)+1;});
-    return m;
+    const m={};src.forEach(r=>{const v=String(r[idx]||'').trim();if(v)m[v]=(m[v]||0)+1;});return m;
   }
-
-  // Totales globales
   const global={
     total:rows.length,personas,anos,
-    porAno:countByField(rows,'Ano'),
-    porCurso:countByField(rows,'Curso'),
-    porJerarquia:countByField(rows,'Jerarquia'),
-    porProvincia:countByField(rows,'Provincia/Pais'),
-    porBecado:countByField(rows,'Becado'),
-    porFuerza:countByField(rows,'Fuerza'),
-    porDictado:countByField(rows,'Dictado'),
-    nota:countByField(rows,'Nota')
+    porAno:countByField(rows,'Ano'),porCurso:countByField(rows,'Curso'),
+    porJerarquia:countByField(rows,'Jerarquia'),porProvincia:countByField(rows,'Provincia/Pais'),
+    porBecado:countByField(rows,'Becado'),porFuerza:countByField(rows,'Fuerza'),
+    porDictado:countByField(rows,'Dictado'),nota:countByField(rows,'Nota')
   };
-
-  // Detalle por año (para filtrado local en la app)
   const porAnoDetalle={};
   anos.forEach(ano=>{
     const subset=rows.filter(r=>String(r[anoIdx]||'').trim()===ano);
     const personasAno=new Set(subset.map(r=>String(r[headers.indexOf('DNI')]||r[headers.indexOf('Apellidos')]||'')).filter(Boolean)).size;
     porAnoDetalle[ano]={
-      total:subset.length,
-      personas:personasAno,
-      porCurso:countByField(subset,'Curso'),
-      porJerarquia:countByField(subset,'Jerarquia'),
-      porProvincia:countByField(subset,'Provincia/Pais'),
-      porBecado:countByField(subset,'Becado'),
-      porFuerza:countByField(subset,'Fuerza'),
-      porDictado:countByField(subset,'Dictado'),
-      nota:countByField(subset,'Nota')
+      total:subset.length,personas:personasAno,
+      porCurso:countByField(subset,'Curso'),porJerarquia:countByField(subset,'Jerarquia'),
+      porProvincia:countByField(subset,'Provincia/Pais'),porBecado:countByField(subset,'Becado'),
+      porFuerza:countByField(subset,'Fuerza'),porDictado:countByField(subset,'Dictado'),nota:countByField(subset,'Nota')
     };
   });
-
   global.porAnoDetalle=porAnoDetalle;
   return JSON.stringify(global);
 }
@@ -1070,7 +1081,7 @@ function handleDuplicados(){
   const grupos={};
   rows.forEach(row=>{
     const dni=String(row[dniIdx]||'').trim(),ape=String(row[apeIdx]||'').trim(),nom=String(row[nomIdx]||'').trim();
-    const key=(dni||(ape+nom))+'||'+(String(row[curIdx]||'').trim())+'||'+(String(row[anoIdx]||'').trim());
+    const key=(dni||(ape+nom))+'||'+String(row[curIdx]||'').trim()+'||'+String(row[anoIdx]||'').trim();
     if(!grupos[key])grupos[key]=[];
     grupos[key].push(rowToObj(headers,row));
   });
@@ -1097,6 +1108,10 @@ function doPost(e){
   if(body.action==='save'){
     const cls=body.cols||headers;
     sheet.appendRow(cls.map(c=>body.data[c]!==undefined?body.data[c]:''));
+    // Invalidar índice al agregar
+    const ss=SpreadsheetApp.getActiveSpreadsheet();
+    const idx=ss.getSheetByName('Indice');
+    if(idx)idx.getRange(1,1).setValue(0);
   }else if(body.action==='update'){
     const ord=String(body.data['Ord']||'');
     for(let i=1;i<rows.length;i++){
@@ -1104,13 +1119,22 @@ function doPost(e){
         headers.forEach((h,j)=>{if(body.data[h]!==undefined)sheet.getRange(i+1,j+1).setValue(body.data[h]||'');});break;
       }
     }
+    const ss=SpreadsheetApp.getActiveSpreadsheet();
+    const idx=ss.getSheetByName('Indice');
+    if(idx)idx.getRange(1,1).setValue(0);
   }else if(body.action==='delete'){
     const ord=String(body.id||'');
-    for(let i=1;i<rows.length;i++){if(String(rows[i][ordIdx])===ord){sheet.deleteRow(i+1);break;}}
+    for(let i=1;i<rows.length;i++){
+      if(String(rows[i][ordIdx])===ord){sheet.deleteRow(i+1);break;}
+    }
+    const ss=SpreadsheetApp.getActiveSpreadsheet();
+    const idx=ss.getSheetByName('Indice');
+    if(idx)idx.getRange(1,1).setValue(0);
   }
   return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
 }`;
 }
-</script>
+
+/script>
 </body>
 </html>

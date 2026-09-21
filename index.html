@@ -3,9 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestión de Alumnos</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<title>Gestion de Alumnos</title>
 <style>
 :root{--p:#185FA5;--pl:#E6F1FB;--pd:#0C447C;--ok:#3B6D11;--okl:#EAF3DE;--err:#A32D2D;--errl:#FCEBEB;--warn:#BA7517;--warnl:#FAEEDA;--g:#5F5E5A;--gl:#F1EFE8;--t:#2C2C2A;--tm:#888780;--bg:#fff;--bg2:#F1EFE8;--bd:#D3D1C7;--r:8px;--rl:12px}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -30,10 +28,10 @@ th{background:var(--bg2);font-weight:500;text-align:left;padding:8px 10px;border
 td{padding:7px 10px;border-bottom:.5px solid var(--bd);vertical-align:middle;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 tr:hover td{background:var(--pl)}
 .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500}
-.bok{background:var(--okl);color:var(--ok)}.berr{background:var(--errl);color:var(--err)}.bgray{background:var(--gl);color:var(--g)}.bwarn{background:var(--warnl);color:var(--warn)}
+.bok{background:var(--okl);color:var(--ok)}.berr{background:var(--errl);color:var(--err)}.bgray{background:var(--gl);color:var(--g)}
 .filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem;align-items:center}
 input,select,textarea{border:.5px solid var(--bd);border-radius:var(--r);padding:7px 10px;font-size:14px;background:var(--bg);color:var(--t);outline:none;font-family:inherit;width:100%}
-input:focus,select:focus,textarea:focus{border-color:var(--p);box-shadow:0 0 0 2px rgba(24,95,165,.15)}
+input:focus,select:focus{border-color:var(--p);box-shadow:0 0 0 2px rgba(24,95,165,.15)}
 .sbox{position:relative;width:100%}
 .sbox input{padding-right:28px}
 .sclear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--tm);font-size:18px;line-height:1;padding:0;width:auto}
@@ -42,17 +40,15 @@ input:focus,select:focus,textarea:focus{border-color:var(--p);box-shadow:0 0 0 2
 .sri:hover{background:var(--pl)}.sri:last-child{border:none}
 .sri-name{font-weight:500}.sri-sub{color:var(--tm);font-size:12px;margin-top:2px}
 .btn{border:.5px solid var(--bd);border-radius:var(--r);padding:7px 14px;font-size:14px;cursor:pointer;background:var(--bg);color:var(--t);transition:all .15s;font-family:inherit;white-space:nowrap}
-.btn:hover{background:var(--bg2)}.btn:active{transform:scale(.98)}
-.btnp{background:var(--p);color:#fff;border-color:var(--p)}.btnp:hover{background:var(--pd)}
-.btnerr{background:var(--err);color:#fff;border-color:var(--err)}
-.btnsm{padding:4px 10px;font-size:12px}
+.btn:hover{background:var(--bg2)}.btnp{background:var(--p);color:#fff;border-color:var(--p)}.btnp:hover{background:var(--pd)}
+.btnerr{background:var(--err);color:#fff;border-color:var(--err)}.btnsm{padding:4px 10px;font-size:12px}
 .bico{padding:4px 7px;font-size:15px;line-height:1;border:none;background:none;cursor:pointer;border-radius:var(--r)}.bico:hover{background:var(--bg2)}
 .mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center;padding:1rem}
 .mbg.open{display:flex}
 .modal{background:var(--bg);border-radius:var(--rl);padding:1.5rem;width:95vw;max-width:820px;max-height:92vh;overflow-y:auto}
 .mhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
 .mtitle{font-size:16px;font-weight:500}
-.mclose{background:none;border:none;font-size:22px;cursor:pointer;color:var(--tm);padding:0 4px;line-height:1}
+.mclose{background:none;border:none;font-size:22px;cursor:pointer;color:var(--tm);line-height:1}
 .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .fg{display:flex;flex-direction:column;gap:4px}.fg.full{grid-column:1/-1}
 label{font-size:11px;font-weight:500;color:var(--tm);text-transform:uppercase;letter-spacing:.03em}
@@ -73,8 +69,7 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
 .step p{font-size:14px;line-height:1.6}
 #toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#2C2C2A;color:#fff;padding:10px 18px;border-radius:var(--r);font-size:14px;transform:translateY(80px);opacity:0;transition:all .3s;z-index:300;max-width:300px}
 #toast.show{transform:translateY(0);opacity:1}
-.tm{color:var(--tm);font-size:13px}
-.flex{display:flex}.g8{gap:8px}
+.tm{color:var(--tm);font-size:13px}.flex{display:flex}.g8{gap:8px}
 .estate{text-align:center;padding:3rem;color:var(--tm)}
 .spin{display:inline-block;width:16px;height:16px;border:2px solid var(--bd);border-top-color:var(--p);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-left:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -82,17 +77,18 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
 .progress-fill{height:100%;background:var(--p);border-radius:20px;transition:width .3s}
 .info-box{padding:.6rem .75rem;background:var(--pl);border-radius:var(--r);font-size:13px;color:var(--pd);margin-bottom:1rem}
 .dup-group{margin-bottom:1.5rem;border:.5px solid var(--errl);border-radius:var(--r);overflow:hidden}
-.dup-header{background:var(--errl);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.dup-hdr{background:var(--errl);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 @media(max-width:600px){.fgrid{grid-template-columns:1fr};main{padding:1rem}}
 </style>
 </head>
 <body>
+
 <div id="loginscr">
   <div class="lbox">
     <h2 style="margin-bottom:1.25rem;font-size:17px">Acceso editor</h2>
     <div class="fg" style="margin-bottom:1rem">
       <label>Contrasena</label>
-      <input type="password" id="pwdi" placeholder="Ingresa la contrasena" onkeydown="if(event.key==='Enter')checkPwd()">
+      <input type="password" id="pwdi" placeholder="Ingresa la contrasena">
     </div>
     <div class="flex g8">
       <button class="btn btnp" style="flex:1" onclick="checkPwd()">Ingresar</button>
@@ -139,7 +135,6 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
   </nav>
   <main>
 
-    <!-- ALUMNOS -->
     <div id="tab-alumnos">
       <div class="card" style="margin-bottom:1rem">
         <div class="card-title">Buscar alumno</div>
@@ -177,26 +172,25 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
       </div>
     </div>
 
-    <!-- ESTADISTICAS -->
     <div id="tab-estadisticas" style="display:none">
       <div class="metrics" id="smetrics"></div>
       <div class="card" style="margin-bottom:1rem">
         <div class="flex g8" style="align-items:center;flex-wrap:wrap">
           <span style="font-size:14px;font-weight:500">Ver:</span>
-          <select id="s-selector" onchange="renderChart()" style="width:auto;min-width:200px">
+          <select id="s-selector" onchange="renderChart(null)" style="width:auto;min-width:200px">
             <option value="porCurso">Top cursos</option>
             <option value="porDictado">Por dictado</option>
             <option value="porAno">Por ano</option>
             <option value="nota">Nota</option>
             <option value="porJerarquia">Por jerarquia</option>
             <option value="porProvincia">Por provincia/pais</option>
-            <option value="porBecado">Becados vs no becados</option>
+            <option value="porBecado">Becados</option>
             <option value="porFuerza">Por fuerza</option>
           </select>
           <span style="font-size:14px;font-weight:500">Ano:</span>
           <select id="s-fano" onchange="renderStats()" style="width:auto"><option value="">Todos</option></select>
           <span id="s-count" class="tm"></span>
-          <button class="btn btnsm" id="s-dl-btn" onclick="downloadCurrentChart()" style="margin-left:auto">Descargar</button>
+          <button class="btn btnsm" onclick="downloadCurrentChart()" style="margin-left:auto">Descargar</button>
         </div>
       </div>
       <div class="card" id="s-tabla-wrap" style="display:none">
@@ -209,27 +203,24 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
       </div>
     </div>
 
-    <!-- DUPLICADOS -->
     <div id="tab-duplicados" style="display:none">
       <div class="metrics" id="dup-metrics"></div>
       <div class="card">
         <div class="arow">
           <div>
             <div class="card-title" style="margin:0">Registros duplicados</div>
-            <p class="tm" style="margin-top:4px">Mismo DNI + Curso + Ano. Revisa cada grupo y elimina el registro incorrecto.</p>
+            <p class="tm" style="margin-top:4px">Mismo DNI + Curso + Ano.</p>
           </div>
           <button class="btn btnsm" onclick="loadDuplicados()">Actualizar</button>
         </div>
-        <div id="dup-content"><div class="estate">Cargando...<span class="spin"></span></div></div>
+        <div id="dup-content"><div class="estate">Carga los duplicados con el boton Actualizar.</div></div>
       </div>
     </div>
 
-    <!-- DESCARGAR -->
     <div id="tab-descargar" style="display:none">
       <div class="card">
         <div class="card-title">Descargar base completa</div>
-        <p class="tm" style="margin-bottom:.75rem">Descarga todos los registros en Excel. Con bases grandes puede tardar varios minutos.</p>
-        <div class="info-box">Tambien podes descargar directamente desde Google Sheets: <strong>Archivo → Descargar → Microsoft Excel (.xlsx)</strong></div>
+        <div class="info-box">Tambien podes descargar directamente desde Google Sheets: Archivo &rarr; Descargar &rarr; Microsoft Excel (.xlsx)</div>
         <button class="btn btnp" id="dl-btn" onclick="startDownload()">Descargar Excel completo</button>
         <div id="dl-progress" style="display:none;margin-top:1rem">
           <p class="tm" id="dl-msg"></p>
@@ -238,7 +229,6 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
       </div>
     </div>
 
-    <!-- CONFIG -->
     <div id="tab-config" style="display:none">
       <div class="card">
         <div class="card-title">Conexion con Google Sheets</div>
@@ -251,11 +241,11 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
         </div>
         <div class="csect">
           <h3>Instrucciones</h3>
-          <div class="step"><div class="snum">1</div><p>En tu Google Sheet: <strong>Extensiones → Apps Script</strong></p></div>
-          <div class="step"><div class="snum">2</div><p>Borra todo el codigo y pega el codigo de abajo.</p></div>
-          <div class="step"><div class="snum">3</div><p><strong>Implementar → Nueva implementacion</strong> → Aplicacion web → Cualquier usuario</p></div>
+          <div class="step"><div class="snum">1</div><p>En tu Google Sheet: Extensiones &rarr; Apps Script</p></div>
+          <div class="step"><div class="snum">2</div><p>Borra todo y pega el codigo de abajo.</p></div>
+          <div class="step"><div class="snum">3</div><p>Implementar &rarr; Nueva implementacion &rarr; Aplicacion web &rarr; Cualquier usuario</p></div>
           <div class="step"><div class="snum">4</div><p>Copia la URL y pegala arriba.</p></div>
-          <code id="ascode"></code>
+          <code id="ascode-display"></code>
           <button class="btn" style="margin-top:8px" onclick="copyScript()">Copiar codigo</button>
         </div>
       </div>
@@ -264,709 +254,642 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
         <div class="flex g8"><input type="password" id="npwd" placeholder="Nueva contrasena" style="flex:1;width:auto"><button class="btn btnp" onclick="changePwd()">Cambiar</button></div>
       </div>
     </div>
+
   </main>
 </div>
 <div id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
-// ── CONFIGURACION ──────────────────────────────────────────
-const SCRIPT_URL = 'PEGAR_URL_AQUI';
-const EDITOR_PWD = 'PEGAR_CONTRASENA_AQUI';
-const PERSONA_COLS = ['Apellidos','Nombres','DNI','Jerarquía','Destino','Teléfono','Mail','Provincia/País','Fuerza'];
-const COL_DNI='DNI',COL_CURSO='Nombre de curso',COL_ANO='Año',COL_NOTA='Nota',COL_NOTA_NUM='Nota numérica',COL_BECADO='Becado';
-const CLRS=['#185FA5','#3B6D11','#BA7517','#A32D2D','#1D9E75','#534AB7','#D85A30','#639922','#D4537E','#5F5E5A'];
+var SCRIPT_URL = 'PEGAR_URL_AQUI';
+var EDITOR_PWD = 'PEGAR_CONTRASENA_AQUI';
+var PERSONA_COLS = ['Apellidos','Nombres','DNI','Jerarquia','Destino','Telefono','Mail','Provincia/Pais','Fuerza'];
+var COL_DNI='DNI', COL_CURSO='Curso', COL_ANO='Ano', COL_NOTA='Nota', COL_NOTA_NUM='Nota numerica', COL_BECADO='Becado';
+var CLRS=['#185FA5','#3B6D11','#BA7517','#A32D2D','#1D9E75','#534AB7','#D85A30','#639922'];
 
-// ── ESTADO ─────────────────────────────────────────────────
-let isEditor=false,cols=[],editIdx=null,historialData=null,addingFor=null;
-let filterCurrentPage=1,filterTotal=0;
-let statsRaw=null; // datos crudos de estadísticas (todos los años)
-let _flushing=false;
-const CH={};
+var isEditor=false, cols=[], editIdx=null, historialData=null, addingFor=null;
+var filterCurrentPage=1, statsRaw=null, _flushing=false;
+var CH={};
 
-// ── INIT ───────────────────────────────────────────────────
-window.onload=()=>{
-  const u=localStorage.getItem('script-url')||SCRIPT_URL;
-  if(u&&u!=='PEGAR_URL_AQUI'){localStorage.setItem('script-url',u);document.getElementById('surl').value=u;}
-  document.getElementById('ascode').textContent=ascode();
+window.onload = function() {
+  document.getElementById('pwdi').addEventListener('keydown', function(e){ if(e.key==='Enter') checkPwd(); });
+  var u = localStorage.getItem('script-url') || SCRIPT_URL;
+  if(u && u !== 'PEGAR_URL_AQUI') {
+    localStorage.setItem('script-url', u);
+    document.getElementById('surl').value = u;
+  }
+  document.getElementById('ascode-display').textContent = document.getElementById('appsscript-code').value;
   loadFilterOptions();
-  document.addEventListener('click',e=>{if(!e.target.closest('#sbox'))hideSR();});
-  setTimeout(flushQueue,2000);
+  document.addEventListener('click', function(e){ if(!e.target.closest('#sbox')) hideSR(); });
+  setTimeout(flushQueue, 2000);
 };
-function getUrl(){return localStorage.getItem('script-url')||SCRIPT_URL;}
 
-// ── ROL ────────────────────────────────────────────────────
+function getUrl(){ return localStorage.getItem('script-url') || SCRIPT_URL; }
+
 function toggleRole(){
-  if(isEditor){isEditor=false;updateRoleUI();toast('Modo solo lectura.');return;}
+  if(isEditor){ isEditor=false; updateRoleUI(); toast('Modo solo lectura.'); return; }
   document.getElementById('loginscr').classList.add('show');
   document.getElementById('pwdi').value='';
   document.getElementById('pwderr').style.display='none';
-  setTimeout(()=>document.getElementById('pwdi').focus(),100);
+  setTimeout(function(){ document.getElementById('pwdi').focus(); }, 100);
 }
 function checkPwd(){
-  const pwd=localStorage.getItem('editor-pwd')||EDITOR_PWD;
-  if(document.getElementById('pwdi').value===pwd){isEditor=true;updateRoleUI();closeLogin();toast('Modo editor activado.');}
-  else document.getElementById('pwderr').style.display='block';
+  var pwd = localStorage.getItem('editor-pwd') || EDITOR_PWD;
+  if(document.getElementById('pwdi').value === pwd){
+    isEditor=true; updateRoleUI(); closeLogin(); toast('Modo editor activado.');
+  } else { document.getElementById('pwderr').style.display='block'; }
 }
-function closeLogin(){document.getElementById('loginscr').classList.remove('show');}
+function closeLogin(){ document.getElementById('loginscr').classList.remove('show'); }
 function updateRoleUI(){
-  document.getElementById('rbadge').textContent=isEditor?'Editor':'Solo lectura';
-  document.getElementById('rbadge').style.background=isEditor?'rgba(59,109,17,.4)':'rgba(255,255,255,.2)';
-  document.getElementById('rbtn').textContent=isEditor?'Salir como editor':'Ingresar como editor';
-  document.querySelectorAll('.editor-only').forEach(el=>el.style.display=isEditor?'':'none');
+  document.getElementById('rbadge').textContent = isEditor ? 'Editor' : 'Solo lectura';
+  document.getElementById('rbadge').style.background = isEditor ? 'rgba(59,109,17,.4)' : 'rgba(255,255,255,.2)';
+  document.getElementById('rbtn').textContent = isEditor ? 'Salir como editor' : 'Ingresar como editor';
+  document.querySelectorAll('.editor-only').forEach(function(el){ el.style.display = isEditor ? '' : 'none'; });
 }
 
-// ── JSONP ──────────────────────────────────────────────────
-function jsonp(url,onSuccess,onError){
-  const cb='cb_'+Date.now()+'_'+Math.floor(Math.random()*99999);
-  const sc=document.createElement('script');
-  sc.src=url+(url.includes('?')?'&':'?')+'callback='+cb;
-  let done=false;
-  window[cb]=function(j){done=true;try{document.body.removeChild(sc);}catch(e){}delete window[cb];onSuccess(j);};
-  sc.onerror=function(){if(!done){try{document.body.removeChild(sc);}catch(e){}delete window[cb];if(onError)onError('error');}};
-  setTimeout(()=>{if(!done){try{document.body.removeChild(sc);}catch(e){}delete window[cb];if(onError)onError('timeout');}},60000);
+function jsonp(url, onSuccess, onError){
+  var cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*99999);
+  var sc = document.createElement('script');
+  sc.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + cb;
+  var done = false;
+  window[cb] = function(j){ done=true; try{document.body.removeChild(sc);}catch(e){} delete window[cb]; onSuccess(j); };
+  sc.onerror = function(){ if(!done){ try{document.body.removeChild(sc);}catch(e){} delete window[cb]; if(onError) onError('error'); } };
+  setTimeout(function(){ if(!done){ try{document.body.removeChild(sc);}catch(e){} delete window[cb]; if(onError) onError('timeout'); } }, 60000);
   document.body.appendChild(sc);
 }
 
-// ── BUSCADOR ───────────────────────────────────────────────
-let searchTimer=null;
+var searchTimer = null;
 function searchPersona(q){
-  const box=document.getElementById('sr');
-  if(!q||q.length<2){box.style.display='none';return;}
+  var box = document.getElementById('sr');
+  if(!q || q.length < 2){ box.style.display='none'; return; }
   clearTimeout(searchTimer);
-  box.innerHTML='<div class="sri" style="color:var(--tm)">Buscando...<span class="spin"></span></div>';
-  box.style.display='block';
-  searchTimer=setTimeout(()=>{
-    const u=getUrl();
-    if(!u||u==='PEGAR_URL_AQUI'){box.innerHTML='<div class="sri" style="color:var(--err)">Configura la URL primero.</div>';return;}
-    const currentQ=document.getElementById('psearch').value;
-    if(currentQ!==q)return;
-    jsonp(u+'?action=search&q='+encodeURIComponent(q)+'&limit=15',j=>{
-      if(!j.data||!j.data.length){box.innerHTML='<div class="sri" style="color:var(--tm)">Sin resultados.</div>';box.style.display='block';return;}
-      box.innerHTML=j.data.map(p=>`
-        <div class="sri" onclick="openHistorial('${escQ(String(p.DNI||''))}','${escQ(p.Apellidos||'')}');clearPS()">
-          <div class="sri-name">${p.Apellidos||''}, ${p.Nombres||''}</div>
-          <div class="sri-sub">DNI: ${p.DNI||'-'} &middot; ${(p.cursos||[]).join(', ')||'Sin cursos'}</div>
-        </div>`).join('');
-      box.style.display='block';
-    },()=>{box.innerHTML='<div class="sri" style="color:var(--err)">Error de conexion. Intenta de nuevo.</div>';});
-  },800);
+  box.innerHTML = '<div class="sri" style="color:var(--tm)">Buscando...<span class="spin"></span></div>';
+  box.style.display = 'block';
+  searchTimer = setTimeout(function(){
+    var u = getUrl();
+    if(!u || u==='PEGAR_URL_AQUI'){ box.innerHTML='<div class="sri" style="color:var(--err)">Configura la URL primero.</div>'; return; }
+    if(document.getElementById('psearch').value !== q) return;
+    jsonp(u + '?action=search&q=' + encodeURIComponent(q) + '&limit=15', function(j){
+      if(!j || !j.data || !j.data.length){ box.innerHTML='<div class="sri" style="color:var(--tm)">Sin resultados.</div>'; return; }
+      box.innerHTML = j.data.map(function(p){
+        return '<div class="sri" onclick="openHistorial(\'' + escQ(String(p.DNI||'')) + '\',\'' + escQ(p.Apellidos||'') + '\');clearPS()">' +
+          '<div class="sri-name">' + (p.Apellidos||'') + ', ' + (p.Nombres||'') + '</div>' +
+          '<div class="sri-sub">DNI: ' + (p.DNI||'-') + ' &middot; ' + ((p.cursos||[]).join(', ')||'Sin cursos') + '</div></div>';
+      }).join('');
+    }, function(){ box.innerHTML='<div class="sri" style="color:var(--err)">Error. Intenta de nuevo.</div>'; });
+  }, 800);
 }
-function hideSR(){document.getElementById('sr').style.display='none';}
-function clearPS(){document.getElementById('psearch').value='';hideSR();}
+function hideSR(){ document.getElementById('sr').style.display='none'; }
+function clearPS(){ document.getElementById('psearch').value=''; hideSR(); }
 
-// ── FILTROS ────────────────────────────────────────────────
 function loadFilterOptions(){
-  const u=getUrl();if(!u||u==='PEGAR_URL_AQUI')return;
-  jsonp(u+'?action=getoptions',j=>{
-    if(!j)return;
-    if(j.cols)cols=j.cols;
+  var u = getUrl(); if(!u || u==='PEGAR_URL_AQUI') return;
+  jsonp(u + '?action=getoptions', function(j){
+    if(!j) return;
+    if(j.cols) cols = j.cols;
     populateSelects(j);
   });
 }
 function populateSelects(uv){
-  const map={fano:'anos',fcurso:'cursos',fnota:'notas',fdictado:'dictados',ffuerza:'fuerzas'};
-  const labels={fano:'Todos los anos',fcurso:'Todos los cursos',fnota:'Todas las notas',fdictado:'Todos los dictados',ffuerza:'Todas las fuerzas'};
-  Object.entries(map).forEach(([id,field])=>{
-    const sel=document.getElementById(id);
-    if(!sel||!uv[field])return;
-    const cur=sel.value;
-    sel.innerHTML=`<option value="">${labels[id]}</option>`+uv[field].map(v=>`<option ${v==cur?'selected':''}>${v}</option>`).join('');
-    if(cur)sel.value=cur;
+  var map = {fano:'anos', fcurso:'cursos', fnota:'notas', fdictado:'dictados', ffuerza:'fuerzas'};
+  var labels = {fano:'Todos los anos', fcurso:'Todos los cursos', fnota:'Todas las notas', fdictado:'Todos los dictados', ffuerza:'Todas las fuerzas'};
+  Object.keys(map).forEach(function(id){
+    var sel = document.getElementById(id); if(!sel || !uv[map[id]]) return;
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">' + labels[id] + '</option>' + uv[map[id]].map(function(v){ return '<option' + (v==cur?' selected':'') + '>' + v + '</option>'; }).join('');
+    if(cur) sel.value = cur;
   });
 }
 
 function applyFilter(page){
-  filterCurrentPage=page||1;
-  const u=getUrl();if(!u||u==='PEGAR_URL_AQUI'){toast('Configura la URL primero.');return;}
-  const p=new URLSearchParams({action:'filter',page:filterCurrentPage,
-    ano:document.getElementById('fano').value,
-    curso:document.getElementById('fcurso').value,
-    nota:document.getElementById('fnota').value,
-    dictado:document.getElementById('fdictado').value,
-    fuerza:document.getElementById('ffuerza').value});
-  document.getElementById('filter-results').innerHTML='<div class="estate">Cargando...<span class="spin"></span></div>';
-  jsonp(u+'?'+p.toString(),j=>{
-    if(!j||!j.data){document.getElementById('filter-results').innerHTML='<div class="estate">Error al cargar datos.</div>';return;}
-    filterTotal=j.total;if(j.cols)cols=j.cols;
-    renderFilterResults(j.data,j.total,j.page,j.pageSize);
-  },()=>{document.getElementById('filter-results').innerHTML='<div class="estate">Error de conexion.</div>';});
+  filterCurrentPage = page || 1;
+  var u = getUrl(); if(!u || u==='PEGAR_URL_AQUI'){ toast('Configura la URL primero.'); return; }
+  var params = 'action=filter&page=' + filterCurrentPage +
+    '&ano=' + encodeURIComponent(document.getElementById('fano').value) +
+    '&curso=' + encodeURIComponent(document.getElementById('fcurso').value) +
+    '&nota=' + encodeURIComponent(document.getElementById('fnota').value) +
+    '&dictado=' + encodeURIComponent(document.getElementById('fdictado').value) +
+    '&fuerza=' + encodeURIComponent(document.getElementById('ffuerza').value);
+  document.getElementById('filter-results').innerHTML = '<div class="estate">Cargando...<span class="spin"></span></div>';
+  jsonp(u + '?' + params, function(j){
+    if(!j || !j.data){ document.getElementById('filter-results').innerHTML='<div class="estate">Error al cargar.</div>'; return; }
+    if(j.cols) cols = j.cols;
+    renderFilterResults(j.data, j.total, j.page, j.pageSize);
+  }, function(){ document.getElementById('filter-results').innerHTML='<div class="estate">Error de conexion.</div>'; });
 }
 function clearFilter(){
-  ['fano','fcurso','fnota','fdictado','ffuerza'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('filter-results').innerHTML='<div class="estate">Usa el buscador o los filtros para ver registros.</div>';
-  document.getElementById('filter-pagination').style.display='none';
+  ['fano','fcurso','fnota','fdictado','ffuerza'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('filter-results').innerHTML = '<div class="estate">Usa el buscador o los filtros para ver registros.</div>';
+  document.getElementById('filter-pagination').style.display = 'none';
 }
-function filterPage(d){applyFilter(filterCurrentPage+d);}
+function filterPage(d){ applyFilter(filterCurrentPage + d); }
 
-function renderFilterResults(data,total,page,pageSize){
-  if(!data.length){document.getElementById('filter-results').innerHTML='<div class="estate">Sin resultados.</div>';document.getElementById('filter-pagination').style.display='none';return;}
-  const dc=cols.filter(c=>['Apellidos','Nombres','DNI','Nombre de curso','Año','Nota','Nota numérica','Jerarquía','Becado'].includes(c));
-  let html='<div class="twrap"><table><thead><tr>';
-  dc.forEach(c=>html+=`<th>${c}</th>`);
-  html+='<th>Acciones</th></tr></thead><tbody>';
-  data.forEach(a=>{
-    html+='<tr>';
-    dc.forEach(c=>{
-      let v=a[c]||'';
-      if(c===COL_NOTA)v=notaBadge(v);
-      else if(c===COL_NOTA_NUM)v=notaNumBadge(v);
-      else if(c===COL_BECADO)v=v?`<span class="badge ${String(v).toLowerCase()==='si'?'bok':'bgray'}">${v}</span>`:'';
-      html+=`<td title="${a[c]||''}">${v}</td>`;
+function renderFilterResults(data, total, page, pageSize){
+  if(!data.length){ document.getElementById('filter-results').innerHTML='<div class="estate">Sin resultados.</div>'; document.getElementById('filter-pagination').style.display='none'; return; }
+  var dc = cols.filter(function(c){ return ['Apellidos','Nombres','DNI','Curso','Ano','Nota','Nota numerica','Jerarquia','Becado'].indexOf(c) >= 0; });
+  var html = '<div class="twrap"><table><thead><tr>';
+  dc.forEach(function(c){ html += '<th>' + c + '</th>'; });
+  html += '<th>Acciones</th></tr></thead><tbody>';
+  data.forEach(function(a){
+    html += '<tr>';
+    dc.forEach(function(c){
+      var v = a[c] || '';
+      if(c===COL_NOTA) v = notaBadge(v);
+      else if(c===COL_NOTA_NUM) v = notaNumBadge(v);
+      else if(c===COL_BECADO && v) v = '<span class="badge ' + (String(v).toLowerCase()==='si'?'bok':'bgray') + '">' + v + '</span>';
+      html += '<td title="' + escHtml(a[c]||'') + '">' + v + '</td>';
     });
-    const ajs=escQ(JSON.stringify(a));
-    html+=`<td><button class="bico" onclick="openHistorial('${escQ(String(a[COL_DNI]||''))}','${escQ(a['Apellidos']||'')}')">&#128065;</button>`;
-    if(isEditor)html+=` <button class="bico" onclick="openModalEditarDirect('${ajs}')">&#9999;</button>`;
-    html+='</td></tr>';
+    html += '<td><button class="bico" onclick="openHistorial(\'' + escQ(String(a[COL_DNI]||'')) + '\',\'' + escQ(a['Apellidos']||'') + '\')">&#128065;</button>';
+    if(isEditor) html += ' <button class="bico" onclick="openModalEdit(\'' + escQ(JSON.stringify(a)) + '\')">&#9999;</button>';
+    html += '</td></tr>';
   });
-  html+='</tbody></table></div>';
-  document.getElementById('filter-results').innerHTML=html;
-  const tp=Math.ceil(total/pageSize);
-  document.getElementById('filter-pagination').style.display='flex';
-  document.getElementById('filter-count').textContent=`${total} registro${total!==1?'s':''} (${(page-1)*pageSize+1}-${Math.min(page*pageSize,total)})`;
-  document.getElementById('fpage').textContent=`${page} / ${tp}`;
-  document.getElementById('fprev').disabled=page<=1;
-  document.getElementById('fnext').disabled=page>=tp;
+  html += '</tbody></table></div>';
+  document.getElementById('filter-results').innerHTML = html;
+  var tp = Math.ceil(total/pageSize);
+  document.getElementById('filter-pagination').style.display = 'flex';
+  document.getElementById('filter-count').textContent = total + ' registros (' + ((page-1)*pageSize+1) + '-' + Math.min(page*pageSize,total) + ')';
+  document.getElementById('fpage').textContent = page + ' / ' + tp;
+  document.getElementById('fprev').disabled = page <= 1;
+  document.getElementById('fnext').disabled = page >= tp;
 }
 
-// ── HISTORIAL ──────────────────────────────────────────────
-function openHistorial(dni,apellido){
-  const u=getUrl();if(!u||u==='PEGAR_URL_AQUI'){toast('Configura la URL primero.');return;}
-  document.getElementById('hcontent').innerHTML='<div class="estate">Cargando historial...<span class="spin"></span></div>';
+function openHistorial(dni, apellido){
+  var u = getUrl(); if(!u || u==='PEGAR_URL_AQUI'){ toast('Configura la URL primero.'); return; }
+  document.getElementById('hcontent').innerHTML = '<div class="estate">Cargando...<span class="spin"></span></div>';
   document.getElementById('hmodal').classList.add('open');
-  document.querySelectorAll('#hmodal .editor-only').forEach(el=>el.style.display=isEditor?'':'none');
-  const params=dni?'action=gethistorial&dni='+encodeURIComponent(dni):'action=gethistorial&apellido='+encodeURIComponent(apellido);
-  jsonp(u+'?'+params,j=>{
-    if(!j||!j.data||!j.data.length){document.getElementById('hcontent').innerHTML='<div class="estate">Sin registros.</div>';return;}
-    historialData=j;if(j.cols)cols=j.cols;
-    renderHistorial(j.data,j.cols||cols);
-  },()=>{document.getElementById('hcontent').innerHTML='<div class="estate">Error de conexion. Intenta de nuevo.</div>';});
+  document.querySelectorAll('#hmodal .editor-only').forEach(function(el){ el.style.display = isEditor ? '' : 'none'; });
+  var params = dni ? 'action=gethistorial&dni=' + encodeURIComponent(dni) : 'action=gethistorial&apellido=' + encodeURIComponent(apellido);
+  jsonp(u + '?' + params, function(j){
+    if(!j || !j.data || !j.data.length){ document.getElementById('hcontent').innerHTML='<div class="estate">Sin registros.</div>'; return; }
+    historialData = j; if(j.cols) cols = j.cols;
+    renderHistorial(j.data, j.cols || cols);
+  }, function(){ document.getElementById('hcontent').innerHTML='<div class="estate">Error de conexion.</div>'; });
 }
 
-function renderHistorial(regs,hcols){
-  const p=regs[0];
-  const ini=((p['Apellidos']||'').charAt(0)+(p['Nombres']||'').charAt(0)).toUpperCase();
-  const total=regs.length;
-  const ap=regs.filter(a=>notaR(a[COL_NOTA])==='ok').length;
-  const des=regs.filter(a=>notaR(a[COL_NOTA])==='err').length;
-  const bec=regs.filter(a=>String(a[COL_BECADO]||'').toLowerCase()==='si').length;
-  const pct=total?Math.round(ap/total*100):0;
-  const barColor=pct>=70?'var(--ok)':pct>=50?'var(--warn)':'var(--err)';
-  const notasNum=[...regs].sort((a,b)=>String(a[COL_ANO]||'').localeCompare(String(b[COL_ANO]||''))).filter(a=>!isNaN(+a[COL_NOTA_NUM])&&String(a[COL_NOTA_NUM]).trim()!=='');
-  const chartId='hch_'+Date.now();
-  const datosCurso=(hcols||cols).filter(c=>!PERSONA_COLS.includes(c)&&c!=='Ord');
-  const datosPersona=PERSONA_COLS.filter(c=>(hcols||cols).includes(c)&&p[c]&&c!=='Apellidos'&&c!=='Nombres');
+function renderHistorial(regs, hcols){
+  var p = regs[0];
+  var ini = ((p['Apellidos']||'').charAt(0) + (p['Nombres']||'').charAt(0)).toUpperCase();
+  var total = regs.length;
+  var ap = regs.filter(function(a){ return notaR(a[COL_NOTA])==='ok'; }).length;
+  var des = regs.filter(function(a){ return notaR(a[COL_NOTA])==='err'; }).length;
+  var bec = regs.filter(function(a){ return String(a[COL_BECADO]||'').toLowerCase()==='si'; }).length;
+  var pct = total ? Math.round(ap/total*100) : 0;
+  var barColor = pct>=70 ? 'var(--ok)' : pct>=50 ? 'var(--warn)' : 'var(--err)';
+  var allCols = hcols || cols;
+  var datosCurso = allCols.filter(function(c){ return PERSONA_COLS.indexOf(c)<0 && c!=='Ord'; });
+  var datosPersona = PERSONA_COLS.filter(function(c){ return allCols.indexOf(c)>=0 && p[c] && c!=='Apellidos' && c!=='Nombres'; });
+  var notasNum = regs.slice().sort(function(a,b){ return String(a[COL_ANO]||'').localeCompare(String(b[COL_ANO]||'')); })
+    .filter(function(a){ return !isNaN(+a[COL_NOTA_NUM]) && String(a[COL_NOTA_NUM]).trim()!==''; });
+  var chartId = 'hch_' + Date.now();
 
-  let html=`<div class="hhdr"><div class="avatar">${ini}</div><div>
-    <div style="font-size:17px;font-weight:500">${p['Apellidos']||''}, ${p['Nombres']||''}</div></div></div>
-    <div class="pdatos">${datosPersona.map(c=>`<div class="dato"><div class="dkey">${c}</div><div class="dval">${p[c]||'-'}</div></div>`).join('')}</div>
-    <div style="margin-bottom:1.25rem">
-      <div style="font-size:12px;font-weight:500;color:var(--tm);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.75rem">Estadisticas</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:1rem">
-        <div class="metric"><div class="mlabel">Cursos</div><div class="mval">${total}</div></div>
-        <div class="metric"><div class="mlabel">Aprobados</div><div class="mval" style="color:var(--ok)">${ap}</div></div>
-        <div class="metric"><div class="mlabel">Desaprobados</div><div class="mval" style="color:var(--err)">${des}</div></div>
-        <div class="metric"><div class="mlabel">Sin nota/otro</div><div class="mval">${total-ap-des}</div></div>
-        <div class="metric"><div class="mlabel">Becado en</div><div class="mval">${bec}</div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-        <span style="font-size:12px;color:var(--tm)">Tasa de aprobacion</span>
-        <span style="font-size:13px;font-weight:500;color:${barColor}">${pct}%</span>
-      </div>
-      <div style="background:var(--bg2);border-radius:20px;height:8px;overflow:hidden">
-        <div style="width:${pct}%;height:100%;background:${barColor};border-radius:20px"></div>
-      </div>
-      ${notasNum.length>=2?`<div style="margin-top:1rem"><div style="font-size:12px;color:var(--tm);margin-bottom:.5rem">Evolucion nota numerica</div>
-        <div style="position:relative;height:180px"><canvas id="${chartId}"></canvas></div></div>`:''}
-    </div>
-    <div style="font-size:12px;font-weight:500;color:var(--tm);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.75rem">Cursos realizados</div>
-    <div class="twrap"><table style="width:100%;border-collapse:collapse;font-size:13px">
-      <thead><tr style="background:var(--bg2)">
-        ${datosCurso.map(c=>`<th style="padding:8px 10px;text-align:left;border-bottom:1px solid var(--bd);font-weight:500">${c}</th>`).join('')}
-        ${isEditor?'<th style="padding:8px 10px;border-bottom:1px solid var(--bd)"></th>':''}
-      </tr></thead><tbody>
-      ${[...regs].sort((a,b)=>String(b[COL_ANO]||'').localeCompare(String(a[COL_ANO]||''))).map(a=>`<tr>
-        ${datosCurso.map(c=>{
-          let v=a[c]||'-';
-          if(c===COL_NOTA)v=notaBadge(a[c]);
-          else if(c===COL_NOTA_NUM)v=notaNumBadge(a[c]);
-          else if(c===COL_BECADO&&a[c])v=`<span class="badge ${String(a[c]).toLowerCase()==='si'?'bok':'bgray'}">${a[c]}</span>`;
-          else if(c===COL_CURSO)v=`<span style="background:var(--pl);color:var(--pd);font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500">${a[c]||'-'}</span>`;
-          return `<td style="padding:7px 10px;border-bottom:.5px solid var(--bd);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a[c]||''}">${v}</td>`;
-        }).join('')}
-        ${isEditor?`<td style="padding:7px 10px;border-bottom:.5px solid var(--bd);white-space:nowrap">
-          <button class="bico" onclick="openModalEditarDirect('${escQ(JSON.stringify(a))}')">&#9999;</button>
-          <button class="bico" onclick="deleteDesdeH('${escQ(JSON.stringify(a))}')">&#128465;</button>
-        </td>`:''}
-      </tr>`).join('')}
-      </tbody></table></div>`;
+  var html = '<div class="hhdr"><div class="avatar">' + ini + '</div><div>' +
+    '<div style="font-size:17px;font-weight:500">' + (p['Apellidos']||'') + ', ' + (p['Nombres']||'') + '</div></div></div>' +
+    '<div class="pdatos">' + datosPersona.map(function(c){ return '<div class="dato"><div class="dkey">' + c + '</div><div class="dval">' + (p[c]||'-') + '</div></div>'; }).join('') + '</div>' +
+    '<div style="margin-bottom:1.25rem">' +
+      '<div style="font-size:12px;font-weight:500;color:var(--tm);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.75rem">Estadisticas</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:1rem">' +
+        '<div class="metric"><div class="mlabel">Cursos</div><div class="mval">' + total + '</div></div>' +
+        '<div class="metric"><div class="mlabel">Aprobados</div><div class="mval" style="color:var(--ok)">' + ap + '</div></div>' +
+        '<div class="metric"><div class="mlabel">Desaprobados</div><div class="mval" style="color:var(--err)">' + des + '</div></div>' +
+        '<div class="metric"><div class="mlabel">Otro/Sin nota</div><div class="mval">' + (total-ap-des) + '</div></div>' +
+        '<div class="metric"><div class="mlabel">Becado en</div><div class="mval">' + bec + '</div></div>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;margin-bottom:4px">' +
+        '<span style="font-size:12px;color:var(--tm)">Tasa de aprobacion</span>' +
+        '<span style="font-size:13px;font-weight:500;color:' + barColor + '">' + pct + '%</span>' +
+      '</div>' +
+      '<div style="background:var(--bg2);border-radius:20px;height:8px;overflow:hidden">' +
+        '<div style="width:' + pct + '%;height:100%;background:' + barColor + ';border-radius:20px"></div>' +
+      '</div>' +
+      (notasNum.length>=2 ? '<div style="margin-top:1rem"><div style="font-size:12px;color:var(--tm);margin-bottom:.5rem">Evolucion nota numerica</div>' +
+        '<div style="position:relative;height:180px"><canvas id="' + chartId + '"></canvas></div></div>' : '') +
+    '</div>' +
+    '<div style="font-size:12px;font-weight:500;color:var(--tm);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.75rem">Cursos realizados</div>' +
+    '<div class="twrap"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:var(--bg2)">' +
+    datosCurso.map(function(c){ return '<th style="padding:8px 10px;text-align:left;border-bottom:1px solid var(--bd);font-weight:500">' + c + '</th>'; }).join('') +
+    (isEditor ? '<th style="padding:8px 10px;border-bottom:1px solid var(--bd)"></th>' : '') +
+    '</tr></thead><tbody>' +
+    regs.slice().sort(function(a,b){ return String(b[COL_ANO]||'').localeCompare(String(a[COL_ANO]||'')); }).map(function(a){
+      return '<tr>' + datosCurso.map(function(c){
+        var v = a[c] || '-';
+        if(c===COL_NOTA) v = notaBadge(a[c]);
+        else if(c===COL_NOTA_NUM) v = notaNumBadge(a[c]);
+        else if(c===COL_BECADO && a[c]) v = '<span class="badge ' + (String(a[c]).toLowerCase()==='si'?'bok':'bgray') + '">' + a[c] + '</span>';
+        else if(c===COL_CURSO) v = '<span style="background:var(--pl);color:var(--pd);font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500">' + (a[c]||'-') + '</span>';
+        return '<td style="padding:7px 10px;border-bottom:.5px solid var(--bd);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(a[c]||'') + '">' + v + '</td>';
+      }).join('') +
+      (isEditor ? '<td style="padding:7px 10px;border-bottom:.5px solid var(--bd);white-space:nowrap">' +
+        '<button class="bico" onclick="openModalEdit(\'' + escQ(JSON.stringify(a)) + '\')">&#9999;</button> ' +
+        '<button class="bico" onclick="deleteDesdeH(\'' + escQ(JSON.stringify(a)) + '\')">&#128465;</button>' +
+        '</td>' : '') + '</tr>';
+    }).join('') + '</tbody></table></div>';
 
-  document.getElementById('hcontent').innerHTML=html;
+  document.getElementById('hcontent').innerHTML = html;
 
-  if(notasNum.length>=2){
-    const ctx=document.getElementById(chartId);
+  if(notasNum.length >= 2){
+    var ctx = document.getElementById(chartId);
     if(ctx){
-      if(CH['hchart'])CH['hchart'].destroy();
-      CH['hchart']=new Chart(ctx.getContext('2d'),{
+      if(CH['hc']) CH['hc'].destroy();
+      CH['hc'] = new Chart(ctx.getContext('2d'), {
         type:'line',
-        data:{labels:notasNum.map(a=>{const c=String(a[COL_CURSO]||'');return c.length>15?c.substring(0,15)+'...':c;}),
-          datasets:[{data:notasNum.map(a=>+a[COL_NOTA_NUM]),borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,.1)',
-          pointBackgroundColor:notasNum.map(a=>+a[COL_NOTA_NUM]>=6?'#3B6D11':'#A32D2D'),pointRadius:5,tension:.3,fill:true}]},
+        data:{
+          labels: notasNum.map(function(a){ var c2=String(a[COL_CURSO]||''); return c2.length>15?c2.substring(0,15)+'...':c2; }),
+          datasets:[{data:notasNum.map(function(a){ return +a[COL_NOTA_NUM]; }),
+            borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,.1)',
+            pointBackgroundColor:notasNum.map(function(a){ return +a[COL_NOTA_NUM]>=6?'#3B6D11':'#A32D2D'; }),
+            pointRadius:5,tension:.3,fill:true}]
+        },
         options:{responsive:true,maintainAspectRatio:false,
-          plugins:{legend:{display:false},tooltip:{callbacks:{title:i=>String(notasNum[i[0].dataIndex][COL_CURSO]||''),label:i=>'Nota: '+i.raw}}},
-          scales:{y:{min:0,max:100,ticks:{font:{size:11}}},x:{ticks:{font:{size:10}}}}}
+          plugins:{legend:{display:false}},
+          scales:{y:{min:0,max:100},x:{ticks:{font:{size:10}}}}}
       });
     }
   }
 }
 
-function closeHistorial(){document.getElementById('hmodal').classList.remove('open');historialData=null;}
+function closeHistorial(){ document.getElementById('hmodal').classList.remove('open'); historialData=null; }
+
 function addCursoHist(){
-  if(!historialData||!historialData.data.length)return;
-  const base=historialData.data[0];
-  addingFor={dni:String(base[COL_DNI]||''),apellido:base['Apellidos']||''};
-  editIdx=null;closeHistorial();
-  document.getElementById('mtitle').textContent='Agregar curso - '+(base['Apellidos']||'')+', '+(base['Nombres']||'');
-  buildForm(base,true);
+  if(!historialData || !historialData.data.length) return;
+  var base = historialData.data[0];
+  addingFor = {dni:String(base[COL_DNI]||''), apellido:base['Apellidos']||''};
+  editIdx = null; closeHistorial();
+  document.getElementById('mtitle').textContent = 'Agregar curso - ' + (base['Apellidos']||'') + ', ' + (base['Nombres']||'');
+  buildForm(base, true);
   document.getElementById('amodal').classList.add('open');
 }
 function exportHistExcel(){
-  if(!historialData||!historialData.data.length){toast('No hay datos.');return;}
-  const ws=XLSX.utils.json_to_sheet(historialData.data,{header:historialData.cols||cols});
-  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Historial');
-  XLSX.writeFile(wb,`historial_${historialData.data[0]['Apellidos']}_${historialData.data[0]['Nombres']}.xlsx`);
+  if(!historialData || !historialData.data.length){ toast('No hay datos.'); return; }
+  var ws = XLSX.utils.json_to_sheet(historialData.data, {header:historialData.cols||cols});
+  var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Historial');
+  XLSX.writeFile(wb, 'historial_' + historialData.data[0]['Apellidos'] + '.xlsx');
 }
 function deleteDesdeH(jsonStr){
-  const a=JSON.parse(jsonStr);
-  if(!confirm('Eliminar: '+a['Apellidos']+' '+a['Nombres']+' - '+a[COL_CURSO]+' '+a[COL_ANO]+'?'))return;
-  sendRecord({action:'delete',id:a['Ord']});
-  toast('Eliminado. Se reflejara en el Sheet en segundos.');
-  const dni=String(a[COL_DNI]||''),ape=a['Apellidos']||'';
-  setTimeout(()=>openHistorial(dni,ape),1500);
+  var a = JSON.parse(jsonStr);
+  if(!confirm('Eliminar: ' + a['Apellidos'] + ' ' + a['Nombres'] + ' - ' + a[COL_CURSO] + ' ' + a[COL_ANO] + '?')) return;
+  sendRecord({action:'delete', id:a['Ord']});
+  toast('Eliminado.');
+  var dni=String(a[COL_DNI]||''), ape=a['Apellidos']||'';
+  setTimeout(function(){ openHistorial(dni, ape); }, 1500);
 }
 
-// ── MODAL FORM ─────────────────────────────────────────────
-function openModalNuevo(){editIdx=null;addingFor=null;document.getElementById('mtitle').textContent='Nuevo registro';buildForm({},false);document.getElementById('amodal').classList.add('open');}
-function openModalEditarDirect(jsonStr){const a=JSON.parse(jsonStr);editIdx=a;addingFor=null;document.getElementById('mtitle').textContent='Editar registro';buildForm(a,false);document.getElementById('amodal').classList.add('open');}
-function closeModal(){document.getElementById('amodal').classList.remove('open');editIdx=null;addingFor=null;}
+function openModalNuevo(){ editIdx=null; addingFor=null; document.getElementById('mtitle').textContent='Nuevo registro'; buildForm({},false); document.getElementById('amodal').classList.add('open'); }
+function openModalEdit(jsonStr){ var a=JSON.parse(jsonStr); editIdx=a; addingFor=null; document.getElementById('mtitle').textContent='Editar registro'; buildForm(a,false); document.getElementById('amodal').classList.add('open'); }
+function closeModal(){ document.getElementById('amodal').classList.remove('open'); editIdx=null; addingFor=null; }
 
-function buildForm(data,lockPersona){
-  const container=document.getElementById('aform');container.innerHTML='';
-  cols.filter(c=>c!=='Ord').forEach(c=>{
-    const div=document.createElement('div');
-    const isLong=['Observacion','Mail','Destino'].includes(c);
-    div.className='fg'+(isLong?' full':'');
-    const lbl=document.createElement('label');lbl.textContent=c;
-    let inp;
-    if(c===COL_BECADO){inp=document.createElement('select');inp.innerHTML='<option value="">-</option><option value="Si">Si</option><option value="No">No</option>';inp.value=data[c]||'';}
-    else if(isLong){inp=document.createElement('textarea');inp.value=data[c]||'';}
-    else{inp=document.createElement('input');inp.type='text';inp.value=data[c]||'';}
-    inp.id='f_'+c.replace(/\s/g,'_');
-    if(lockPersona&&PERSONA_COLS.includes(c)){inp.disabled=true;inp.style.opacity='.5';}
-    div.appendChild(lbl);div.appendChild(inp);container.appendChild(div);
+function buildForm(data, lockPersona){
+  var container = document.getElementById('aform'); container.innerHTML='';
+  cols.filter(function(c){ return c!=='Ord'; }).forEach(function(c){
+    var div = document.createElement('div');
+    var isLong = ['Observacion','Mail','Destino'].indexOf(c) >= 0;
+    div.className = 'fg' + (isLong?' full':'');
+    var lbl = document.createElement('label'); lbl.textContent = c;
+    var inp;
+    if(c===COL_BECADO){ inp=document.createElement('select'); inp.innerHTML='<option value="">-</option><option>Si</option><option>No</option>'; inp.value=data[c]||''; }
+    else if(isLong){ inp=document.createElement('textarea'); inp.value=data[c]||''; }
+    else{ inp=document.createElement('input'); inp.type='text'; inp.value=data[c]||''; }
+    inp.id = 'f_' + c.replace(/\s/g,'_');
+    if(lockPersona && PERSONA_COLS.indexOf(c)>=0){ inp.disabled=true; inp.style.opacity='.5'; }
+    div.appendChild(lbl); div.appendChild(inp); container.appendChild(div);
   });
 }
 
 function saveAlumno(){
-  const btn=document.getElementById('btnGuardar');
-  if(btn&&btn.disabled)return;if(btn){btn.disabled=true;btn.innerText='Guardando...';}
-  const obj={};
-  cols.filter(c=>c!=='Ord').forEach(c=>{const el=document.getElementById('f_'+c.replace(/\s/g,'_'));obj[c]=el?el.value.trim():'';});
-  if(!obj['Apellidos']&&!obj['Nombres']){toast('Ingresa Apellidos o Nombres.');if(btn){btn.disabled=false;btn.innerText='Guardar';}return;}
+  var btn = document.getElementById('btnGuardar');
+  if(btn && btn.disabled) return;
+  if(btn){ btn.disabled=true; btn.innerText='Guardando...'; }
+  var obj = {};
+  cols.filter(function(c){ return c!=='Ord'; }).forEach(function(c){
+    var el = document.getElementById('f_' + c.replace(/\s/g,'_'));
+    obj[c] = el ? el.value.trim() : '';
+  });
+  if(!obj['Apellidos'] && !obj['Nombres']){ toast('Ingresa Apellidos o Nombres.'); if(btn){btn.disabled=false;btn.innerText='Guardar';} return; }
 
   if(addingFor){
-    jsonp(getUrl()+'?action=gethistorial&dni='+encodeURIComponent(addingFor.dni)+'&apellido='+encodeURIComponent(addingFor.apellido),j=>{
-      const base=(j.data||[])[0]||{};
-      PERSONA_COLS.forEach(c=>obj[c]=base[c]||obj[c]||'');
-      obj['Ord']=Date.now();sendRecord({action:'save',data:obj});
-      toast('Curso agregado al Sheet.');closeModal();
+    jsonp(getUrl()+'?action=gethistorial&dni='+encodeURIComponent(addingFor.dni)+'&apellido='+encodeURIComponent(addingFor.apellido), function(j){
+      var base = (j.data||[])[0]||{};
+      PERSONA_COLS.forEach(function(c){ obj[c]=base[c]||obj[c]||''; });
+      obj['Ord'] = Date.now();
+      sendRecord({action:'save', data:obj});
+      toast('Curso agregado.'); closeModal();
       if(btn){btn.disabled=false;btn.innerText='Guardar';}
-      setTimeout(()=>openHistorial(addingFor.dni,addingFor.apellido),1500);
-    });return;
+      var af = addingFor;
+      setTimeout(function(){ openHistorial(af.dni, af.apellido); }, 1500);
+    }); return;
   }
-  if(editIdx!==null&&typeof editIdx==='object'){
-    obj['Ord']=editIdx['Ord'];sendRecord({action:'update',data:obj});
-    toast('Actualizado en el Sheet.');closeModal();
-    if(btn){btn.disabled=false;btn.innerText='Guardar';}return;
+  if(editIdx !== null && typeof editIdx === 'object'){
+    obj['Ord'] = editIdx['Ord'];
+    sendRecord({action:'update', data:obj});
+    toast('Actualizado.'); closeModal();
+    if(btn){btn.disabled=false;btn.innerText='Guardar';} return;
   }
-  obj['Ord']=Date.now();sendRecord({action:'save',data:obj});
-  toast('Agregado al Sheet.');closeModal();
+  obj['Ord'] = Date.now();
+  sendRecord({action:'save', data:obj});
+  toast('Agregado.'); closeModal();
   if(btn){btn.disabled=false;btn.innerText='Guardar';}
 }
 
-// ── ESCRITURA ──────────────────────────────────────────────
 function sendRecord(op){
-  let q=[];try{q=JSON.parse(localStorage.getItem('sync-queue')||'[]');}catch(e){}
-  q.push(op);localStorage.setItem('sync-queue',JSON.stringify(q));flushQueue();
+  var q=[]; try{q=JSON.parse(localStorage.getItem('sync-queue')||'[]');}catch(e){}
+  q.push(op); localStorage.setItem('sync-queue', JSON.stringify(q)); flushQueue();
 }
 function flushQueue(){
-  if(_flushing)return;
-  const u=getUrl();if(!u||u==='PEGAR_URL_AQUI')return;
-  let q=[];try{q=JSON.parse(localStorage.getItem('sync-queue')||'[]');}catch(e){}
-  if(!q.length)return;_flushing=true;
-  postToSheet(u,q[0],()=>{
-    let q2=[];try{q2=JSON.parse(localStorage.getItem('sync-queue')||'[]');}catch(e){}
-    q2.shift();localStorage.setItem('sync-queue',JSON.stringify(q2));
-    _flushing=false;if(q2.length)setTimeout(flushQueue,500);
+  if(_flushing) return;
+  var u = getUrl(); if(!u || u==='PEGAR_URL_AQUI') return;
+  var q=[]; try{q=JSON.parse(localStorage.getItem('sync-queue')||'[]');}catch(e){}
+  if(!q.length) return; _flushing=true;
+  postToSheet(u, q[0], function(){
+    var q2=[]; try{q2=JSON.parse(localStorage.getItem('sync-queue')||'[]');}catch(e){}
+    q2.shift(); localStorage.setItem('sync-queue', JSON.stringify(q2));
+    _flushing=false; if(q2.length) setTimeout(flushQueue, 500);
   });
 }
-function postToSheet(u,op,onDone){
-  const form=document.createElement('form');
-  form.method='POST';form.action=u;form.target='_syncfr';form.style.display='none';
-  const inp=document.createElement('input');inp.type='hidden';inp.name='payload';
-  inp.value=JSON.stringify({...op,cols});form.appendChild(inp);
-  let fr=document.getElementById('_syncfr');
-  if(!fr){fr=document.createElement('iframe');fr.name='_syncfr';fr.id='_syncfr';fr.style.display='none';document.body.appendChild(fr);}
-  fr.onload=()=>{try{document.body.removeChild(form);}catch(e){}if(onDone)onDone();};
-  document.body.appendChild(form);form.submit();
+function postToSheet(u, op, onDone){
+  var form = document.createElement('form');
+  form.method='POST'; form.action=u; form.target='_syncfr'; form.style.display='none';
+  var inp = document.createElement('input'); inp.type='hidden'; inp.name='payload';
+  inp.value = JSON.stringify({action:op.action, data:op.data, id:op.id, cols:cols});
+  form.appendChild(inp);
+  var fr = document.getElementById('_syncfr');
+  if(!fr){ fr=document.createElement('iframe'); fr.name='_syncfr'; fr.id='_syncfr'; fr.style.display='none'; document.body.appendChild(fr); }
+  fr.onload = function(){ try{document.body.removeChild(form);}catch(e){} if(onDone) onDone(); };
+  document.body.appendChild(form); form.submit();
 }
 
-// ── NOTAS ──────────────────────────────────────────────────
-function notaR(n){
-  if(!n)return'none';const s=String(n).toLowerCase().trim();
-  if(s==='aprobado')return'ok';if(s==='desaprobado')return'err';return'neutro';
-}
-function notaBadge(n){if(!n)return'-';const r=notaR(n);return`<span class="badge ${r==='ok'?'bok':r==='err'?'berr':'bgray'}">${n}</span>`;}
-function notaNumBadge(n){if(!n)return'-';const s=String(n).trim();if(!isNaN(+s)&&s!=='')return`<span class="badge ${+s>=6?'bok':'berr'}">${s}</span>`;return`<span class="badge bgray">${s}</span>`;}
+function notaR(n){ if(!n) return 'none'; var s=String(n).toLowerCase().trim(); if(s==='aprobado') return 'ok'; if(s==='desaprobado') return 'err'; return 'neutro'; }
+function notaBadge(n){ if(!n) return '-'; var r=notaR(n); return '<span class="badge ' + (r==='ok'?'bok':r==='err'?'berr':'bgray') + '">' + n + '</span>'; }
+function notaNumBadge(n){ if(!n) return '-'; var s=String(n).trim(); if(!isNaN(+s)&&s!=='') return '<span class="badge ' + (+s>=6?'bok':'berr') + '">' + s + '</span>'; return '<span class="badge bgray">' + s + '</span>'; }
 
-// ── ESTADISTICAS ───────────────────────────────────────────
-// Carga todos los datos de estadísticas de una vez (sin filtro de año)
-// El filtro por año se aplica localmente
 function loadStats(){
-  const u=getUrl();if(!u||u==='PEGAR_URL_AQUI'){toast('Configura la URL primero.');return;}
-  document.getElementById('smetrics').innerHTML='<div class="estate">Cargando estadisticas...<span class="spin"></span></div>';
-  jsonp(u+'?action=getstats',j=>{
-    statsRaw=j;
-    // Poblar selector de años
-    const sfa=document.getElementById('s-fano');
-    const sv=sfa.value;
-    sfa.innerHTML='<option value="">Todos</option>'+(j.anos||[]).map(a=>`<option ${a==sv?'selected':''}>${a}</option>`).join('');
-    if(sv)sfa.value=sv;
+  var u = getUrl(); if(!u || u==='PEGAR_URL_AQUI'){ toast('Configura la URL primero.'); return; }
+  document.getElementById('smetrics').innerHTML = '<div class="estate">Cargando...<span class="spin"></span></div>';
+  jsonp(u + '?action=getstats', function(j){
+    statsRaw = j;
+    var sfa = document.getElementById('s-fano'); var sv = sfa.value;
+    sfa.innerHTML = '<option value="">Todos</option>' + (j.anos||[]).map(function(a){ return '<option' + (a==sv?' selected':'') + '>' + a + '</option>'; }).join('');
+    if(sv) sfa.value = sv;
     renderStats();
-  },()=>{document.getElementById('smetrics').innerHTML='<div class="estate">Error al cargar estadisticas. Intenta de nuevo.</div>';});
+  }, function(){ document.getElementById('smetrics').innerHTML='<div class="estate">Error al cargar. Intenta de nuevo.</div>'; });
 }
 
-// Filtra statsRaw por año localmente y renderiza
 function renderStats(){
-  if(!statsRaw){loadStats();return;}
-  const ano=document.getElementById('s-fano').value;
-  // Calcular métricas filtradas por año
-  let stats;
-  if(!ano){
-    stats=statsRaw;
-  } else {
-    // Filtrar cada campo por año
-    const filterByAno=(obj)=>{
-      if(!obj||!obj[ano])return{};
-      // Si el objeto tiene años como clave
-      if(typeof obj[ano]==='object')return obj[ano];
-      return obj;
-    };
-    // statsRaw.porAnoDetalle contiene los datos desagregados por año
-    const det=statsRaw.porAnoDetalle&&statsRaw.porAnoDetalle[ano];
-    if(det){
-      stats={
-        total:det.total||0,
-        personas:det.personas||0,
-        anos:statsRaw.anos,
-        porAno:statsRaw.porAno,
-        porCurso:det.porCurso||{},
-        porJerarquia:det.porJerarquia||{},
-        porProvincia:det.porProvincia||{},
-        porBecado:det.porBecado||{},
-        porFuerza:det.porFuerza||{},
-        porDictado:det.porDictado||{},
-        nota:det.nota||{}
-      };
-    } else {
-      stats=statsRaw;
-    }
+  if(!statsRaw){ loadStats(); return; }
+  var ano = document.getElementById('s-fano').value;
+  var stats;
+  if(!ano){ stats = statsRaw; }
+  else{
+    var det = statsRaw.porAnoDetalle && statsRaw.porAnoDetalle[ano];
+    stats = det ? {total:det.total,personas:det.personas,anos:statsRaw.anos,porAno:statsRaw.porAno,porCurso:det.porCurso,porJerarquia:det.porJerarquia,porProvincia:det.porProvincia,porBecado:det.porBecado,porFuerza:det.porFuerza,porDictado:det.porDictado,nota:det.nota} : statsRaw;
   }
-
-  const notaTotal=Object.values(stats.nota||{}).reduce((a,b)=>a+b,0);
-  const ap=(stats.nota&&stats.nota['Aprobado'])||0;
-  document.getElementById('smetrics').innerHTML=`
-    <div class="metric"><div class="mlabel">Total registros</div><div class="mval">${stats.total||0}</div></div>
-    <div class="metric"><div class="mlabel">Personas unicas</div><div class="mval">${stats.personas||0}</div></div>
-    <div class="metric"><div class="mlabel">% aprobados</div><div class="mval">${stats.total?Math.round(ap/stats.total*100):0}%</div></div>
-    <div class="metric"><div class="mlabel">Anos con datos</div><div class="mval">${(stats.anos||[]).length}</div></div>`;
-  const sc=document.getElementById('s-count');
-  if(sc)sc.textContent=ano?`Filtrando por ${ano}: ${stats.total} registros`:`${stats.total} registros totales`;
+  var ap = (stats.nota && stats.nota['Aprobado']) || 0;
+  document.getElementById('smetrics').innerHTML =
+    '<div class="metric"><div class="mlabel">Total registros</div><div class="mval">' + (stats.total||0) + '</div></div>' +
+    '<div class="metric"><div class="mlabel">Personas unicas</div><div class="mval">' + (stats.personas||0) + '</div></div>' +
+    '<div class="metric"><div class="mlabel">% aprobados</div><div class="mval">' + (stats.total?Math.round(ap/stats.total*100):0) + '%</div></div>' +
+    '<div class="metric"><div class="mlabel">Anos con datos</div><div class="mval">' + ((stats.anos||[]).length) + '</div></div>';
+  var sc = document.getElementById('s-count');
+  if(sc) sc.textContent = ano ? ('Ano ' + ano + ': ' + (stats.total||0) + ' registros') : ((stats.total||0) + ' registros totales');
   renderChart(stats);
 }
 
 function renderChart(stats){
-  if(!stats&&!statsRaw){loadStats();return;}
+  if(!stats && !statsRaw){ loadStats(); return; }
   if(!stats){
-    const ano=document.getElementById('s-fano').value;
-    const det=statsRaw.porAnoDetalle&&ano&&statsRaw.porAnoDetalle[ano];
-    stats=det?{...statsRaw,...det,anos:statsRaw.anos,porAno:statsRaw.porAno}:statsRaw;
+    var ano = document.getElementById('s-fano').value;
+    var det = statsRaw.porAnoDetalle && ano && statsRaw.porAnoDetalle[ano];
+    stats = det ? {total:det.total,personas:det.personas,anos:statsRaw.anos,porAno:statsRaw.porAno,porCurso:det.porCurso,porJerarquia:det.porJerarquia,porProvincia:det.porProvincia,porBecado:det.porBecado,porFuerza:det.porFuerza,porDictado:det.porDictado,nota:det.nota} : statsRaw;
   }
-  const sel=document.getElementById('s-selector').value;
-  const isTbl=sel==='porCurso'||sel==='porDictado';
-  document.getElementById('s-tabla-wrap').style.display=isTbl?'':'none';
-  document.getElementById('s-chart-wrap').style.display=isTbl?'none':'';
-  const dlBtn=document.getElementById('s-dl-btn');
-  if(dlBtn)dlBtn.textContent=isTbl?'Descargar Excel':'Descargar PNG';
+  var sel = document.getElementById('s-selector').value;
+  var isTbl = sel==='porCurso' || sel==='porDictado';
+  document.getElementById('s-tabla-wrap').style.display = isTbl ? '' : 'none';
+  document.getElementById('s-chart-wrap').style.display = isTbl ? 'none' : '';
 
-  const dataMap={porCurso:stats.porCurso,porDictado:stats.porDictado,porAno:stats.porAno,nota:stats.nota,porJerarquia:stats.porJerarquia,porProvincia:stats.porProvincia,porBecado:stats.porBecado,porFuerza:stats.porFuerza};
-  const rawData=dataMap[sel]||{};
-  const configs={
-    porCurso:{title:'Top cursos',horiz:false,byKey:false,tbl:true},
-    porDictado:{title:'Por dictado',horiz:false,byKey:false,tbl:true},
-    porAno:{title:'Por ano',horiz:false,byKey:true},
-    nota:{title:'Nota',horiz:true,byKey:false},
-    porJerarquia:{title:'Por jerarquia',horiz:true,byKey:false,min:10},
-    porProvincia:{title:'Por provincia/pais',horiz:true,byKey:false},
-    porBecado:{title:'Becados vs no becados',horiz:true,byKey:false},
-    porFuerza:{title:'Por fuerza',horiz:true,byKey:false},
-  };
-  const cfg=configs[sel];if(!cfg)return;
+  var dataMap = {porCurso:stats.porCurso, porDictado:stats.porDictado, porAno:stats.porAno, nota:stats.nota, porJerarquia:stats.porJerarquia, porProvincia:stats.porProvincia, porBecado:stats.porBecado, porFuerza:stats.porFuerza};
+  var rawData = dataMap[sel] || {};
+  var titles = {porCurso:'Top cursos',porDictado:'Por dictado',porAno:'Por ano',nota:'Nota',porJerarquia:'Por jerarquia',porProvincia:'Por provincia/pais',porBecado:'Becados',porFuerza:'Por fuerza'};
+  var horiz = sel!=='porAno';
 
   if(isTbl){
-    document.getElementById('s-tabla-title').textContent=cfg.title;
-    let entries=Object.entries(rawData).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
-    if(!entries.length){document.getElementById('s-tabla-content').innerHTML='<div class="estate">Sin datos.</div>';return;}
-    const maxV=entries[0][1]||1;
-    let html='<table style="width:100%;border-collapse:collapse;font-size:13px"><tr style="background:var(--bg2)"><th style="padding:7px 10px;text-align:left;border-bottom:1px solid var(--bd)">Nombre</th><th style="padding:7px 10px;border-bottom:1px solid var(--bd);width:60%"></th><th style="padding:7px 10px;text-align:right;border-bottom:1px solid var(--bd)">Cant.</th></tr>';
-    entries.forEach(([lbl,cnt])=>{
-      const pct=Math.round(cnt/maxV*100);
-      html+=`<tr><td style="padding:7px 10px;border-bottom:.5px solid var(--bd);white-space:nowrap;max-width:250px;overflow:hidden;text-overflow:ellipsis" title="${lbl}">${lbl}</td>
-        <td style="padding:7px 10px;border-bottom:.5px solid var(--bd)"><div style="background:var(--bg2);border-radius:20px;height:8px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--p);border-radius:20px"></div></div></td>
-        <td style="padding:7px 10px;border-bottom:.5px solid var(--bd);text-align:right;font-weight:500">${cnt}</td></tr>`;
+    document.getElementById('s-tabla-title').textContent = titles[sel]||sel;
+    var entries = Object.keys(rawData).filter(function(k){ return rawData[k]>0; }).map(function(k){ return [k,rawData[k]]; }).sort(function(a,b){ return b[1]-a[1]; });
+    if(!entries.length){ document.getElementById('s-tabla-content').innerHTML='<div class="estate">Sin datos.</div>'; return; }
+    var maxV = entries[0][1]||1;
+    var th = '<table style="width:100%;border-collapse:collapse;font-size:13px"><tr style="background:var(--bg2)"><th style="padding:7px 10px;text-align:left;border-bottom:1px solid var(--bd)">Nombre</th><th style="padding:7px 10px;border-bottom:1px solid var(--bd);width:55%"></th><th style="padding:7px 10px;text-align:right;border-bottom:1px solid var(--bd)">Cant.</th></tr>';
+    entries.forEach(function(e){
+      var p2 = Math.round(e[1]/maxV*100);
+      th += '<tr><td style="padding:7px 10px;border-bottom:.5px solid var(--bd);white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis" title="' + escHtml(e[0]) + '">' + escHtml(e[0]) + '</td>' +
+        '<td style="padding:7px 10px;border-bottom:.5px solid var(--bd)"><div style="background:var(--bg2);border-radius:20px;height:8px;overflow:hidden"><div style="width:' + p2 + '%;height:100%;background:var(--p);border-radius:20px"></div></div></td>' +
+        '<td style="padding:7px 10px;border-bottom:.5px solid var(--bd);text-align:right;font-weight:500">' + e[1] + '</td></tr>';
     });
-    document.getElementById('s-tabla-content').innerHTML=html+'</table>';
+    document.getElementById('s-tabla-content').innerHTML = th + '</table>';
     return;
   }
 
-  let entries=Object.entries(rawData).filter(([,v])=>v>0);
-  if(cfg.min)entries=entries.filter(([,v])=>v>=cfg.min);
-  if(cfg.byKey)entries.sort((a,b)=>a[0].localeCompare(b[0]));
-  else entries.sort((a,b)=>b[1]-a[1]);
-  const labels=entries.map(e=>e[0]),data=entries.map(e=>e[1]);
+  var allE = Object.keys(rawData).filter(function(k){ return rawData[k]>0; }).map(function(k){ return [k,rawData[k]]; });
+  if(sel==='porJerarquia') allE = allE.filter(function(e){ return e[1]>=10; });
+  if(sel==='porAno') allE.sort(function(a,b){ return a[0].localeCompare(b[0]); });
+  else allE.sort(function(a,b){ return b[1]-a[1]; });
+  var lbls = allE.map(function(e){ return e[0]; });
+  var vals = allE.map(function(e){ return e[1]; });
 
-  if(!labels.length){
-    const cont=document.getElementById('s-chart-container');
-    cont.innerHTML='<div class="estate">Sin datos para mostrar.</div>';return;
+  if(!lbls.length){
+    document.getElementById('s-chart-container').innerHTML = '<div class="estate">Sin datos para mostrar.</div>';
+    return;
   }
-  // Restaurar canvas si fue reemplazado
-  const cont=document.getElementById('s-chart-container');
-  if(!document.getElementById('s-chart'))cont.innerHTML='<canvas id="s-chart"></canvas>';
-  const h=cfg.horiz?Math.max(260,labels.length*30+40):320;
-  cont.style.height=h+'px';
-  if(CH['smain'])CH['smain'].destroy();
-  const el=document.getElementById('s-chart');
-  CH['smain']=new Chart(el.getContext('2d'),{
+  var cont = document.getElementById('s-chart-container');
+  if(!document.getElementById('s-chart')) cont.innerHTML = '<canvas id="s-chart"></canvas>';
+  cont.style.height = (horiz ? Math.max(260,lbls.length*30+40) : 320) + 'px';
+  document.getElementById('s-chart-title').textContent = titles[sel]||sel;
+
+  if(CH['sm']) CH['sm'].destroy();
+  CH['sm'] = new Chart(document.getElementById('s-chart').getContext('2d'), {
     type:'bar',
-    data:{labels,datasets:[{data,backgroundColor:CLRS[0],borderRadius:4,borderSkipped:false}]},
-    options:{indexAxis:cfg.horiz?'y':'x',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{enabled:true}},
-      scales:{x:{ticks:{font:{size:11}},grid:{display:!cfg.horiz}},y:{ticks:{font:{size:11}},grid:{display:cfg.horiz}}}},
-    plugins:[{id:'vals',afterDatasetsDraw(chart){
-      const{ctx,data:cd,chartArea}=chart;if(!chartArea)return;ctx.save();
-      chart.getDatasetMeta(0).data.forEach((bar,i)=>{
-        const val=cd.datasets[0].data[i];if(!val)return;
-        ctx.font='bold 11px system-ui';ctx.fillStyle='#2C2C2A';
-        if(cfg.horiz){ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(val,bar.x+4,bar.y);}
-        else{ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(val,bar.x,bar.y-4);}
-      });ctx.restore();
+    data:{labels:lbls, datasets:[{data:vals, backgroundColor:CLRS[0], borderRadius:4, borderSkipped:false}]},
+    options:{indexAxis:horiz?'y':'x', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{ticks:{font:{size:11}},grid:{display:!horiz}}, y:{ticks:{font:{size:11}},grid:{display:horiz}}}},
+    plugins:[{id:'v',afterDatasetsDraw:function(chart){
+      var c2=chart.ctx, cd=chart.data, ca=chart.chartArea; if(!ca) return; c2.save();
+      chart.getDatasetMeta(0).data.forEach(function(bar,i){
+        var val=cd.datasets[0].data[i]; if(!val) return;
+        c2.font='bold 11px system-ui'; c2.fillStyle='#2C2C2A';
+        if(horiz){c2.textAlign='left';c2.textBaseline='middle';c2.fillText(val,bar.x+4,bar.y);}
+        else{c2.textAlign='center';c2.textBaseline='bottom';c2.fillText(val,bar.x,bar.y-4);}
+      }); c2.restore();
     }}]
   });
 }
 
 function downloadCurrentChart(){
-  if(!statsRaw){toast('Carga las estadisticas primero.');return;}
-  const sel=document.getElementById('s-selector').value;
-  const isTbl=sel==='porCurso'||sel==='porDictado';
-  const ano=document.getElementById('s-fano').value;
-  const det=statsRaw.porAnoDetalle&&ano&&statsRaw.porAnoDetalle[ano];
-  const stats=det?{...statsRaw,...det}:statsRaw;
-  const dataMap={porCurso:stats.porCurso,porDictado:stats.porDictado,porAno:stats.porAno,nota:stats.nota,porJerarquia:stats.porJerarquia,porProvincia:stats.porProvincia,porBecado:stats.porBecado,porFuerza:stats.porFuerza};
+  if(!statsRaw){ toast('Carga las estadisticas primero.'); return; }
+  var sel = document.getElementById('s-selector').value;
+  var isTbl = sel==='porCurso' || sel==='porDictado';
+  var ano = document.getElementById('s-fano').value;
+  var det = statsRaw.porAnoDetalle && ano && statsRaw.porAnoDetalle[ano];
+  var stats = det ? {porCurso:det.porCurso,porDictado:det.porDictado,porAno:statsRaw.porAno,nota:det.nota,porJerarquia:det.porJerarquia,porProvincia:det.porProvincia,porBecado:det.porBecado,porFuerza:det.porFuerza} : statsRaw;
+  var dataMap = {porCurso:stats.porCurso, porDictado:stats.porDictado, porAno:stats.porAno, nota:stats.nota, porJerarquia:stats.porJerarquia, porProvincia:stats.porProvincia, porBecado:stats.porBecado, porFuerza:stats.porFuerza};
   if(isTbl){
-    const rows=Object.entries(dataMap[sel]||{}).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).map(([n,c])=>({Nombre:n,Cantidad:c}));
-    if(!rows.length){toast('No hay datos.');return;}
-    const ws=XLSX.utils.json_to_sheet(rows,{header:['Nombre','Cantidad']});
-    ws['!cols']=[{wch:60},{wch:12}];
-    const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,sel);
-    XLSX.writeFile(wb,`estadistica_${sel}${ano?'_'+ano:''}.xlsx`);toast('Excel descargado.');
-  }else{
-    const el=document.getElementById('s-chart');if(!el)return;
-    const cv=document.createElement('canvas');cv.width=el.width;cv.height=el.height;
-    const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);ctx.drawImage(el,0,0);
-    const link=document.createElement('a');link.download=`estadistica_${sel}${ano?'_'+ano:''}.png`;link.href=cv.toDataURL('image/png');link.click();
+    var rows2 = Object.keys(dataMap[sel]||{}).filter(function(k){ return dataMap[sel][k]>0; }).sort(function(a,b){ return dataMap[sel][b]-dataMap[sel][a]; }).map(function(n){ return {Nombre:n,Cantidad:dataMap[sel][n]}; });
+    if(!rows2.length){ toast('No hay datos.'); return; }
+    var ws = XLSX.utils.json_to_sheet(rows2, {header:['Nombre','Cantidad']}); ws['!cols']=[{wch:60},{wch:12}];
+    var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,sel);
+    XLSX.writeFile(wb, 'estadistica_' + sel + (ano?'_'+ano:'') + '.xlsx'); toast('Excel descargado.');
+  } else {
+    var el2 = document.getElementById('s-chart'); if(!el2) return;
+    var cv = document.createElement('canvas'); cv.width=el2.width; cv.height=el2.height;
+    var c3 = cv.getContext('2d'); c3.fillStyle='#fff'; c3.fillRect(0,0,cv.width,cv.height); c3.drawImage(el2,0,0);
+    var lnk = document.createElement('a'); lnk.download='estadistica_'+sel+(ano?'_'+ano:'')+'.png'; lnk.href=cv.toDataURL('image/png'); lnk.click();
     toast('PNG descargado.');
   }
 }
 
-// ── DUPLICADOS ─────────────────────────────────────────────
 function loadDuplicados(){
-  const u=getUrl();if(!u||u==='PEGAR_URL_AQUI'){toast('Configura la URL primero.');return;}
-  document.getElementById('dup-content').innerHTML='<div class="estate">Buscando duplicados...<span class="spin"></span></div>';
-  jsonp(u+'?action=getduplicados',j=>{
-    if(!j){document.getElementById('dup-content').innerHTML='<div class="estate">Error al cargar.</div>';return;}
-    const grupos=j.grupos||[];
-    const totalExtra=grupos.reduce((s,g)=>s+g.length-1,0);
-    document.getElementById('dup-metrics').innerHTML=`
-      <div class="metric"><div class="mlabel">Grupos duplicados</div><div class="mval" style="color:${grupos.length?'var(--err)':'var(--ok)'}">${grupos.length}</div></div>
-      <div class="metric"><div class="mlabel">Registros extra</div><div class="mval" style="color:${totalExtra?'var(--err)':'var(--ok)'}">${totalExtra}</div></div>`;
-    if(!grupos.length){document.getElementById('dup-content').innerHTML='<div class="estate" style="color:var(--ok)">No se encontraron duplicados.</div>';return;}
-    const hcols=j.cols||cols;
-    const showCols=hcols.filter(c=>c!=='Ord').slice(0,10);
-    let html='';
-    grupos.forEach((grupo,gi)=>{
-      const p=grupo[0];
-      html+=`<div class="dup-group">
-        <div class="dup-header">
-          <span style="font-size:13px;font-weight:500;color:var(--err)">${p['Apellidos']||''}, ${p['Nombres']||''} — ${p[COL_CURSO]||''} — ${p[COL_ANO]||''}</span>
-          <span style="font-size:12px;color:var(--err)">${grupo.length} registros</span>
-        </div>
-        <div class="twrap"><table style="width:100%;border-collapse:collapse;font-size:12px">
-          <thead><tr style="background:var(--bg2)">
-            ${showCols.map(c=>`<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--bd);font-weight:500">${c}</th>`).join('')}
-            <th style="padding:6px 8px;border-bottom:1px solid var(--bd)"></th>
-          </tr></thead><tbody>
-          ${grupo.map((a,ri)=>`<tr style="${ri===0?'background:var(--okl)':''}">
-            ${showCols.map(c=>{
-              let v=a[c]||'-';
-              if(c===COL_NOTA)v=notaBadge(a[c]);
-              return `<td style="padding:6px 8px;border-bottom:.5px solid var(--bd);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a[c]||''}">${v}</td>`;
-            }).join('')}
-            <td style="padding:6px 8px;border-bottom:.5px solid var(--bd);white-space:nowrap">
-              ${ri===0?'<span style="font-size:11px;color:var(--ok);font-weight:500">Original</span>':
-                `<button class="btn btnsm btnerr" onclick="eliminarDuplicado('${escQ(JSON.stringify(a))}')">Eliminar</button>`}
-            </td>
-          </tr>`).join('')}
-          </tbody></table></div>
-      </div>`;
+  var u = getUrl(); if(!u || u==='PEGAR_URL_AQUI'){ toast('Configura la URL primero.'); return; }
+  document.getElementById('dup-content').innerHTML = '<div class="estate">Buscando duplicados...<span class="spin"></span></div>';
+  jsonp(u + '?action=getduplicados', function(j){
+    if(!j){ document.getElementById('dup-content').innerHTML='<div class="estate">Error al cargar.</div>'; return; }
+    var grupos = j.grupos||[];
+    var totalExtra = grupos.reduce(function(s,g){ return s+g.length-1; }, 0);
+    document.getElementById('dup-metrics').innerHTML =
+      '<div class="metric"><div class="mlabel">Grupos duplicados</div><div class="mval" style="color:' + (grupos.length?'var(--err)':'var(--ok)') + '">' + grupos.length + '</div></div>' +
+      '<div class="metric"><div class="mlabel">Registros extra</div><div class="mval" style="color:' + (totalExtra?'var(--err)':'var(--ok)') + '">' + totalExtra + '</div></div>';
+    if(!grupos.length){ document.getElementById('dup-content').innerHTML='<div class="estate" style="color:var(--ok)">No se encontraron duplicados.</div>'; return; }
+    var hcols = j.cols || cols;
+    var showCols = hcols.filter(function(c){ return c!=='Ord'; }).slice(0,10);
+    var html = '';
+    grupos.forEach(function(grupo){
+      var p2 = grupo[0];
+      html += '<div class="dup-group"><div class="dup-hdr">' +
+        '<span style="font-size:13px;font-weight:500;color:var(--err)">' + (p2['Apellidos']||'') + ', ' + (p2['Nombres']||'') + ' - ' + (p2[COL_CURSO]||'') + ' ' + (p2[COL_ANO]||'') + '</span>' +
+        '<span style="font-size:12px;color:var(--err)">' + grupo.length + ' registros</span></div>' +
+        '<div class="twrap"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:var(--bg2)">' +
+        showCols.map(function(c){ return '<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--bd);font-weight:500">' + c + '</th>'; }).join('') +
+        '<th style="padding:6px 8px;border-bottom:1px solid var(--bd)"></th></tr></thead><tbody>' +
+        grupo.map(function(a, ri){
+          return '<tr style="' + (ri===0?'background:var(--okl)':'') + '">' +
+            showCols.map(function(c){ var v=a[c]||'-'; if(c===COL_NOTA)v=notaBadge(a[c]); return '<td style="padding:6px 8px;border-bottom:.5px solid var(--bd);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + v + '</td>'; }).join('') +
+            '<td style="padding:6px 8px;border-bottom:.5px solid var(--bd);white-space:nowrap">' +
+            (ri===0 ? '<span style="font-size:11px;color:var(--ok);font-weight:500">Original</span>' :
+              '<button class="btn btnsm btnerr" onclick="eliminarDup(\'' + escQ(JSON.stringify(a)) + '\')">Eliminar</button>') +
+            '</td></tr>';
+        }).join('') +
+        '</tbody></table></div></div>';
     });
-    document.getElementById('dup-content').innerHTML=html;
-  },()=>{document.getElementById('dup-content').innerHTML='<div class="estate">Error de conexion.</div>';});
+    document.getElementById('dup-content').innerHTML = html;
+  }, function(){ document.getElementById('dup-content').innerHTML='<div class="estate">Error de conexion.</div>'; });
 }
 
-function eliminarDuplicado(jsonStr){
-  const a=JSON.parse(jsonStr);
-  if(!confirm('Eliminar este registro?'))return;
-  sendRecord({action:'delete',id:a['Ord']});
+function eliminarDup(jsonStr){
+  var a = JSON.parse(jsonStr);
+  if(!confirm('Eliminar este registro?')) return;
+  sendRecord({action:'delete', id:a['Ord']});
   toast('Eliminado. Actualizando...');
-  setTimeout(loadDuplicados,1500);
+  setTimeout(loadDuplicados, 1500);
 }
 
-// ── DESCARGA COMPLETA ──────────────────────────────────────
-let dlData=[],dlTotalPages=0,dlCurrentPage=0,dlCols=[];
+var dlData=[], dlTotalPages=0, dlCurrentPage=0, dlCols=[];
 function startDownload(){
-  const u=getUrl();if(!u||u==='PEGAR_URL_AQUI'){toast('Configura la URL primero.');return;}
-  dlData=[];dlTotalPages=0;dlCurrentPage=0;dlCols=[];
+  var u = getUrl(); if(!u || u==='PEGAR_URL_AQUI'){ toast('Configura la URL primero.'); return; }
+  dlData=[]; dlTotalPages=0; dlCurrentPage=0; dlCols=[];
   document.getElementById('dl-btn').disabled=true;
   document.getElementById('dl-progress').style.display='block';
   document.getElementById('dl-fill').style.width='0%';
   downloadPage(1);
 }
 function downloadPage(page){
-  const u=getUrl();
-  document.getElementById('dl-msg').textContent=`Descargando pagina ${page}${dlTotalPages?'/'+dlTotalPages:''}...`;
-  jsonp(u+'?action=getpage&page='+page,j=>{
-    if(!j||!j.data){downloadError('Error en respuesta.');return;}
-    if(j.cols&&!dlCols.length)dlCols=j.cols;
-    dlData=dlData.concat(j.data);dlTotalPages=j.totalPages;dlCurrentPage=j.page;
-    const pct=Math.round(dlCurrentPage/dlTotalPages*100);
-    document.getElementById('dl-fill').style.width=pct+'%';
-    document.getElementById('dl-msg').textContent=`Descargando... ${dlData.length} de ${j.total} registros (${pct}%)`;
-    if(dlCurrentPage<dlTotalPages)setTimeout(()=>downloadPage(dlCurrentPage+1),300);
+  var u = getUrl();
+  document.getElementById('dl-msg').textContent = 'Descargando pagina ' + page + (dlTotalPages?'/'+dlTotalPages:'') + '...';
+  jsonp(u + '?action=getpage&page=' + page, function(j){
+    if(!j || !j.data){ downloadError('Error en respuesta.'); return; }
+    if(j.cols && !dlCols.length) dlCols = j.cols;
+    dlData = dlData.concat(j.data); dlTotalPages=j.totalPages; dlCurrentPage=j.page;
+    var pct = Math.round(dlCurrentPage/dlTotalPages*100);
+    document.getElementById('dl-fill').style.width = pct + '%';
+    document.getElementById('dl-msg').textContent = 'Descargando... ' + dlData.length + ' de ' + j.total + ' registros (' + pct + '%)';
+    if(dlCurrentPage < dlTotalPages) setTimeout(function(){ downloadPage(dlCurrentPage+1); }, 300);
     else finishDownload();
-  },()=>downloadError('Error de conexion.'));
+  }, function(){ downloadError('Error de conexion.'); });
 }
 function finishDownload(){
-  const ws=XLSX.utils.json_to_sheet(dlData,{header:dlCols});
-  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Alumnos');
-  XLSX.writeFile(wb,'alumnos_base.xlsx');
+  var ws = XLSX.utils.json_to_sheet(dlData, {header:dlCols});
+  var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Alumnos');
+  XLSX.writeFile(wb, 'alumnos_base.xlsx');
   document.getElementById('dl-btn').disabled=false;
   document.getElementById('dl-progress').style.display='none';
-  toast('Excel descargado con '+dlData.length+' registros.');
+  toast('Excel descargado con ' + dlData.length + ' registros.');
 }
-function downloadError(msg){document.getElementById('dl-msg').textContent='Error: '+msg;document.getElementById('dl-btn').disabled=false;}
+function downloadError(msg){ document.getElementById('dl-msg').textContent='Error: '+msg; document.getElementById('dl-btn').disabled=false; }
 
-// ── CONFIG ─────────────────────────────────────────────────
-function saveUrl(){const v=document.getElementById('surl').value.trim();localStorage.setItem('script-url',v);toast('URL guardada.');}
-function changePwd(){const v=document.getElementById('npwd').value;if(!v){toast('Ingresa una contrasena.');return;}localStorage.setItem('editor-pwd',v);toast('Contrasena actualizada.');}
-function copyScript(){navigator.clipboard.writeText(document.getElementById('ascode').textContent).then(()=>toast('Codigo copiado.'));}
+function saveUrl(){ var v=document.getElementById('surl').value.trim(); localStorage.setItem('script-url',v); toast('URL guardada.'); }
+function changePwd(){ var v=document.getElementById('npwd').value; if(!v){toast('Ingresa una contrasena.');return;} localStorage.setItem('editor-pwd',v); toast('Contrasena actualizada.'); }
+function copyScript(){ navigator.clipboard.writeText(document.getElementById('appsscript-code').value).then(function(){ toast('Codigo copiado.'); }); }
 
-// ── TABS ───────────────────────────────────────────────────
-function showTab(n,btn){
-  ['alumnos','estadisticas','duplicados','descargar','config'].forEach(t=>document.getElementById('tab-'+t).style.display=t===n?'':'none');
-  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
-  if(n==='estadisticas'&&!statsRaw)loadStats();
-  if(n==='duplicados')loadDuplicados();
+function showTab(n, btn){
+  ['alumnos','estadisticas','duplicados','descargar','config'].forEach(function(t){ document.getElementById('tab-'+t).style.display = t===n?'':'none'; });
+  document.querySelectorAll('nav button').forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active');
+  if(n==='estadisticas' && !statsRaw) loadStats();
 }
 
-// ── UTILS ──────────────────────────────────────────────────
-function escQ(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
-function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeModal();closeHistorial();closeLogin();}
-  if(e.key==='Enter'&&document.getElementById('loginscr').classList.contains('show'))checkPwd();
+function escQ(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg){ var el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(function(){ el.classList.remove('show'); },3000); }
+
+document.addEventListener('keydown', function(e){
+  if(e.key==='Escape'){ closeModal(); closeHistorial(); closeLogin(); }
 });
+</script>
 
-// ── APPS SCRIPT ────────────────────────────────────────────
-function ascode(){
-return `const SHEET_NAME = 'Alumnos';
+<textarea id="appsscript-code" style="display:none">const SHEET_NAME = 'Alumnos';
 const INDEX_NAME = 'Indice';
-const INDEX_MAX_AGE_MS = 60 * 60 * 1000; // 1 hora
+const INDEX_MAX_AGE_MS = 60 * 60 * 1000;
 
 function getSheet(){return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);}
 
 function getHeadersAndRows(){
-  const sheet=getSheet();
-  const rows=sheet.getDataRange().getValues();
-  const headers=rows[0].map(h=>String(h).trim());
-  return{headers,rows:rows.slice(1)};
+  var sheet=getSheet();
+  var rows=sheet.getDataRange().getValues();
+  var headers=rows[0].map(function(h){return String(h).trim();});
+  return{headers:headers,rows:rows.slice(1)};
 }
 
 function rowToObj(headers,row){
-  const o={};headers.forEach((h,i)=>o[h]=row[i]!==undefined?row[i]:'');return o;
+  var o={};headers.forEach(function(h,i){o[h]=row[i]!==undefined?row[i]:'';});return o;
 }
 
-// ── ÍNDICE DE BÚSQUEDA ────────────────────────────────────
-// Crea o actualiza la hoja Indice con una fila por persona única
 function buildIndex(){
-  const ss=SpreadsheetApp.getActiveSpreadsheet();
-  let idxSheet=ss.getSheetByName(INDEX_NAME);
+  var ss=SpreadsheetApp.getActiveSpreadsheet();
+  var idxSheet=ss.getSheetByName(INDEX_NAME);
   if(!idxSheet)idxSheet=ss.insertSheet(INDEX_NAME);
   else idxSheet.clearContents();
-
-  const{headers,rows}=getHeadersAndRows();
-  const dniIdx=headers.indexOf('DNI'),apeIdx=headers.indexOf('Apellidos'),nomIdx=headers.indexOf('Nombres'),curIdx=headers.indexOf('Curso');
-  const personas={};
-  rows.forEach(row=>{
-    const dni=String(row[dniIdx]||'').trim(),ape=String(row[apeIdx]||'').trim(),nom=String(row[nomIdx]||'').trim();
-    const key=dni||(ape+'|'+nom);
-    if(!key)return;
-    if(!personas[key])personas[key]={dni,ape,nom,cursos:new Set()};
-    if(curIdx>=0&&row[curIdx])personas[key].cursos.add(String(row[curIdx]).trim());
+  var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
+  var dniIdx=headers.indexOf('DNI'),apIdx=headers.indexOf('Apellidos'),nomIdx=headers.indexOf('Nombres'),curIdx=headers.indexOf('Curso');
+  var personas={};
+  rows.forEach(function(row){
+    var dni=String(row[dniIdx]||'').trim(),ape=String(row[apIdx]||'').trim(),nom=String(row[nomIdx]||'').trim();
+    var key=dni||(ape+'|'+nom);if(!key)return;
+    if(!personas[key])personas[key]={dni:dni,ape:ape,nom:nom,cursos:[]};
+    if(curIdx>=0&&row[curIdx]){var cv=String(row[curIdx]).trim();if(personas[key].cursos.indexOf(cv)<0)personas[key].cursos.push(cv);}
   });
-
-  // Escribir índice: timestamp en A1, datos desde A2
   idxSheet.getRange(1,1).setValue(Date.now());
-  const indexRows=Object.values(personas).map(p=>[p.dni,p.ape,p.nom,[...p.cursos].slice(0,5).join(', ')]);
-  if(indexRows.length>0){
-    idxSheet.getRange(2,1,indexRows.length,4).setValues(indexRows);
-  }
-  return indexRows.length;
+  var idxRows=Object.keys(personas).map(function(k){var p=personas[k];return[p.dni,p.ape,p.nom,p.cursos.slice(0,5).join(', ')];});
+  if(idxRows.length>0)idxSheet.getRange(2,1,idxRows.length,4).setValues(idxRows);
+  return idxRows.length;
 }
 
-// Lee el índice si está vigente, lo regenera si expiró
 function getIndex(){
-  const ss=SpreadsheetApp.getActiveSpreadsheet();
-  const idxSheet=ss.getSheetByName(INDEX_NAME);
+  var ss=SpreadsheetApp.getActiveSpreadsheet();
+  var idxSheet=ss.getSheetByName(INDEX_NAME);
   if(!idxSheet){buildIndex();return getIndex();}
-  const lastUpdate=Number(idxSheet.getRange(1,1).getValue()||0);
+  var lastUpdate=Number(idxSheet.getRange(1,1).getValue()||0);
   if(Date.now()-lastUpdate>INDEX_MAX_AGE_MS){buildIndex();return getIndex();}
-  const data=idxSheet.getDataRange().getValues();
+  var data=idxSheet.getDataRange().getValues();
   if(data.length<2)return[];
-  return data.slice(1); // [dni, apellidos, nombres, cursos]
+  return data.slice(1);
 }
 
 function doGet(e){
-  const cb=e.parameter.callback,action=e.parameter.action;
-  let result;
+  var cb=e.parameter.callback,action=e.parameter.action,result;
   try{
     if(action==='search')result=handleSearch(e.parameter);
     else if(action==='filter')result=handleFilter(e.parameter);
@@ -975,23 +898,21 @@ function doGet(e){
     else if(action==='getoptions')result=handleOptions();
     else if(action==='getduplicados')result=handleDuplicados();
     else if(action==='getpage')result=handleGetPage(e.parameter);
-    else if(action==='rebuildindex'){const n=buildIndex();result=JSON.stringify({ok:true,personas:n});}
-    else{const{headers}=getHeadersAndRows();result=JSON.stringify({cols:headers});}
+    else if(action==='rebuildindex'){var n=buildIndex();result=JSON.stringify({ok:true,personas:n});}
+    else{var hr2=getHeadersAndRows();result=JSON.stringify({cols:hr2.headers});}
   }catch(err){result=JSON.stringify({error:err.message});}
   if(cb)return ContentService.createTextOutput(cb+'('+result+')').setMimeType(ContentService.MimeType.JAVASCRIPT);
   return ContentService.createTextOutput(result).setMimeType(ContentService.MimeType.JSON);
 }
 
-// BÚSQUEDA usando el índice (rápida)
 function handleSearch(params){
-  const q=String(params.q||'').toLowerCase().trim();
+  var q=String(params.q||'').toLowerCase().trim();
   if(!q||q.length<2)return JSON.stringify({data:[]});
-  const index=getIndex();
-  const results=[];
-  for(let i=0;i<index.length;i++){
-    const row=index[i];
-    const dni=String(row[0]||''),ape=String(row[1]||''),nom=String(row[2]||''),curs=String(row[3]||'');
-    if(ape.toLowerCase().includes(q)||nom.toLowerCase().includes(q)||dni.toLowerCase().includes(q)){
+  var index=getIndex(),results=[];
+  for(var i=0;i<index.length;i++){
+    var row=index[i];
+    var dni=String(row[0]||''),ape=String(row[1]||''),nom=String(row[2]||''),curs=String(row[3]||'');
+    if(ape.toLowerCase().indexOf(q)>=0||nom.toLowerCase().indexOf(q)>=0||dni.toLowerCase().indexOf(q)>=0){
       results.push({DNI:dni,Apellidos:ape,Nombres:nom,cursos:curs?curs.split(', '):[]});
       if(results.length>=parseInt(params.limit||'15'))break;
     }
@@ -999,142 +920,114 @@ function handleSearch(params){
   return JSON.stringify({data:results});
 }
 
-// OPCIONES para selectores
 function handleOptions(){
-  const{headers,rows}=getHeadersAndRows();
-  function uniq(field){
-    const idx=headers.indexOf(field);if(idx<0)return[];
-    return[...new Set(rows.map(r=>String(r[idx]||'').trim()).filter(Boolean))].sort();
-  }
-  return JSON.stringify({
-    cols:headers,
-    anos:uniq('Ano').sort().reverse(),
-    cursos:uniq('Curso'),
-    notas:uniq('Nota'),
-    dictados:uniq('Dictado'),
-    fuerzas:uniq('Fuerza')
-  });
+  var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
+  function uniq(field){var idx=headers.indexOf(field);if(idx<0)return[];var s={};rows.forEach(function(r){var v=String(r[idx]||'').trim();if(v)s[v]=1;});return Object.keys(s).sort();}
+  return JSON.stringify({cols:headers,anos:uniq('Ano').sort().reverse(),cursos:uniq('Curso'),notas:uniq('Nota'),dictados:uniq('Dictado'),fuerzas:uniq('Fuerza')});
 }
 
-// FILTRO paginado
 function handleFilter(params){
-  const{headers,rows}=getHeadersAndRows();
-  const page=parseInt(params.page||'1'),pageSize=50;
-  const filters={'Ano':params.ano||'','Curso':params.curso||'','Nota':params.nota||'','Dictado':params.dictado||'','Fuerza':params.fuerza||''};
-  const filtered=rows.filter(row=>Object.entries(filters).every(([field,val])=>{
-    if(!val)return true;
-    const idx=headers.indexOf(field);
-    return idx>=0&&String(row[idx]||'').trim()===val;
-  }));
-  const total=filtered.length;
-  const pageRows=filtered.slice((page-1)*pageSize,page*pageSize).map(r=>rowToObj(headers,r));
-  return JSON.stringify({data:pageRows,total,page,pageSize,cols:headers});
+  var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
+  var page=parseInt(params.page||1),pageSize=50;
+  var filters={'Ano':(params.ano||''),'Curso':(params.curso||''),'Nota':(params.nota||''),'Dictado':(params.dictado||''),'Fuerza':(params.fuerza||'')};
+  var filtered=rows.filter(function(row){
+    return Object.keys(filters).every(function(field){
+      var val=filters[field];if(!val)return true;
+      var idx=headers.indexOf(field);
+      return idx>=0&&String(row[idx]||'').trim()===val;
+    });
+  });
+  var total=filtered.length;
+  var pageRows=filtered.slice((page-1)*pageSize,page*pageSize).map(function(r){return rowToObj(headers,r);});
+  return JSON.stringify({data:pageRows,total:total,page:page,pageSize:pageSize,cols:headers});
 }
 
-// HISTORIAL por DNI o apellido
 function handleHistorial(params){
-  const dni=String(params.dni||'').trim(),apellido=String(params.apellido||'').trim();
+  var dni=String(params.dni||'').trim(),apellido=String(params.apellido||'').trim();
   if(!dni&&!apellido)return JSON.stringify({data:[]});
-  const{headers,rows}=getHeadersAndRows();
-  const dniIdx=headers.indexOf('DNI'),apeIdx=headers.indexOf('Apellidos');
-  const regs=rows.filter(row=>dni?String(row[dniIdx]||'').trim()===dni:String(row[apeIdx]||'').trim()===apellido).map(r=>rowToObj(headers,r));
+  var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
+  var dniIdx=headers.indexOf('DNI'),apeIdx=headers.indexOf('Apellidos');
+  var regs=rows.filter(function(row){return dni?String(row[dniIdx]||'').trim()===dni:String(row[apeIdx]||'').trim()===apellido;}).map(function(r){return rowToObj(headers,r);});
   return JSON.stringify({data:regs,cols:headers});
 }
 
-// ESTADÍSTICAS completas + detalle por año
 function handleStats(){
-  const{headers,rows}=getHeadersAndRows();
-  const anoIdx=headers.indexOf('Ano');
-  const anos=[...new Set(rows.map(r=>String(r[anoIdx]||'').trim()).filter(Boolean))].sort();
-  const personas=new Set(rows.map(r=>String(r[headers.indexOf('DNI')]||r[headers.indexOf('Apellidos')]||'')).filter(Boolean)).size;
-  function countByField(src,field){
-    const idx=headers.indexOf(field);if(idx<0)return{};
-    const m={};src.forEach(r=>{const v=String(r[idx]||'').trim();if(v)m[v]=(m[v]||0)+1;});return m;
-  }
-  const global={
-    total:rows.length,personas,anos,
-    porAno:countByField(rows,'Ano'),porCurso:countByField(rows,'Curso'),
-    porJerarquia:countByField(rows,'Jerarquia'),porProvincia:countByField(rows,'Provincia/Pais'),
-    porBecado:countByField(rows,'Becado'),porFuerza:countByField(rows,'Fuerza'),
-    porDictado:countByField(rows,'Dictado'),nota:countByField(rows,'Nota')
-  };
-  const porAnoDetalle={};
-  anos.forEach(ano=>{
-    const subset=rows.filter(r=>String(r[anoIdx]||'').trim()===ano);
-    const personasAno=new Set(subset.map(r=>String(r[headers.indexOf('DNI')]||r[headers.indexOf('Apellidos')]||'')).filter(Boolean)).size;
-    porAnoDetalle[ano]={
-      total:subset.length,personas:personasAno,
-      porCurso:countByField(subset,'Curso'),porJerarquia:countByField(subset,'Jerarquia'),
-      porProvincia:countByField(subset,'Provincia/Pais'),porBecado:countByField(subset,'Becado'),
-      porFuerza:countByField(subset,'Fuerza'),porDictado:countByField(subset,'Dictado'),nota:countByField(subset,'Nota')
-    };
+  var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
+  var anoIdx=headers.indexOf('Ano');
+  var anosSet={};rows.forEach(function(r){var v=String(r[anoIdx]||'').trim();if(v)anosSet[v]=1;});
+  var anos=Object.keys(anosSet).sort();
+  var dniIdx=headers.indexOf('DNI'),apIdx=headers.indexOf('Apellidos');
+  var pSet={};rows.forEach(function(r){var v=String(r[dniIdx]||r[apIdx]||'');if(v)pSet[v]=1;});
+  function countBy(src,field){var idx=headers.indexOf(field);if(idx<0)return{};var m={};src.forEach(function(r){var v=String(r[idx]||'').trim();if(v)m[v]=(m[v]||0)+1;});return m;}
+  var global={total:rows.length,personas:Object.keys(pSet).length,anos:anos,
+    porAno:countBy(rows,'Ano'),porCurso:countBy(rows,'Curso'),porJerarquia:countBy(rows,'Jerarquia'),
+    porProvincia:countBy(rows,'Provincia/Pais'),porBecado:countBy(rows,'Becado'),
+    porFuerza:countBy(rows,'Fuerza'),porDictado:countBy(rows,'Dictado'),nota:countBy(rows,'Nota')};
+  var porAnoDetalle={};
+  anos.forEach(function(ano){
+    var subset=rows.filter(function(r){return String(r[anoIdx]||'').trim()===ano;});
+    var psub={};subset.forEach(function(r){var v=String(r[dniIdx]||r[apIdx]||'');if(v)psub[v]=1;});
+    porAnoDetalle[ano]={total:subset.length,personas:Object.keys(psub).length,
+      porCurso:countBy(subset,'Curso'),porJerarquia:countBy(subset,'Jerarquia'),
+      porProvincia:countBy(subset,'Provincia/Pais'),porBecado:countBy(subset,'Becado'),
+      porFuerza:countBy(subset,'Fuerza'),porDictado:countBy(subset,'Dictado'),nota:countBy(subset,'Nota')};
   });
   global.porAnoDetalle=porAnoDetalle;
   return JSON.stringify(global);
 }
 
-// DUPLICADOS por DNI+Curso+Ano
 function handleDuplicados(){
-  const{headers,rows}=getHeadersAndRows();
-  const dniIdx=headers.indexOf('DNI'),apeIdx=headers.indexOf('Apellidos'),nomIdx=headers.indexOf('Nombres');
-  const curIdx=headers.indexOf('Curso'),anoIdx=headers.indexOf('Ano');
-  const grupos={};
-  rows.forEach(row=>{
-    const dni=String(row[dniIdx]||'').trim(),ape=String(row[apeIdx]||'').trim(),nom=String(row[nomIdx]||'').trim();
-    const key=(dni||(ape+nom))+'||'+String(row[curIdx]||'').trim()+'||'+String(row[anoIdx]||'').trim();
+  var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
+  var dniIdx=headers.indexOf('DNI'),apeIdx=headers.indexOf('Apellidos');
+  var curIdx=headers.indexOf('Curso'),anoIdx=headers.indexOf('Ano');
+  var grupos={};
+  rows.forEach(function(row){
+    var dni=String(row[dniIdx]||'').trim(),ape=String(row[apeIdx]||'').trim();
+    var key=(dni||ape)+'||'+String(row[curIdx]||'').trim()+'||'+String(row[anoIdx]||'').trim();
     if(!grupos[key])grupos[key]=[];
     grupos[key].push(rowToObj(headers,row));
   });
-  const duplicados=Object.values(grupos).filter(g=>g.length>1);
-  return JSON.stringify({grupos:duplicados,cols:headers});
+  var dups=Object.keys(grupos).filter(function(k){return grupos[k].length>1;}).map(function(k){return grupos[k];});
+  return JSON.stringify({grupos:dups,cols:headers});
 }
 
-// DESCARGA paginada
 function handleGetPage(params){
-  const page=parseInt(params.page||'1'),pageSize=500;
-  const{headers,rows}=getHeadersAndRows();
-  const total=rows.length,totalPages=Math.ceil(total/pageSize);
-  const pageRows=rows.slice((page-1)*pageSize,page*pageSize).map(r=>rowToObj(headers,r));
-  return JSON.stringify({data:pageRows,total,totalPages,page,cols:headers});
+  var page=parseInt(params.page||1),pageSize=500;
+  var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
+  var total=rows.length,totalPages=Math.ceil(total/pageSize);
+  var pageRows=rows.slice((page-1)*pageSize,page*pageSize).map(function(r){return rowToObj(headers,r);});
+  return JSON.stringify({data:pageRows,total:total,totalPages:totalPages,page:page,cols:headers});
 }
 
 function doPost(e){
-  let body;
+  var body;
   try{body=JSON.parse(e.postData.contents);}catch(err){body=JSON.parse(e.parameter.payload||'{}');}
-  const sheet=getSheet();
-  const rows=sheet.getDataRange().getValues();
-  const headers=rows[0].map(h=>String(h).trim());
-  const ordIdx=headers.indexOf('Ord');
+  var sheet=getSheet();
+  var rows=sheet.getDataRange().getValues();
+  var headers=rows[0].map(function(h){return String(h).trim();});
+  var ordIdx=headers.indexOf('Ord');
+  var ss=SpreadsheetApp.getActiveSpreadsheet();
+  var idx=ss.getSheetByName('Indice');
   if(body.action==='save'){
-    const cls=body.cols||headers;
-    sheet.appendRow(cls.map(c=>body.data[c]!==undefined?body.data[c]:''));
-    // Invalidar índice al agregar
-    const ss=SpreadsheetApp.getActiveSpreadsheet();
-    const idx=ss.getSheetByName('Indice');
+    var cls=body.cols||headers;
+    sheet.appendRow(cls.map(function(c){return body.data[c]!==undefined?body.data[c]:'';}));
     if(idx)idx.getRange(1,1).setValue(0);
   }else if(body.action==='update'){
-    const ord=String(body.data['Ord']||'');
-    for(let i=1;i<rows.length;i++){
+    var ord=String(body.data['Ord']||'');
+    for(var i=1;i<rows.length;i++){
       if(String(rows[i][ordIdx])===ord){
-        headers.forEach((h,j)=>{if(body.data[h]!==undefined)sheet.getRange(i+1,j+1).setValue(body.data[h]||'');});break;
+        headers.forEach(function(h,j){if(body.data[h]!==undefined)sheet.getRange(i+1,j+1).setValue(body.data[h]||'');});
+        break;
       }
     }
-    const ss=SpreadsheetApp.getActiveSpreadsheet();
-    const idx=ss.getSheetByName('Indice');
     if(idx)idx.getRange(1,1).setValue(0);
   }else if(body.action==='delete'){
-    const ord=String(body.id||'');
-    for(let i=1;i<rows.length;i++){
-      if(String(rows[i][ordIdx])===ord){sheet.deleteRow(i+1);break;}
-    }
-    const ss=SpreadsheetApp.getActiveSpreadsheet();
-    const idx=ss.getSheetByName('Indice');
+    var ord2=String(body.id||'');
+    for(var j=1;j<rows.length;j++){if(String(rows[j][ordIdx])===ord2){sheet.deleteRow(j+1);break;}}
     if(idx)idx.getRange(1,1).setValue(0);
   }
   return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
-}`;
-}
+}</textarea>
 
-/script>
 </body>
 </html>

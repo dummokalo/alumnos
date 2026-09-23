@@ -178,16 +178,16 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
         <div class="flex g8" style="align-items:center;flex-wrap:wrap">
           <span style="font-size:14px;font-weight:500">Ver:</span>
           <select id="s-selector" onchange="renderChart(null)" style="width:auto;min-width:200px">
-            <option value="porCurso">Top Cursos</option>
-            <option value="porDictado">Por Dictado</option>
-            <option value="porAno">Por Año</option>
+            <option value="porCurso">Top cursos</option>
+            <option value="porDictado">Por dictado</option>
+            <option value="porAno">Por año</option>
             <option value="nota">Nota</option>
-            <option value="porJerarquia">Por Jerarquía</option>
-            <option value="porProvincia">Por Provincia/País</option>
+            <option value="porJerarquia">Por jerarquía</option>
+            <option value="porProvincia">Por provincia/país</option>
             <option value="porBecado">Becados</option>
-            <option value="porFuerza">Por Fuerza</option>
+            <option value="porFuerza">Por fuerza</option>
           </select>
-          <span style="font-size:14px;font-weight:500">Ano:</span>
+          <span style="font-size:14px;font-weight:500">Año:</span>
           <select id="s-fano" onchange="renderStats()" style="width:auto"><option value="">Todos</option></select>
           <span id="s-count" class="tm"></span>
           <button class="btn btnsm" onclick="downloadCurrentChart()" style="margin-left:auto">Descargar</button>
@@ -264,8 +264,8 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
 <script>
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzoqiGArbaxuMziOiiJ-s5oVLdzoKhSPieuTwdH5CwzUEzxNB5Y_UCi9IzT-SVs-yjk/exec';
 var EDITOR_PWD = 'ADMIN123';
-var PERSONA_COLS = ['Apellidos','Nombres','DNI','Jerarquia','Destino','Telefono','Mail','Provincia/Pais','Fuerza'];
-var COL_DNI='DNI', COL_CURSO='Curso', COL_ANO='Ano', COL_NOTA='Nota', COL_NOTA_NUM='Nota numerica', COL_BECADO='Becado';
+var PERSONA_COLS = ['Apellidos','Nombres','DNI','Jerarquía','Destino','Teléfono','Mail','Provincia/País','Fuerza'];
+var COL_DNI='DNI', COL_CURSO='Curso', COL_ANO='Año', COL_NOTA='Nota', COL_NOTA_NUM='Nota numérica', COL_BECADO='Becado';
 var CLRS=['#185FA5','#3B6D11','#BA7517','#A32D2D','#1D9E75','#534AB7','#D85A30','#639922'];
 
 var isEditor=false, cols=[], editIdx=null, historialData=null, addingFor=null;
@@ -387,7 +387,7 @@ function filterPage(d){ applyFilter(filterCurrentPage + d); }
 
 function renderFilterResults(data, total, page, pageSize){
   if(!data.length){ document.getElementById('filter-results').innerHTML='<div class="estate">Sin resultados.</div>'; document.getElementById('filter-pagination').style.display='none'; return; }
-  var dc = cols.filter(function(c){ return ['Apellidos','Nombres','DNI','Curso','Ano','Nota','Nota numerica','Jerarquia','Becado'].indexOf(c) >= 0; });
+  var dc = cols.filter(function(c){ return ['Apellidos','Nombres','DNI','Curso','Año','Nota','Nota numérica','Jerarquía','Becado'].indexOf(c) >= 0; });
   var html = '<div class="twrap"><table><thead><tr>';
   dc.forEach(function(c){ html += '<th>' + c + '</th>'; });
   html += '<th>Acciones</th></tr></thead><tbody>';
@@ -667,7 +667,7 @@ function renderChart(stats){
 
   var dataMap = {porCurso:stats.porCurso, porDictado:stats.porDictado, porAno:stats.porAno, nota:stats.nota, porJerarquia:stats.porJerarquia, porProvincia:stats.porProvincia, porBecado:stats.porBecado, porFuerza:stats.porFuerza};
   var rawData = dataMap[sel] || {};
-  var titles = {porCurso:'Top Cursos',porDictado:'Por Dictado',porAno:'Por Año',nota:'Nota',porJerarquia:'Por Jerarquía',porProvincia:'Por Provincia/País',porBecado:'Becados',porFuerza:'Por fuerza'};
+  var titles = {porCurso:'Top cursos',porDictado:'Por dictado',porAno:'Por año',nota:'Nota',porJerarquia:'Por jerarquía',porProvincia:'Por provincia/país',porBecado:'Becados',porFuerza:'Por fuerza'};
   var horiz = sel!=='porAno';
 
   if(isTbl){
@@ -923,13 +923,13 @@ function handleSearch(params){
 function handleOptions(){
   var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
   function uniq(field){var idx=headers.indexOf(field);if(idx<0)return[];var s={};rows.forEach(function(r){var v=String(r[idx]||'').trim();if(v)s[v]=1;});return Object.keys(s).sort();}
-  return JSON.stringify({cols:headers,anos:uniq('Ano').sort().reverse(),cursos:uniq('Curso'),notas:uniq('Nota'),dictados:uniq('Dictado'),fuerzas:uniq('Fuerza')});
+  return JSON.stringify({cols:headers,anos:uniq('Año').sort().reverse(),cursos:uniq('Curso'),notas:uniq('Nota'),dictados:uniq('Dictado'),fuerzas:uniq('Fuerza')});
 }
 
 function handleFilter(params){
   var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
   var page=parseInt(params.page||1),pageSize=50;
-  var filters={'Ano':(params.ano||''),'Curso':(params.curso||''),'Nota':(params.nota||''),'Dictado':(params.dictado||''),'Fuerza':(params.fuerza||'')};
+  var filters={'Año':(params.ano||''),'Curso':(params.curso||''),'Nota':(params.nota||''),'Dictado':(params.dictado||''),'Fuerza':(params.fuerza||'')};
   var filtered=rows.filter(function(row){
     return Object.keys(filters).every(function(field){
       var val=filters[field];if(!val)return true;
@@ -953,23 +953,23 @@ function handleHistorial(params){
 
 function handleStats(){
   var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
-  var anoIdx=headers.indexOf('Ano');
+  var anoIdx=headers.indexOf('Año');
   var anosSet={};rows.forEach(function(r){var v=String(r[anoIdx]||'').trim();if(v)anosSet[v]=1;});
   var anos=Object.keys(anosSet).sort();
   var dniIdx=headers.indexOf('DNI'),apIdx=headers.indexOf('Apellidos');
   var pSet={};rows.forEach(function(r){var v=String(r[dniIdx]||r[apIdx]||'');if(v)pSet[v]=1;});
   function countBy(src,field){var idx=headers.indexOf(field);if(idx<0)return{};var m={};src.forEach(function(r){var v=String(r[idx]||'').trim();if(v)m[v]=(m[v]||0)+1;});return m;}
   var global={total:rows.length,personas:Object.keys(pSet).length,anos:anos,
-    porAno:countBy(rows,'Ano'),porCurso:countBy(rows,'Curso'),porJerarquia:countBy(rows,'Jerarquia'),
-    porProvincia:countBy(rows,'Provincia/Pais'),porBecado:countBy(rows,'Becado'),
+    porAno:countBy(rows,'Año'),porCurso:countBy(rows,'Curso'),porJerarquia:countBy(rows,'Jerarquía'),
+    porProvincia:countBy(rows,'Provincia/País'),porBecado:countBy(rows,'Becado'),
     porFuerza:countBy(rows,'Fuerza'),porDictado:countBy(rows,'Dictado'),nota:countBy(rows,'Nota')};
   var porAnoDetalle={};
   anos.forEach(function(ano){
     var subset=rows.filter(function(r){return String(r[anoIdx]||'').trim()===ano;});
     var psub={};subset.forEach(function(r){var v=String(r[dniIdx]||r[apIdx]||'');if(v)psub[v]=1;});
     porAnoDetalle[ano]={total:subset.length,personas:Object.keys(psub).length,
-      porCurso:countBy(subset,'Curso'),porJerarquia:countBy(subset,'Jerarquia'),
-      porProvincia:countBy(subset,'Provincia/Pais'),porBecado:countBy(subset,'Becado'),
+      porCurso:countBy(subset,'Curso'),porJerarquia:countBy(subset,'Jerarquía'),
+      porProvincia:countBy(subset,'Provincia/País'),porBecado:countBy(subset,'Becado'),
       porFuerza:countBy(subset,'Fuerza'),porDictado:countBy(subset,'Dictado'),nota:countBy(subset,'Nota')};
   });
   global.porAnoDetalle=porAnoDetalle;
@@ -979,7 +979,7 @@ function handleStats(){
 function handleDuplicados(){
   var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
   var dniIdx=headers.indexOf('DNI'),apeIdx=headers.indexOf('Apellidos');
-  var curIdx=headers.indexOf('Curso'),anoIdx=headers.indexOf('Ano');
+  var curIdx=headers.indexOf('Curso'),anoIdx=headers.indexOf('Año');
   var grupos={};
   rows.forEach(function(row){
     var dni=String(row[dniIdx]||'').trim(),ape=String(row[apeIdx]||'').trim();

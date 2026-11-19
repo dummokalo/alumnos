@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestion de Alumnos</title>
+<title>Gestión de Alumnos</title>
 <style>
 :root{--p:#185FA5;--pl:#E6F1FB;--pd:#0C447C;--ok:#3B6D11;--okl:#EAF3DE;--err:#A32D2D;--errl:#FCEBEB;--warn:#BA7517;--warnl:#FAEEDA;--g:#5F5E5A;--gl:#F1EFE8;--t:#2C2C2A;--tm:#888780;--bg:#fff;--bg2:#F1EFE8;--bd:#D3D1C7;--r:8px;--rl:12px}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -78,6 +78,17 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
 .info-box{padding:.6rem .75rem;background:var(--pl);border-radius:var(--r);font-size:13px;color:var(--pd);margin-bottom:1rem}
 .dup-group{margin-bottom:1.5rem;border:.5px solid var(--errl);border-radius:var(--r);overflow:hidden}
 .dup-hdr{background:var(--errl);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.ms{position:relative;display:inline-block}
+.ms-btn{border:.5px solid var(--bd);border-radius:var(--r);padding:7px 10px;font-size:14px;background:var(--bg);color:var(--t);cursor:pointer;font-family:inherit;min-width:140px;max-width:230px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:auto}
+.ms-btn.active{border-color:var(--p);background:var(--pl);color:var(--pd)}
+.ms-panel{display:none;position:absolute;top:calc(100% + 4px);left:0;min-width:250px;max-width:360px;background:var(--bg);border:.5px solid var(--bd);border-radius:var(--r);z-index:60;box-shadow:0 4px 16px rgba(0,0,0,.12);padding:8px}
+.ms.open .ms-panel{display:block}
+.ms-list{max-height:240px;overflow-y:auto;margin-top:6px}
+.ms-opt{display:flex;align-items:center;gap:8px;padding:5px 4px;font-size:13px;cursor:pointer;border-radius:4px;text-transform:none;letter-spacing:0;font-weight:400;color:var(--t)}
+.ms-opt:hover{background:var(--pl)}
+.ms-opt input{width:auto;margin:0}
+.ms-top{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12px}
+.ms-top a{color:var(--p);cursor:pointer}
 @media(max-width:600px){.fgrid{grid-template-columns:1fr};main{padding:1rem}}
 </style>
 </head>
@@ -87,14 +98,14 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
   <div class="lbox">
     <h2 style="margin-bottom:1.25rem;font-size:17px">Acceso editor</h2>
     <div class="fg" style="margin-bottom:1rem">
-      <label>Contrasena</label>
-      <input type="password" id="pwdi" placeholder="Ingresa la contrasena">
+      <label>Contraseña</label>
+      <input type="password" id="pwdi" placeholder="Ingresa la contraseña">
     </div>
     <div class="flex g8">
       <button class="btn btnp" style="flex:1" onclick="checkPwd()">Ingresar</button>
       <button class="btn" onclick="closeLogin()">Cancelar</button>
     </div>
-    <p id="pwderr" style="color:var(--err);font-size:13px;margin-top:8px;display:none">Contrasena incorrecta.</p>
+    <p id="pwderr" style="color:var(--err);font-size:13px;margin-top:8px;display:none">Contraseña incorrecta.</p>
   </div>
 </div>
 
@@ -122,16 +133,16 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
 
 <div id="app">
   <header>
-    <h1>Gestion de Alumnos</h1>
+    <h1>Gestión de Alumnos</h1>
     <span class="rbadge" id="rbadge">Solo lectura</span>
     <button class="btn btnsm" id="rbtn" style="font-size:12px" onclick="toggleRole()">Ingresar como editor</button>
   </header>
   <nav>
     <button class="active" onclick="showTab('alumnos',this)">Alumnos</button>
-    <button onclick="showTab('estadisticas',this)">Estadisticas</button>
+    <button onclick="showTab('estadisticas',this)">Estadísticas</button>
     <button onclick="showTab('duplicados',this)">Duplicados</button>
     <button onclick="showTab('descargar',this)">Descargar</button>
-    <button onclick="showTab('config',this)">Configuracion</button>
+    <button onclick="showTab('config',this)">Configuración</button>
   </nav>
   <main>
 
@@ -150,16 +161,18 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
           <div class="flex g8" style="flex-wrap:wrap">
             <button class="btn btnsm btnp" onclick="applyFilter()">Buscar</button>
             <button class="btn btnsm" onclick="clearFilter()">Limpiar</button>
+            <button class="btn btnsm" id="fdl-btn" onclick="downloadFiltered()">Descargar</button>
             <button class="btn btnsm btnp editor-only" style="display:none" onclick="openModalNuevo()">+ Agregar</button>
           </div>
         </div>
         <div class="filters">
-          <select id="fano" style="width:auto"><option value="">Todos los anos</option></select>
-          <select id="fcurso" style="width:auto;max-width:200px"><option value="">Todos los cursos</option></select>
-          <select id="fnota" style="width:auto"><option value="">Todas las notas</option></select>
-          <select id="fdictado" style="width:auto;max-width:180px"><option value="">Todos los dictados</option></select>
-          <select id="ffuerza" style="width:auto;max-width:180px"><option value="">Todas las fuerzas</option></select>
+          <div class="ms" id="ms-fano"></div>
+          <div class="ms" id="ms-fcurso"></div>
+          <div class="ms" id="ms-fnota"></div>
+          <div class="ms" id="ms-fdictado"></div>
+          <div class="ms" id="ms-ffuerza"></div>
         </div>
+        <div id="fdl-progress" style="display:none;margin-bottom:1rem"><p class="tm" id="fdl-msg"></p><div class="progress-bar"><div class="progress-fill" id="fdl-fill" style="width:0%"></div></div></div>
         <div id="filter-results"><div class="estate">Usa el buscador o los filtros para ver registros.</div></div>
         <div id="filter-pagination" style="display:none;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:8px">
           <span class="tm" id="filter-count"></span>
@@ -183,12 +196,16 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
             <option value="porAno">Por año</option>
             <option value="nota">Nota</option>
             <option value="porJerarquia">Por jerarquía</option>
+            <option value="porEscuela">Por escuela</option>
             <option value="porProvincia">Por provincia/país</option>
             <option value="porBecado">Becados</option>
             <option value="porFuerza">Por fuerza</option>
           </select>
-          <span style="font-size:14px;font-weight:500">Año:</span>
-          <select id="s-fano" onchange="renderStats()" style="width:auto"><option value="">Todos</option></select>
+          <div class="ms" id="ms-sano"></div>
+          <div class="ms" id="ms-sdictado"></div>
+          <div class="ms" id="ms-sescuela"></div>
+          <button class="btn btnsm btnp" onclick="loadStats()">Aplicar</button>
+          <button class="btn btnsm" onclick="clearStatsFilters()">Limpiar</button>
           <span id="s-count" class="tm"></span>
           <button class="btn btnsm" onclick="downloadCurrentChart()" style="margin-left:auto">Descargar</button>
         </div>
@@ -209,18 +226,18 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
         <div class="arow">
           <div>
             <div class="card-title" style="margin:0">Registros duplicados</div>
-            <p class="tm" style="margin-top:4px">Mismo DNI + Curso + Ano.</p>
+            <p class="tm" style="margin-top:4px">Dos listas: mismo DNI + Curso + Año, y DNI compartido por personas distintas. Puedes editar o eliminar cualquier registro (solo editores).</p>
           </div>
           <button class="btn btnsm" onclick="loadDuplicados()">Actualizar</button>
         </div>
-        <div id="dup-content"><div class="estate">Carga los duplicados con el boton Actualizar.</div></div>
+        <div id="dup-content"><div class="estate">Carga los duplicados con el botón Actualizar.</div></div>
       </div>
     </div>
 
     <div id="tab-descargar" style="display:none">
       <div class="card">
         <div class="card-title">Descargar base completa</div>
-        <div class="info-box">Tambien podes descargar directamente desde Google Sheets: Archivo &rarr; Descargar &rarr; Microsoft Excel (.xlsx)</div>
+        <div class="info-box">También puedes descargar directamente desde Google Sheets: Archivo &rarr; Descargar &rarr; Microsoft Excel (.xlsx)</div>
         <button class="btn btnp" id="dl-btn" onclick="startDownload()">Descargar Excel completo</button>
         <div id="dl-progress" style="display:none;margin-top:1rem">
           <p class="tm" id="dl-msg"></p>
@@ -231,7 +248,7 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
 
     <div id="tab-config" style="display:none">
       <div class="card">
-        <div class="card-title">Conexion con Google Sheets</div>
+        <div class="card-title">Conexión con Google Sheets</div>
         <div class="csect">
           <h3>URL del Apps Script</h3>
           <div class="flex g8" style="margin-bottom:.75rem">
@@ -242,16 +259,16 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
         <div class="csect">
           <h3>Instrucciones</h3>
           <div class="step"><div class="snum">1</div><p>En tu Google Sheet: Extensiones &rarr; Apps Script</p></div>
-          <div class="step"><div class="snum">2</div><p>Borra todo y pega el codigo de abajo.</p></div>
-          <div class="step"><div class="snum">3</div><p>Implementar &rarr; Nueva implementacion &rarr; Aplicacion web &rarr; Cualquier usuario</p></div>
-          <div class="step"><div class="snum">4</div><p>Copia la URL y pegala arriba.</p></div>
+          <div class="step"><div class="snum">2</div><p>Borra todo y pega el código de abajo.</p></div>
+          <div class="step"><div class="snum">3</div><p>Implementar &rarr; Nueva implementación &rarr; Aplicación web &rarr; Cualquier usuario</p></div>
+          <div class="step"><div class="snum">4</div><p>Copia la URL y pégala arriba.</p></div>
           <code id="ascode-display"></code>
-          <button class="btn" style="margin-top:8px" onclick="copyScript()">Copiar codigo</button>
+          <button class="btn" style="margin-top:8px" onclick="copyScript()">Copiar código</button>
         </div>
       </div>
       <div class="card editor-only" style="display:none">
-        <div class="card-title">Contrasena de editor</div>
-        <div class="flex g8"><input type="password" id="npwd" placeholder="Nueva contrasena" style="flex:1;width:auto"><button class="btn btnp" onclick="changePwd()">Cambiar</button></div>
+        <div class="card-title">Contraseña de editor</div>
+        <div class="flex g8"><input type="password" id="npwd" placeholder="Nueva contraseña" style="flex:1;width:auto"><button class="btn btnp" onclick="changePwd()">Cambiar</button></div>
       </div>
     </div>
 
@@ -262,9 +279,9 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzoqiGArbaxuMziOiiJ-s5oVLdzoKhSPieuTwdH5CwzUEzxNB5Y_UCi9IzT-SVs-yjk/exec';
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw66tzXyXlO5tGAv_M0ffrp7Mn4O_0RU9a8GmHDxVs-RmXfEG5Ps8M-nwkhVcw43KA4/exec';
 var EDITOR_PWD = 'ADMIN123';
-var PERSONA_COLS = ['Apellidos','Nombres','DNI','Jerarquía','Destino','Teléfono','Mail','Provincia/País','Fuerza'];
+var PERSONA_COLS = ['Apellidos','Nombres','DNI','Jerarquía','Escuela','Destino','Teléfono','Mail','Provincia/País','Fuerza'];
 var COL_DNI='DNI', COL_CURSO='Curso', COL_ANO='Año', COL_NOTA='Nota', COL_NOTA_NUM='Nota numérica', COL_BECADO='Becado';
 var CLRS=['#185FA5','#3B6D11','#BA7517','#A32D2D','#1D9E75','#534AB7','#D85A30','#639922'];
 
@@ -273,6 +290,9 @@ var filterCurrentPage=1, statsRaw=null, _flushing=false;
 var CH={};
 
 window.onload = function() {
+  msInit('ms-fano','Año'); msInit('ms-fcurso','Curso'); msInit('ms-fnota','Nota'); msInit('ms-fdictado','Dictado'); msInit('ms-ffuerza','Fuerza');
+  msInit('ms-sano','Año'); msInit('ms-sdictado','Dictado'); msInit('ms-sescuela','Escuela');
+  document.addEventListener('click', function(e){ if(!e.target.closest('.ms')) msCloseAll(); });
   document.getElementById('pwdi').addEventListener('keydown', function(e){ if(e.key==='Enter') checkPwd(); });
   var u = localStorage.getItem('script-url') || SCRIPT_URL;
   if(u && u !== 'PEGAR_URL_AQUI') {
@@ -306,6 +326,7 @@ function updateRoleUI(){
   document.getElementById('rbadge').style.background = isEditor ? 'rgba(59,109,17,.4)' : 'rgba(255,255,255,.2)';
   document.getElementById('rbtn').textContent = isEditor ? 'Salir como editor' : 'Ingresar como editor';
   document.querySelectorAll('.editor-only').forEach(function(el){ el.style.display = isEditor ? '' : 'none'; });
+  if(dupData) renderDup();
 }
 
 function jsonp(url, onSuccess, onError){
@@ -333,15 +354,72 @@ function searchPersona(q){
     jsonp(u + '?action=search&q=' + encodeURIComponent(q) + '&limit=15', function(j){
       if(!j || !j.data || !j.data.length){ box.innerHTML='<div class="sri" style="color:var(--tm)">Sin resultados.</div>'; return; }
       box.innerHTML = j.data.map(function(p){
-        return '<div class="sri" onclick="openHistorial(\'' + escQ(String(p.DNI||'')) + '\',\'' + escQ(p.Apellidos||'') + '\');clearPS()">' +
+        var warn = p.compartido ? ' <span style="color:var(--err);font-weight:500">&#9888; DNI compartido con otra persona</span>' : '';
+        return '<div class="sri" onclick="openHistorial(\'' + escQ(String(p.DNI||'')) + '\',\'' + escQ(p.Apellidos||'') + '\',\'' + escQ(p.Nombres||'') + '\');clearPS()">' +
           '<div class="sri-name">' + (p.Apellidos||'') + ', ' + (p.Nombres||'') + '</div>' +
-          '<div class="sri-sub">DNI: ' + (p.DNI||'-') + ' &middot; ' + ((p.cursos||[]).join(', ')||'Sin cursos') + '</div></div>';
+          '<div class="sri-sub">DNI: ' + (p.DNI||'-') + ' &middot; ' + ((p.cursos||[]).join(', ')||'Sin cursos') + warn + '</div></div>';
       }).join('');
     }, function(){ box.innerHTML='<div class="sri" style="color:var(--err)">Error. Intenta de nuevo.</div>'; });
   }, 800);
 }
 function hideSR(){ document.getElementById('sr').style.display='none'; }
 function clearPS(){ document.getElementById('psearch').value=''; hideSR(); }
+
+var MS = {};
+function msInit(id, label){
+  var root = document.getElementById(id); if(!root) return;
+  MS[id] = {label: label, options: [], sel: {}, q: ''};
+  root.innerHTML = '<button type="button" class="ms-btn" onclick="msToggle(\'' + id + '\')"></button>' +
+    '<div class="ms-panel">' +
+    '<input type="text" placeholder="Buscar..." oninput="msSearch(\'' + id + '\',this.value)">' +
+    '<div class="ms-top"><span class="tm">Marca una o varias</span><a onclick="msClear(\'' + id + '\')">Quitar selección</a></div>' +
+    '<div class="ms-list"></div></div>';
+  msRefresh(id);
+}
+function msSetOptions(id, arr){
+  var m = MS[id]; if(!m) return;
+  m.options = (arr || []).map(function(v){ return String(v); });
+  var keep = {};
+  m.options.forEach(function(v){ if(m.sel[v]) keep[v] = true; });
+  m.sel = keep;
+  msRenderList(id);
+  msRefresh(id);
+}
+function msRenderList(id){
+  var m = MS[id]; var root = document.getElementById(id); if(!m || !root) return;
+  var q = m.q.toLowerCase();
+  var html = '';
+  m.options.forEach(function(v, i){
+    if(q && v.toLowerCase().indexOf(q) < 0) return;
+    html += '<label class="ms-opt"><input type="checkbox" data-i="' + i + '"' + (m.sel[v] ? ' checked' : '') + ' onchange="msCheck(\'' + id + '\',this)"><span>' + escHtml(v) + '</span></label>';
+  });
+  root.querySelector('.ms-list').innerHTML = html || '<div class="tm" style="padding:6px 4px">Sin opciones</div>';
+}
+function msCheck(id, el){
+  var m = MS[id]; var v = m.options[+el.getAttribute('data-i')];
+  if(el.checked) m.sel[v] = true; else delete m.sel[v];
+  msRefresh(id);
+}
+function msSearch(id, q){ MS[id].q = q || ''; msRenderList(id); }
+function msClear(id){ if(!MS[id]) return; MS[id].sel = {}; msRenderList(id); msRefresh(id); }
+function msClearAll(ids){ ids.forEach(function(i){ msClear(i); }); }
+function msRefresh(id){
+  var m = MS[id]; var root = document.getElementById(id); if(!m || !root) return;
+  var vals = Object.keys(m.sel);
+  var btn = root.querySelector('.ms-btn');
+  var txt = vals.length === 0 ? 'Todos' : (vals.length === 1 ? vals[0] : vals.length + ' seleccionados');
+  btn.textContent = m.label + ': ' + txt;
+  btn.title = vals.join(', ');
+  btn.className = 'ms-btn' + (vals.length ? ' active' : '');
+}
+function msToggle(id){
+  var root = document.getElementById(id); var wasOpen = root.classList.contains('open');
+  msCloseAll();
+  if(!wasOpen) root.classList.add('open');
+}
+function msCloseAll(){ document.querySelectorAll('.ms.open').forEach(function(el){ el.classList.remove('open'); }); }
+function msVals(id){ return MS[id] ? Object.keys(MS[id].sel) : []; }
+function msParam(id){ return msVals(id).join('|'); }
 
 function loadFilterOptions(){
   var u = getUrl(); if(!u || u==='PEGAR_URL_AQUI') return;
@@ -352,42 +430,49 @@ function loadFilterOptions(){
   });
 }
 function populateSelects(uv){
-  var map = {fano:'anos', fcurso:'cursos', fnota:'notas', fdictado:'dictados', ffuerza:'fuerzas'};
-  var labels = {fano:'Todos los anos', fcurso:'Todos los cursos', fnota:'Todas las notas', fdictado:'Todos los dictados', ffuerza:'Todas las fuerzas'};
-  Object.keys(map).forEach(function(id){
-    var sel = document.getElementById(id); if(!sel || !uv[map[id]]) return;
-    var cur = sel.value;
-    sel.innerHTML = '<option value="">' + labels[id] + '</option>' + uv[map[id]].map(function(v){ return '<option' + (v==cur?' selected':'') + '>' + v + '</option>'; }).join('');
-    if(cur) sel.value = cur;
-  });
+  msSetOptions('ms-fano', uv.anos); msSetOptions('ms-fcurso', uv.cursos); msSetOptions('ms-fnota', uv.notas);
+  msSetOptions('ms-fdictado', uv.dictados); msSetOptions('ms-ffuerza', uv.fuerzas);
+  msSetOptions('ms-sano', uv.anos); msSetOptions('ms-sdictado', uv.dictados); msSetOptions('ms-sescuela', uv.escuelas);
 }
 
+var lastFp = '';
+function filterParams(){
+  return '&ano=' + encodeURIComponent(msParam('ms-fano')) +
+    '&curso=' + encodeURIComponent(msParam('ms-fcurso')) +
+    '&nota=' + encodeURIComponent(msParam('ms-fnota')) +
+    '&dictado=' + encodeURIComponent(msParam('ms-fdictado')) +
+    '&fuerza=' + encodeURIComponent(msParam('ms-ffuerza'));
+}
 function applyFilter(page){
+  if(!page){
+    lastFp = filterParams();
+    if(lastFp.length > 6500){ toast('Elegiste demasiados valores. Quita algunos o deja el filtro en Todos.'); return; }
+  }
   filterCurrentPage = page || 1;
   var u = getUrl(); if(!u || u==='PEGAR_URL_AQUI'){ toast('Configura la URL primero.'); return; }
-  var params = 'action=filter&page=' + filterCurrentPage +
-    '&ano=' + encodeURIComponent(document.getElementById('fano').value) +
-    '&curso=' + encodeURIComponent(document.getElementById('fcurso').value) +
-    '&nota=' + encodeURIComponent(document.getElementById('fnota').value) +
-    '&dictado=' + encodeURIComponent(document.getElementById('fdictado').value) +
-    '&fuerza=' + encodeURIComponent(document.getElementById('ffuerza').value);
   document.getElementById('filter-results').innerHTML = '<div class="estate">Cargando...<span class="spin"></span></div>';
-  jsonp(u + '?' + params, function(j){
+  jsonp(u + '?action=filter&page=' + filterCurrentPage + lastFp, function(j){
     if(!j || !j.data){ document.getElementById('filter-results').innerHTML='<div class="estate">Error al cargar.</div>'; return; }
     if(j.cols) cols = j.cols;
     renderFilterResults(j.data, j.total, j.page, j.pageSize);
-  }, function(){ document.getElementById('filter-results').innerHTML='<div class="estate">Error de conexion.</div>'; });
+  }, function(){ document.getElementById('filter-results').innerHTML='<div class="estate">Error de conexión.</div>'; });
 }
 function clearFilter(){
-  ['fano','fcurso','fnota','fdictado','ffuerza'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  msClearAll(['ms-fano','ms-fcurso','ms-fnota','ms-fdictado','ms-ffuerza']);
+  lastFp = '';
   document.getElementById('filter-results').innerHTML = '<div class="estate">Usa el buscador o los filtros para ver registros.</div>';
   document.getElementById('filter-pagination').style.display = 'none';
+}
+function downloadFiltered(){
+  var fp = filterParams();
+  if(fp.length > 6500){ toast('Elegiste demasiados valores. Quita algunos o deja el filtro en Todos.'); return; }
+  downloadPaged(fp, 'alumnos_filtrado.xlsx', {btn:'fdl-btn', box:'fdl-progress', msg:'fdl-msg', fill:'fdl-fill'});
 }
 function filterPage(d){ applyFilter(filterCurrentPage + d); }
 
 function renderFilterResults(data, total, page, pageSize){
   if(!data.length){ document.getElementById('filter-results').innerHTML='<div class="estate">Sin resultados.</div>'; document.getElementById('filter-pagination').style.display='none'; return; }
-  var dc = cols.filter(function(c){ return ['Apellidos','Nombres','DNI','Curso','Año','Nota','Nota numérica','Jerarquía','Becado'].indexOf(c) >= 0; });
+  var dc = cols.filter(function(c){ return ['Apellidos','Nombres','DNI','Curso','Año','Nota','Nota numérica','Jerarquía','Escuela','Becado'].indexOf(c) >= 0; });
   var html = '<div class="twrap"><table><thead><tr>';
   dc.forEach(function(c){ html += '<th>' + c + '</th>'; });
   html += '<th>Acciones</th></tr></thead><tbody>';
@@ -400,7 +485,7 @@ function renderFilterResults(data, total, page, pageSize){
       else if(c===COL_BECADO && v) v = '<span class="badge ' + (String(v).toLowerCase()==='si'?'bok':'bgray') + '">' + v + '</span>';
       html += '<td title="' + escHtml(a[c]||'') + '">' + v + '</td>';
     });
-    html += '<td><button class="bico" onclick="openHistorial(\'' + escQ(String(a[COL_DNI]||'')) + '\',\'' + escQ(a['Apellidos']||'') + '\')">&#128065;</button>';
+    html += '<td><button class="bico" onclick="openHistorial(\'' + escQ(String(a[COL_DNI]||'')) + '\',\'' + escQ(a['Apellidos']||'') + '\',\'' + escQ(a['Nombres']||'') + '\')">&#128065;</button>';
     if(isEditor) html += ' <button class="bico" onclick="openModalEdit(\'' + escQ(JSON.stringify(a)) + '\')">&#9999;</button>';
     html += '</td></tr>';
   });
@@ -414,17 +499,22 @@ function renderFilterResults(data, total, page, pageSize){
   document.getElementById('fnext').disabled = page >= tp;
 }
 
-function openHistorial(dni, apellido){
+function histParams(dni, apellido, nombre){
+  return 'action=gethistorial' + (dni ? '&dni=' + encodeURIComponent(dni) : '') +
+    (apellido ? '&apellido=' + encodeURIComponent(apellido) : '') +
+    (nombre ? '&nombre=' + encodeURIComponent(nombre) : '');
+}
+function openHistorial(dni, apellido, nombre){
   var u = getUrl(); if(!u || u==='PEGAR_URL_AQUI'){ toast('Configura la URL primero.'); return; }
   document.getElementById('hcontent').innerHTML = '<div class="estate">Cargando...<span class="spin"></span></div>';
   document.getElementById('hmodal').classList.add('open');
   document.querySelectorAll('#hmodal .editor-only').forEach(function(el){ el.style.display = isEditor ? '' : 'none'; });
-  var params = dni ? 'action=gethistorial&dni=' + encodeURIComponent(dni) : 'action=gethistorial&apellido=' + encodeURIComponent(apellido);
+  var params = histParams(dni, apellido, nombre);
   jsonp(u + '?' + params, function(j){
     if(!j || !j.data || !j.data.length){ document.getElementById('hcontent').innerHTML='<div class="estate">Sin registros.</div>'; return; }
     historialData = j; if(j.cols) cols = j.cols;
     renderHistorial(j.data, j.cols || cols);
-  }, function(){ document.getElementById('hcontent').innerHTML='<div class="estate">Error de conexion.</div>'; });
+  }, function(){ document.getElementById('hcontent').innerHTML='<div class="estate">Error de conexión.</div>'; });
 }
 
 function renderHistorial(regs, hcols){
@@ -447,7 +537,7 @@ function renderHistorial(regs, hcols){
     '<div style="font-size:17px;font-weight:500">' + (p['Apellidos']||'') + ', ' + (p['Nombres']||'') + '</div></div></div>' +
     '<div class="pdatos">' + datosPersona.map(function(c){ return '<div class="dato"><div class="dkey">' + c + '</div><div class="dval">' + (p[c]||'-') + '</div></div>'; }).join('') + '</div>' +
     '<div style="margin-bottom:1.25rem">' +
-      '<div style="font-size:12px;font-weight:500;color:var(--tm);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.75rem">Estadisticas</div>' +
+      '<div style="font-size:12px;font-weight:500;color:var(--tm);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.75rem">Estadísticas</div>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:1rem">' +
         '<div class="metric"><div class="mlabel">Cursos</div><div class="mval">' + total + '</div></div>' +
         '<div class="metric"><div class="mlabel">Aprobados</div><div class="mval" style="color:var(--ok)">' + ap + '</div></div>' +
@@ -456,13 +546,13 @@ function renderHistorial(regs, hcols){
         '<div class="metric"><div class="mlabel">Becado en</div><div class="mval">' + bec + '</div></div>' +
       '</div>' +
       '<div style="display:flex;justify-content:space-between;margin-bottom:4px">' +
-        '<span style="font-size:12px;color:var(--tm)">Tasa de aprobacion</span>' +
+        '<span style="font-size:12px;color:var(--tm)">Tasa de aprobación</span>' +
         '<span style="font-size:13px;font-weight:500;color:' + barColor + '">' + pct + '%</span>' +
       '</div>' +
       '<div style="background:var(--bg2);border-radius:20px;height:8px;overflow:hidden">' +
         '<div style="width:' + pct + '%;height:100%;background:' + barColor + ';border-radius:20px"></div>' +
       '</div>' +
-      (notasNum.length>=2 ? '<div style="margin-top:1rem"><div style="font-size:12px;color:var(--tm);margin-bottom:.5rem">Evolucion nota numerica</div>' +
+      (notasNum.length>=2 ? '<div style="margin-top:1rem"><div style="font-size:12px;color:var(--tm);margin-bottom:.5rem">Evolución nota numérica</div>' +
         '<div style="position:relative;height:180px"><canvas id="' + chartId + '"></canvas></div></div>' : '') +
     '</div>' +
     '<div style="font-size:12px;font-weight:500;color:var(--tm);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.75rem">Cursos realizados</div>' +
@@ -513,7 +603,7 @@ function closeHistorial(){ document.getElementById('hmodal').classList.remove('o
 function addCursoHist(){
   if(!historialData || !historialData.data.length) return;
   var base = historialData.data[0];
-  addingFor = {dni:String(base[COL_DNI]||''), apellido:base['Apellidos']||''};
+  addingFor = {dni:String(base[COL_DNI]||''), apellido:base['Apellidos']||'', nombre:base['Nombres']||''};
   editIdx = null; closeHistorial();
   document.getElementById('mtitle').textContent = 'Agregar curso - ' + (base['Apellidos']||'') + ', ' + (base['Nombres']||'');
   buildForm(base, true);
@@ -527,11 +617,11 @@ function exportHistExcel(){
 }
 function deleteDesdeH(jsonStr){
   var a = JSON.parse(jsonStr);
-  if(!confirm('Eliminar: ' + a['Apellidos'] + ' ' + a['Nombres'] + ' - ' + a[COL_CURSO] + ' ' + a[COL_ANO] + '?')) return;
+  if(!confirm('¿Eliminar: ' + a['Apellidos'] + ' ' + a['Nombres'] + ' - ' + a[COL_CURSO] + ' ' + a[COL_ANO] + '?')) return;
   sendRecord({action:'delete', id:a['Ord']});
   toast('Eliminado.');
-  var dni=String(a[COL_DNI]||''), ape=a['Apellidos']||'';
-  setTimeout(function(){ openHistorial(dni, ape); }, 1500);
+  var dni=String(a[COL_DNI]||''), ape=a['Apellidos']||'', nom=a['Nombres']||'';
+  setTimeout(function(){ openHistorial(dni, ape, nom); }, 1500);
 }
 
 function openModalNuevo(){ editIdx=null; addingFor=null; document.getElementById('mtitle').textContent='Nuevo registro'; buildForm({},false); document.getElementById('amodal').classList.add('open'); }
@@ -542,7 +632,7 @@ function buildForm(data, lockPersona){
   var container = document.getElementById('aform'); container.innerHTML='';
   cols.filter(function(c){ return c!=='Ord'; }).forEach(function(c){
     var div = document.createElement('div');
-    var isLong = ['Observacion','Mail','Destino'].indexOf(c) >= 0;
+    var isLong = ['Observación','Mail','Destino'].indexOf(c) >= 0;
     div.className = 'fg' + (isLong?' full':'');
     var lbl = document.createElement('label'); lbl.textContent = c;
     var inp;
@@ -567,7 +657,7 @@ function saveAlumno(){
   if(!obj['Apellidos'] && !obj['Nombres']){ toast('Ingresa Apellidos o Nombres.'); if(btn){btn.disabled=false;btn.innerText='Guardar';} return; }
 
   if(addingFor){
-    jsonp(getUrl()+'?action=gethistorial&dni='+encodeURIComponent(addingFor.dni)+'&apellido='+encodeURIComponent(addingFor.apellido), function(j){
+    jsonp(getUrl()+'?'+histParams(addingFor.dni, addingFor.apellido, addingFor.nombre), function(j){
       var base = (j.data||[])[0]||{};
       PERSONA_COLS.forEach(function(c){ obj[c]=base[c]||obj[c]||''; });
       obj['Ord'] = Date.now();
@@ -575,7 +665,7 @@ function saveAlumno(){
       toast('Curso agregado.'); closeModal();
       if(btn){btn.disabled=false;btn.innerText='Guardar';}
       var af = addingFor;
-      setTimeout(function(){ openHistorial(af.dni, af.apellido); }, 1500);
+      setTimeout(function(){ openHistorial(af.dni, af.apellido, af.nombre); }, 1500);
     }); return;
   }
   if(editIdx !== null && typeof editIdx === 'object'){
@@ -590,9 +680,10 @@ function saveAlumno(){
   if(btn){btn.disabled=false;btn.innerText='Guardar';}
 }
 
+var pendingRefresh = false;
 function sendRecord(op){
   var q=[]; try{q=JSON.parse(localStorage.getItem('sync-queue')||'[]');}catch(e){}
-  q.push(op); localStorage.setItem('sync-queue', JSON.stringify(q)); flushQueue();
+  q.push(op); localStorage.setItem('sync-queue', JSON.stringify(q)); pendingRefresh = true; flushQueue();
 }
 function flushQueue(){
   if(_flushing) return;
@@ -602,7 +693,7 @@ function flushQueue(){
   postToSheet(u, q[0], function(){
     var q2=[]; try{q2=JSON.parse(localStorage.getItem('sync-queue')||'[]');}catch(e){}
     q2.shift(); localStorage.setItem('sync-queue', JSON.stringify(q2));
-    _flushing=false; if(q2.length) setTimeout(flushQueue, 500);
+    _flushing=false; if(q2.length) setTimeout(flushQueue, 500); else if(pendingRefresh){ pendingRefresh=false; setTimeout(refreshViews, 700); }
   });
 }
 function postToSheet(u, op, onDone){
@@ -621,53 +712,59 @@ function notaR(n){ if(!n) return 'none'; var s=String(n).toLowerCase().trim(); i
 function notaBadge(n){ if(!n) return '-'; var r=notaR(n); return '<span class="badge ' + (r==='ok'?'bok':r==='err'?'berr':'bgray') + '">' + n + '</span>'; }
 function notaNumBadge(n){ if(!n) return '-'; var s=String(n).trim(); if(!isNaN(+s)&&s!=='') return '<span class="badge ' + (+s>=6?'bok':'berr') + '">' + s + '</span>'; return '<span class="badge bgray">' + s + '</span>'; }
 
+var statsToken = 0;
+function statsParams(){
+  return '&ano=' + encodeURIComponent(msParam('ms-sano')) +
+    '&dictado=' + encodeURIComponent(msParam('ms-sdictado')) +
+    '&escuela=' + encodeURIComponent(msParam('ms-sescuela'));
+}
+function statsFiltersActive(){
+  return msVals('ms-sano').length + msVals('ms-sdictado').length + msVals('ms-sescuela').length > 0;
+}
 function loadStats(){
   var u = getUrl(); if(!u || u==='PEGAR_URL_AQUI'){ toast('Configura la URL primero.'); return; }
-  document.getElementById('smetrics').innerHTML = '<div class="estate">Cargando...<span class="spin"></span></div>';
-  jsonp(u + '?action=getstats', function(j){
+  var sp = statsParams();
+  if(sp.length > 6500){ toast('Elegiste demasiados valores. Quita algunos o deja el filtro en Todos.'); return; }
+  var token = ++statsToken;
+  document.getElementById('smetrics').innerHTML = '<div class="estate">Calculando...<span class="spin"></span></div>';
+  jsonp(u + '?action=getstats' + sp, function(j){
+    if(token !== statsToken) return;
+    if(!j || j.error){ document.getElementById('smetrics').innerHTML = '<div class="estate">Error al cargar estadísticas.</div>'; return; }
     statsRaw = j;
-    var sfa = document.getElementById('s-fano'); var sv = sfa.value;
-    sfa.innerHTML = '<option value="">Todos</option>' + (j.anos||[]).map(function(a){ return '<option' + (a==sv?' selected':'') + '>' + a + '</option>'; }).join('');
-    if(sv) sfa.value = sv;
     renderStats();
-  }, function(){ document.getElementById('smetrics').innerHTML='<div class="estate">Error al cargar. Intenta de nuevo.</div>'; });
+  }, function(){
+    if(token === statsToken) document.getElementById('smetrics').innerHTML = '<div class="estate">Error al cargar. Intenta de nuevo.</div>';
+  });
 }
-
+function clearStatsFilters(){
+  msClearAll(['ms-sano','ms-sdictado','ms-sescuela']);
+  loadStats();
+}
 function renderStats(){
   if(!statsRaw){ loadStats(); return; }
-  var ano = document.getElementById('s-fano').value;
-  var stats;
-  if(!ano){ stats = statsRaw; }
-  else{
-    var det = statsRaw.porAnoDetalle && statsRaw.porAnoDetalle[ano];
-    stats = det ? {total:det.total,personas:det.personas,anos:statsRaw.anos,porAno:statsRaw.porAno,porCurso:det.porCurso,porJerarquia:det.porJerarquia,porProvincia:det.porProvincia,porBecado:det.porBecado,porFuerza:det.porFuerza,porDictado:det.porDictado,nota:det.nota} : statsRaw;
-  }
+  var stats = statsRaw;
   var ap = (stats.nota && stats.nota['Aprobado']) || 0;
   document.getElementById('smetrics').innerHTML =
     '<div class="metric"><div class="mlabel">Total registros</div><div class="mval">' + (stats.total||0) + '</div></div>' +
-    '<div class="metric"><div class="mlabel">Personas unicas</div><div class="mval">' + (stats.personas||0) + '</div></div>' +
-    '<div class="metric"><div class="mlabel">% aprobados</div><div class="mval">' + (stats.total?Math.round(ap/stats.total*100):0) + '%</div></div>' +
-    '<div class="metric"><div class="mlabel">Anos con datos</div><div class="mval">' + ((stats.anos||[]).length) + '</div></div>';
+    '<div class="metric"><div class="mlabel">Personas únicas</div><div class="mval">' + (stats.personas||0) + '</div></div>' +
+    '<div class="metric"><div class="mlabel">% aprobados</div><div class="mval">' + (stats.total ? Math.round(ap/stats.total*100) : 0) + '%</div></div>' +
+    '<div class="metric"><div class="mlabel">Años con datos</div><div class="mval">' + Object.keys(stats.porAno||{}).length + '</div></div>';
   var sc = document.getElementById('s-count');
-  if(sc) sc.textContent = ano ? ('Ano ' + ano + ': ' + (stats.total||0) + ' registros') : ((stats.total||0) + ' registros totales');
+  if(sc) sc.textContent = statsFiltersActive() ? ('Con filtros: ' + (stats.total||0) + ' registros') : ((stats.total||0) + ' registros totales');
   renderChart(stats);
 }
 
 function renderChart(stats){
   if(!stats && !statsRaw){ loadStats(); return; }
-  if(!stats){
-    var ano = document.getElementById('s-fano').value;
-    var det = statsRaw.porAnoDetalle && ano && statsRaw.porAnoDetalle[ano];
-    stats = det ? {total:det.total,personas:det.personas,anos:statsRaw.anos,porAno:statsRaw.porAno,porCurso:det.porCurso,porJerarquia:det.porJerarquia,porProvincia:det.porProvincia,porBecado:det.porBecado,porFuerza:det.porFuerza,porDictado:det.porDictado,nota:det.nota} : statsRaw;
-  }
+  if(!stats) stats = statsRaw;
   var sel = document.getElementById('s-selector').value;
   var isTbl = sel==='porCurso' || sel==='porDictado';
   document.getElementById('s-tabla-wrap').style.display = isTbl ? '' : 'none';
   document.getElementById('s-chart-wrap').style.display = isTbl ? 'none' : '';
 
-  var dataMap = {porCurso:stats.porCurso, porDictado:stats.porDictado, porAno:stats.porAno, nota:stats.nota, porJerarquia:stats.porJerarquia, porProvincia:stats.porProvincia, porBecado:stats.porBecado, porFuerza:stats.porFuerza};
+  var dataMap = {porCurso:stats.porCurso, porDictado:stats.porDictado, porAno:stats.porAno, nota:stats.nota, porJerarquia:stats.porJerarquia, porEscuela:stats.porEscuela, porProvincia:stats.porProvincia, porBecado:stats.porBecado, porFuerza:stats.porFuerza};
   var rawData = dataMap[sel] || {};
-  var titles = {porCurso:'Top cursos',porDictado:'Por dictado',porAno:'Por año',nota:'Nota',porJerarquia:'Por jerarquía',porProvincia:'Por provincia/país',porBecado:'Becados',porFuerza:'Por fuerza'};
+  var titles = {porCurso:'Top cursos',porDictado:'Por dictado',porAno:'Por año',nota:'Nota',porJerarquia:'Por jerarquía',porEscuela:'Por escuela',porProvincia:'Por provincia/país',porBecado:'Becados',porFuerza:'Por fuerza'};
   var horiz = sel!=='porAno';
 
   if(isTbl){
@@ -687,7 +784,7 @@ function renderChart(stats){
   }
 
   var allE = Object.keys(rawData).filter(function(k){ return rawData[k]>0; }).map(function(k){ return [k,rawData[k]]; });
-  if(sel==='porJerarquia') allE = allE.filter(function(e){ return e[1]>=10; });
+  if(sel==='porJerarquia' && !statsFiltersActive()) allE = allE.filter(function(e){ return e[1]>=10; });
   if(sel==='porAno') allE.sort(function(a,b){ return a[0].localeCompare(b[0]); });
   else allE.sort(function(a,b){ return b[1]-a[1]; });
   var lbls = allE.map(function(e){ return e[0]; });
@@ -722,108 +819,157 @@ function renderChart(stats){
 }
 
 function downloadCurrentChart(){
-  if(!statsRaw){ toast('Carga las estadisticas primero.'); return; }
+  if(!statsRaw){ toast('Carga las estadísticas primero.'); return; }
   var sel = document.getElementById('s-selector').value;
   var isTbl = sel==='porCurso' || sel==='porDictado';
-  var ano = document.getElementById('s-fano').value;
-  var det = statsRaw.porAnoDetalle && ano && statsRaw.porAnoDetalle[ano];
-  var stats = det ? {porCurso:det.porCurso,porDictado:det.porDictado,porAno:statsRaw.porAno,nota:det.nota,porJerarquia:det.porJerarquia,porProvincia:det.porProvincia,porBecado:det.porBecado,porFuerza:det.porFuerza} : statsRaw;
-  var dataMap = {porCurso:stats.porCurso, porDictado:stats.porDictado, porAno:stats.porAno, nota:stats.nota, porJerarquia:stats.porJerarquia, porProvincia:stats.porProvincia, porBecado:stats.porBecado, porFuerza:stats.porFuerza};
+  var sfx = statsFiltersActive() ? '_filtrado' : '';
+  var stats = statsRaw;
+  var dataMap = {porCurso:stats.porCurso, porDictado:stats.porDictado, porAno:stats.porAno, nota:stats.nota, porJerarquia:stats.porJerarquia, porEscuela:stats.porEscuela, porProvincia:stats.porProvincia, porBecado:stats.porBecado, porFuerza:stats.porFuerza};
   if(isTbl){
     var rows2 = Object.keys(dataMap[sel]||{}).filter(function(k){ return dataMap[sel][k]>0; }).sort(function(a,b){ return dataMap[sel][b]-dataMap[sel][a]; }).map(function(n){ return {Nombre:n,Cantidad:dataMap[sel][n]}; });
     if(!rows2.length){ toast('No hay datos.'); return; }
     var ws = XLSX.utils.json_to_sheet(rows2, {header:['Nombre','Cantidad']}); ws['!cols']=[{wch:60},{wch:12}];
     var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,sel);
-    XLSX.writeFile(wb, 'estadistica_' + sel + (ano?'_'+ano:'') + '.xlsx'); toast('Excel descargado.');
+    XLSX.writeFile(wb, 'estadistica_' + sel + sfx + '.xlsx'); toast('Excel descargado.');
   } else {
     var el2 = document.getElementById('s-chart'); if(!el2) return;
     var cv = document.createElement('canvas'); cv.width=el2.width; cv.height=el2.height;
     var c3 = cv.getContext('2d'); c3.fillStyle='#fff'; c3.fillRect(0,0,cv.width,cv.height); c3.drawImage(el2,0,0);
-    var lnk = document.createElement('a'); lnk.download='estadistica_'+sel+(ano?'_'+ano:'')+'.png'; lnk.href=cv.toDataURL('image/png'); lnk.click();
+    var lnk = document.createElement('a'); lnk.download='estadistica_'+sel+sfx+'.png'; lnk.href=cv.toDataURL('image/png'); lnk.click();
     toast('PNG descargado.');
   }
 }
 
+var dupData = null;
+var DUP_COLS = ['Apellidos','Nombres','DNI','Curso','Año','Dictado','Nota','Nota numérica','Jerarquía','Becado'];
+function dupShowCols(hcols){
+  var pref = DUP_COLS.filter(function(c){ return hcols.indexOf(c) >= 0; });
+  return pref.length ? pref : hcols.filter(function(c){ return c !== 'Ord'; }).slice(0, 10);
+}
+function normNom(s){ return String(s == null ? '' : s).trim().toLowerCase().replace(/\s+/g, ' '); }
+function cantPersonas(grupo){
+  var k = {};
+  grupo.forEach(function(a){ k[normNom(a['Apellidos']) + '|' + normNom(a['Nombres'])] = 1; });
+  return Object.keys(k).length;
+}
+function dupTable(grupo, showCols){
+  var th = 'padding:6px 8px;text-align:left;border-bottom:1px solid var(--bd);font-weight:500';
+  var td = 'padding:6px 8px;border-bottom:.5px solid var(--bd);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+  return '<div class="twrap"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:var(--bg2)">' +
+    showCols.map(function(c){ return '<th style="' + th + '">' + c + '</th>'; }).join('') +
+    '<th style="' + th + '"></th></tr></thead><tbody>' +
+    grupo.map(function(a){
+      var js = escQ(JSON.stringify(a));
+      return '<tr>' + showCols.map(function(c){
+        var v = (a[c] === undefined || a[c] === '' || a[c] === null) ? '-' : escHtml(a[c]);
+        if(c === COL_NOTA) v = notaBadge(a[c]);
+        return '<td style="' + td + '">' + v + '</td>';
+      }).join('') +
+      '<td style="padding:6px 8px;border-bottom:.5px solid var(--bd);white-space:nowrap">' +
+      (isEditor ? '<button class="btn btnsm" onclick="openModalEdit(\'' + js + '\')">Editar</button> <button class="btn btnsm btnerr" onclick="eliminarDup(\'' + js + '\')">Eliminar</button>'
+                : '<span class="tm">Solo editores</span>') +
+      '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+}
+function renderDup(){
+  var j = dupData; if(!j) return;
+  var grupos = j.grupos || [], comp = j.compartidos || [];
+  var compTotal = j.compartidosTotal || comp.length;
+  var totalExtra = grupos.reduce(function(s, g){ return s + g.length - 1; }, 0);
+  document.getElementById('dup-metrics').innerHTML =
+    '<div class="metric"><div class="mlabel">Grupos duplicados</div><div class="mval" style="color:' + (grupos.length ? 'var(--err)' : 'var(--ok)') + '">' + grupos.length + '</div></div>' +
+    '<div class="metric"><div class="mlabel">Registros extra</div><div class="mval" style="color:' + (totalExtra ? 'var(--err)' : 'var(--ok)') + '">' + totalExtra + '</div></div>' +
+    '<div class="metric"><div class="mlabel">DNI compartidos</div><div class="mval" style="color:' + (compTotal ? 'var(--err)' : 'var(--ok)') + '">' + compTotal + '</div></div>';
+  var hcols = j.cols || cols; var showCols = dupShowCols(hcols);
+  var hd = 'font-size:14px;font-weight:500;margin:1rem 0 .5rem';
+  var html = '<div style="' + hd + '">Mismo DNI + Curso + Año (' + grupos.length + ')</div>';
+  if(!grupos.length) html += '<div class="estate" style="color:var(--ok);padding:1.5rem">No se encontraron duplicados.</div>';
+  grupos.forEach(function(grupo){
+    var p2 = grupo[0]; var np = cantPersonas(grupo);
+    html += '<div class="dup-group"><div class="dup-hdr">' +
+      '<span style="font-size:13px;font-weight:500;color:var(--err)">' + escHtml(p2['Apellidos']) + ', ' + escHtml(p2['Nombres']) + ' - ' + escHtml(p2[COL_CURSO]) + ' ' + escHtml(p2[COL_ANO]) + '</span>' +
+      '<span style="font-size:12px;color:var(--err)">' + grupo.length + ' registros' + (np > 1 ? ' &middot; &#9888; nombres distintos: puede ser otra persona' : '') + '</span></div>' +
+      dupTable(grupo, showCols) + '</div>';
+  });
+  html += '<div style="' + hd + '">DNI compartido por personas distintas (' + compTotal + ')</div>';
+  if(!comp.length) html += '<div class="estate" style="color:var(--ok);padding:1.5rem">No hay DNI compartidos.</div>';
+  comp.forEach(function(grupo){
+    html += '<div class="dup-group"><div class="dup-hdr">' +
+      '<span style="font-size:13px;font-weight:500;color:var(--err)">DNI ' + escHtml(grupo[0][COL_DNI]) + '</span>' +
+      '<span style="font-size:12px;color:var(--err)">' + cantPersonas(grupo) + ' personas &middot; ' + grupo.length + ' registros</span></div>' +
+      dupTable(grupo, showCols) + '</div>';
+  });
+  if(compTotal > comp.length) html += '<p class="tm">Mostrando los primeros ' + comp.length + ' de ' + compTotal + '. Corrige algunos y actualiza para ver el resto.</p>';
+  document.getElementById('dup-content').innerHTML = html;
+}
 function loadDuplicados(){
   var u = getUrl(); if(!u || u==='PEGAR_URL_AQUI'){ toast('Configura la URL primero.'); return; }
   document.getElementById('dup-content').innerHTML = '<div class="estate">Buscando duplicados...<span class="spin"></span></div>';
   jsonp(u + '?action=getduplicados', function(j){
-    if(!j){ document.getElementById('dup-content').innerHTML='<div class="estate">Error al cargar.</div>'; return; }
-    var grupos = j.grupos||[];
-    var totalExtra = grupos.reduce(function(s,g){ return s+g.length-1; }, 0);
-    document.getElementById('dup-metrics').innerHTML =
-      '<div class="metric"><div class="mlabel">Grupos duplicados</div><div class="mval" style="color:' + (grupos.length?'var(--err)':'var(--ok)') + '">' + grupos.length + '</div></div>' +
-      '<div class="metric"><div class="mlabel">Registros extra</div><div class="mval" style="color:' + (totalExtra?'var(--err)':'var(--ok)') + '">' + totalExtra + '</div></div>';
-    if(!grupos.length){ document.getElementById('dup-content').innerHTML='<div class="estate" style="color:var(--ok)">No se encontraron duplicados.</div>'; return; }
-    var hcols = j.cols || cols;
-    var showCols = hcols.filter(function(c){ return c!=='Ord'; }).slice(0,10);
-    var html = '';
-    grupos.forEach(function(grupo){
-      var p2 = grupo[0];
-      html += '<div class="dup-group"><div class="dup-hdr">' +
-        '<span style="font-size:13px;font-weight:500;color:var(--err)">' + (p2['Apellidos']||'') + ', ' + (p2['Nombres']||'') + ' - ' + (p2[COL_CURSO]||'') + ' ' + (p2[COL_ANO]||'') + '</span>' +
-        '<span style="font-size:12px;color:var(--err)">' + grupo.length + ' registros</span></div>' +
-        '<div class="twrap"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:var(--bg2)">' +
-        showCols.map(function(c){ return '<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--bd);font-weight:500">' + c + '</th>'; }).join('') +
-        '<th style="padding:6px 8px;border-bottom:1px solid var(--bd)"></th></tr></thead><tbody>' +
-        grupo.map(function(a, ri){
-          return '<tr style="' + (ri===0?'background:var(--okl)':'') + '">' +
-            showCols.map(function(c){ var v=a[c]||'-'; if(c===COL_NOTA)v=notaBadge(a[c]); return '<td style="padding:6px 8px;border-bottom:.5px solid var(--bd);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + v + '</td>'; }).join('') +
-            '<td style="padding:6px 8px;border-bottom:.5px solid var(--bd);white-space:nowrap">' +
-            (ri===0 ? '<span style="font-size:11px;color:var(--ok);font-weight:500">Original</span>' :
-              '<button class="btn btnsm btnerr" onclick="eliminarDup(\'' + escQ(JSON.stringify(a)) + '\')">Eliminar</button>') +
-            '</td></tr>';
-        }).join('') +
-        '</tbody></table></div></div>';
-    });
-    document.getElementById('dup-content').innerHTML = html;
-  }, function(){ document.getElementById('dup-content').innerHTML='<div class="estate">Error de conexion.</div>'; });
+    if(!j || j.error){ document.getElementById('dup-content').innerHTML = '<div class="estate">Error al cargar.</div>'; return; }
+    dupData = j;
+    renderDup();
+  }, function(){ document.getElementById('dup-content').innerHTML = '<div class="estate">Error de conexión.</div>'; });
 }
-
 function eliminarDup(jsonStr){
+  if(!isEditor){ toast('Solo editores.'); return; }
   var a = JSON.parse(jsonStr);
-  if(!confirm('Eliminar este registro?')) return;
+  if(!confirm('¿Eliminar este registro?\n' + (a['Apellidos']||'') + ' ' + (a['Nombres']||'') + ' - ' + (a[COL_CURSO]||'') + ' ' + (a[COL_ANO]||''))) return;
   sendRecord({action:'delete', id:a['Ord']});
-  toast('Eliminado. Actualizando...');
-  setTimeout(loadDuplicados, 1500);
+  toast('Eliminando... se actualiza solo.');
+}
+function refreshViews(){
+  if(document.getElementById('tab-duplicados').style.display !== 'none') loadDuplicados();
+  else if(document.getElementById('filter-pagination').style.display === 'flex') applyFilter(filterCurrentPage);
 }
 
-var dlData=[], dlTotalPages=0, dlCurrentPage=0, dlCols=[];
-function startDownload(){
+var dl = null;
+function downloadPaged(extra, filename, ui){
   var u = getUrl(); if(!u || u==='PEGAR_URL_AQUI'){ toast('Configura la URL primero.'); return; }
-  dlData=[]; dlTotalPages=0; dlCurrentPage=0; dlCols=[];
-  document.getElementById('dl-btn').disabled=true;
-  document.getElementById('dl-progress').style.display='block';
-  document.getElementById('dl-fill').style.width='0%';
-  downloadPage(1);
+  if(dl){ toast('Ya hay una descarga en curso.'); return; }
+  dl = {extra: extra, filename: filename, ui: ui, data: [], cols: [], pages: 0};
+  document.getElementById(ui.btn).disabled = true;
+  document.getElementById(ui.box).style.display = 'block';
+  document.getElementById(ui.fill).style.width = '0%';
+  dlNext(1);
 }
-function downloadPage(page){
-  var u = getUrl();
-  document.getElementById('dl-msg').textContent = 'Descargando pagina ' + page + (dlTotalPages?'/'+dlTotalPages:'') + '...';
-  jsonp(u + '?action=getpage&page=' + page, function(j){
-    if(!j || !j.data){ downloadError('Error en respuesta.'); return; }
-    if(j.cols && !dlCols.length) dlCols = j.cols;
-    dlData = dlData.concat(j.data); dlTotalPages=j.totalPages; dlCurrentPage=j.page;
-    var pct = Math.round(dlCurrentPage/dlTotalPages*100);
-    document.getElementById('dl-fill').style.width = pct + '%';
-    document.getElementById('dl-msg').textContent = 'Descargando... ' + dlData.length + ' de ' + j.total + ' registros (' + pct + '%)';
-    if(dlCurrentPage < dlTotalPages) setTimeout(function(){ downloadPage(dlCurrentPage+1); }, 300);
-    else finishDownload();
-  }, function(){ downloadError('Error de conexion.'); });
+function dlNext(page){
+  var u = getUrl(); var ui = dl.ui;
+  document.getElementById(ui.msg).textContent = 'Descargando página ' + page + (dl.pages ? '/' + dl.pages : '') + '...';
+  jsonp(u + '?action=getpage&page=' + page + dl.extra, function(j){
+    if(!dl) return;
+    if(!j || !j.data){ dlError('Error en respuesta.'); return; }
+    if(j.cols && !dl.cols.length) dl.cols = j.cols;
+    dl.data = dl.data.concat(j.data); dl.pages = j.totalPages;
+    var pct = j.totalPages ? Math.round(j.page / j.totalPages * 100) : 100;
+    document.getElementById(ui.fill).style.width = pct + '%';
+    document.getElementById(ui.msg).textContent = 'Descargando... ' + dl.data.length + ' de ' + j.total + ' registros (' + pct + '%)';
+    if(j.page < j.totalPages) setTimeout(function(){ dlNext(j.page + 1); }, 300);
+    else dlFinish();
+  }, function(){ dlError('Error de conexión.'); });
 }
-function finishDownload(){
-  var ws = XLSX.utils.json_to_sheet(dlData, {header:dlCols});
-  var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Alumnos');
-  XLSX.writeFile(wb, 'alumnos_base.xlsx');
-  document.getElementById('dl-btn').disabled=false;
-  document.getElementById('dl-progress').style.display='none';
-  toast('Excel descargado con ' + dlData.length + ' registros.');
+function dlFinish(){
+  var d = dl; dl = null;
+  document.getElementById(d.ui.btn).disabled = false;
+  document.getElementById(d.ui.box).style.display = 'none';
+  if(!d.data.length){ toast('No hay registros para descargar.'); return; }
+  var ws = XLSX.utils.json_to_sheet(d.data, {header: d.cols});
+  var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Alumnos');
+  XLSX.writeFile(wb, d.filename);
+  toast('Excel descargado con ' + d.data.length + ' registros.');
 }
-function downloadError(msg){ document.getElementById('dl-msg').textContent='Error: '+msg; document.getElementById('dl-btn').disabled=false; }
+function dlError(msg){
+  var d = dl; dl = null; if(!d) return;
+  document.getElementById(d.ui.msg).textContent = 'Error: ' + msg;
+  document.getElementById(d.ui.btn).disabled = false;
+}
+function startDownload(){
+  downloadPaged('', 'alumnos_base.xlsx', {btn:'dl-btn', box:'dl-progress', msg:'dl-msg', fill:'dl-fill'});
+}
 
 function saveUrl(){ var v=document.getElementById('surl').value.trim(); localStorage.setItem('script-url',v); toast('URL guardada.'); }
-function changePwd(){ var v=document.getElementById('npwd').value; if(!v){toast('Ingresa una contrasena.');return;} localStorage.setItem('editor-pwd',v); toast('Contrasena actualizada.'); }
-function copyScript(){ navigator.clipboard.writeText(document.getElementById('appsscript-code').value).then(function(){ toast('Codigo copiado.'); }); }
+function changePwd(){ var v=document.getElementById('npwd').value; if(!v){toast('Ingresa una contraseña.');return;} localStorage.setItem('editor-pwd',v); toast('Contraseña actualizada.'); }
+function copyScript(){ navigator.clipboard.writeText(document.getElementById('appsscript-code').value).then(function(){ toast('Código copiado.'); }); }
 
 function showTab(n, btn){
   ['alumnos','estadisticas','duplicados','descargar','config'].forEach(function(t){ document.getElementById('tab-'+t).style.display = t===n?'':'none'; });
@@ -843,6 +989,7 @@ document.addEventListener('keydown', function(e){
 <textarea id="appsscript-code" style="display:none">const SHEET_NAME = 'Alumnos';
 const INDEX_NAME = 'Indice';
 const INDEX_MAX_AGE_MS = 60 * 60 * 1000;
+const INDEX_VERSION = 2;
 
 function getSheet(){return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);}
 
@@ -857,34 +1004,53 @@ function rowToObj(headers,row){
   var o={};headers.forEach(function(h,i){o[h]=row[i]!==undefined?row[i]:'';});return o;
 }
 
+function normName(s){
+  return String(s === undefined || s === null ? '' : s).trim().toLowerCase().replace(/\s+/g, ' ');
+}
+function personKey(dni, ape, nom){
+  return String(dni || '') + '|' + normName(ape) + '|' + normName(nom);
+}
+
 function buildIndex(){
-  var ss=SpreadsheetApp.getActiveSpreadsheet();
-  var idxSheet=ss.getSheetByName(INDEX_NAME);
-  if(!idxSheet)idxSheet=ss.insertSheet(INDEX_NAME);
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var idxSheet = ss.getSheetByName(INDEX_NAME);
+  if(!idxSheet) idxSheet = ss.insertSheet(INDEX_NAME);
   else idxSheet.clearContents();
-  var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
-  var dniIdx=headers.indexOf('DNI'),apIdx=headers.indexOf('Apellidos'),nomIdx=headers.indexOf('Nombres'),curIdx=headers.indexOf('Curso');
-  var personas={};
+  var hr = getHeadersAndRows(), headers = hr.headers, rows = hr.rows;
+  var dniIdx = headers.indexOf('DNI'), apIdx = headers.indexOf('Apellidos'), nomIdx = headers.indexOf('Nombres'), curIdx = headers.indexOf('Curso');
+  var personas = {}, porDni = {};
   rows.forEach(function(row){
-    var dni=String(row[dniIdx]||'').trim(),ape=String(row[apIdx]||'').trim(),nom=String(row[nomIdx]||'').trim();
-    var key=dni||(ape+'|'+nom);if(!key)return;
-    if(!personas[key])personas[key]={dni:dni,ape:ape,nom:nom,cursos:[]};
-    if(curIdx>=0&&row[curIdx]){var cv=String(row[curIdx]).trim();if(personas[key].cursos.indexOf(cv)<0)personas[key].cursos.push(cv);}
+    var dni = String(row[dniIdx] || '').trim(), ape = String(row[apIdx] || '').trim(), nom = String(row[nomIdx] || '').trim();
+    if(!dni && !ape && !nom) return;
+    var key = personKey(dni, ape, nom);
+    if(!personas[key]){
+      personas[key] = {dni: dni, ape: ape, nom: nom, cursos: []};
+      if(dni) porDni[dni] = (porDni[dni] || 0) + 1;
+    }
+    if(curIdx >= 0 && row[curIdx]){
+      var cv = String(row[curIdx]).trim();
+      if(personas[key].cursos.indexOf(cv) < 0) personas[key].cursos.push(cv);
+    }
   });
-  idxSheet.getRange(1,1).setValue(Date.now());
-  var idxRows=Object.keys(personas).map(function(k){var p=personas[k];return[p.dni,p.ape,p.nom,p.cursos.slice(0,5).join(', ')];});
-  if(idxRows.length>0)idxSheet.getRange(2,1,idxRows.length,4).setValues(idxRows);
+  idxSheet.getRange(1, 1).setValue(Date.now());
+  idxSheet.getRange(1, 2).setValue(INDEX_VERSION);
+  var idxRows = Object.keys(personas).map(function(k){
+    var p = personas[k];
+    return [p.dni, p.ape, p.nom, p.cursos.slice(0, 5).join(', '), (p.dni && porDni[p.dni] > 1) ? 1 : 0];
+  });
+  if(idxRows.length > 0) idxSheet.getRange(2, 1, idxRows.length, 5).setValues(idxRows);
   return idxRows.length;
 }
 
 function getIndex(){
-  var ss=SpreadsheetApp.getActiveSpreadsheet();
-  var idxSheet=ss.getSheetByName(INDEX_NAME);
-  if(!idxSheet){buildIndex();return getIndex();}
-  var lastUpdate=Number(idxSheet.getRange(1,1).getValue()||0);
-  if(Date.now()-lastUpdate>INDEX_MAX_AGE_MS){buildIndex();return getIndex();}
-  var data=idxSheet.getDataRange().getValues();
-  if(data.length<2)return[];
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var idxSheet = ss.getSheetByName(INDEX_NAME);
+  if(!idxSheet){ buildIndex(); return getIndex(); }
+  var lastUpdate = Number(idxSheet.getRange(1, 1).getValue() || 0);
+  var ver = Number(idxSheet.getRange(1, 2).getValue() || 0);
+  if(ver !== INDEX_VERSION || Date.now() - lastUpdate > INDEX_MAX_AGE_MS){ buildIndex(); return getIndex(); }
+  var data = idxSheet.getDataRange().getValues();
+  if(data.length < 2) return [];
   return data.slice(1);
 }
 
@@ -894,7 +1060,7 @@ function doGet(e){
     if(action==='search')result=handleSearch(e.parameter);
     else if(action==='filter')result=handleFilter(e.parameter);
     else if(action==='gethistorial')result=handleHistorial(e.parameter);
-    else if(action==='getstats')result=handleStats();
+    else if(action==='getstats')result=handleStats(e.parameter);
     else if(action==='getoptions')result=handleOptions();
     else if(action==='getduplicados')result=handleDuplicados();
     else if(action==='getpage')result=handleGetPage(e.parameter);
@@ -913,90 +1079,182 @@ function handleSearch(params){
     var row=index[i];
     var dni=String(row[0]||''),ape=String(row[1]||''),nom=String(row[2]||''),curs=String(row[3]||'');
     if(ape.toLowerCase().indexOf(q)>=0||nom.toLowerCase().indexOf(q)>=0||dni.toLowerCase().indexOf(q)>=0){
-      results.push({DNI:dni,Apellidos:ape,Nombres:nom,cursos:curs?curs.split(', '):[]});
+      results.push({DNI:dni,Apellidos:ape,Nombres:nom,cursos:curs?curs.split(', '):[],compartido:Number(row[4]||0)===1});
       if(results.length>=parseInt(params.limit||'15'))break;
     }
   }
   return JSON.stringify({data:results});
 }
 
+function splitParam(s){
+  s = String(s || '');
+  if(!s) return [];
+  return s.split('|').map(function(x){ return x.trim(); }).filter(function(x){ return x !== ''; });
+}
+
+function buildFilterSpec(params, headers){
+  var defs = [['Año','ano'],['Curso','curso'],['Nota','nota'],['Dictado','dictado'],['Fuerza','fuerza'],['Jerarquía','jer'],['Escuela','escuela']];
+  var spec = [];
+  defs.forEach(function(d){
+    var vals = splitParam(params[d[1]]);
+    if(vals.length === 0) return;
+    var idx = headers.indexOf(d[0]);
+    if(idx < 0) return;
+    var set = {};
+    vals.forEach(function(v){ set['k_' + v] = 1; });
+    spec.push({idx: idx, set: set});
+  });
+  return spec;
+}
+
+function applyFilters(rows, spec){
+  if(spec.length === 0) return rows;
+  return rows.filter(function(row){
+    for(var i = 0; i < spec.length; i++){
+      var v = row[spec[i].idx];
+      var s = String(v === undefined || v === null ? '' : v).trim();
+      if(!spec[i].set['k_' + s]) return false;
+    }
+    return true;
+  });
+}
+
+function cacheVersion(){
+  var c = CacheService.getScriptCache();
+  var v = c.get('ver');
+  if(!v){ v = String(Date.now()); c.put('ver', v, 21600); }
+  return v;
+}
+function bumpCache(){
+  try{ CacheService.getScriptCache().put('ver', String(Date.now()), 21600); }catch(e){}
+}
+function cacheKey(name, params, fields){
+  var raw = name + '|' + cacheVersion() + '|' + fields.map(function(f){ return f + '=' + String(params[f] || ''); }).join('&');
+  var d = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, raw);
+  return name + '_' + d.map(function(b){ return ('0' + (b & 0xff).toString(16)).slice(-2); }).join('');
+}
+function cacheGet(key){
+  try{ return CacheService.getScriptCache().get(key); }catch(e){ return null; }
+}
+function cachePut(key, val){
+  try{ if(val.length < 80000) CacheService.getScriptCache().put(key, val, 600); }catch(e){}
+}
+
 function handleOptions(){
-  var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
-  function uniq(field){var idx=headers.indexOf(field);if(idx<0)return[];var s={};rows.forEach(function(r){var v=String(r[idx]||'').trim();if(v)s[v]=1;});return Object.keys(s).sort();}
-  return JSON.stringify({cols:headers,anos:uniq('Año').sort().reverse(),cursos:uniq('Curso'),notas:uniq('Nota'),dictados:uniq('Dictado'),fuerzas:uniq('Fuerza')});
+  var ckey = cacheKey('options2', {}, []);
+  var cached = cacheGet(ckey);
+  if(cached) return cached;
+  var hr = getHeadersAndRows(), headers = hr.headers, rows = hr.rows;
+  function uniq(field){
+    var idx = headers.indexOf(field);
+    if(idx < 0) return [];
+    var s = {};
+    rows.forEach(function(r){ var v = String(r[idx] === undefined ? '' : r[idx]).trim(); if(v) s[v] = 1; });
+    return Object.keys(s).sort();
+  }
+  var out = JSON.stringify({cols: headers, anos: uniq('Año').reverse(), cursos: uniq('Curso'), notas: uniq('Nota'), dictados: uniq('Dictado'), fuerzas: uniq('Fuerza'), jerarquias: uniq('Jerarquía'), escuelas: uniq('Escuela')});
+  cachePut(ckey, out);
+  return out;
 }
 
 function handleFilter(params){
-  var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
-  var page=parseInt(params.page||1),pageSize=50;
-  var filters={'Año':(params.ano||''),'Curso':(params.curso||''),'Nota':(params.nota||''),'Dictado':(params.dictado||''),'Fuerza':(params.fuerza||'')};
-  var filtered=rows.filter(function(row){
-    return Object.keys(filters).every(function(field){
-      var val=filters[field];if(!val)return true;
-      var idx=headers.indexOf(field);
-      return idx>=0&&String(row[idx]||'').trim()===val;
-    });
-  });
-  var total=filtered.length;
-  var pageRows=filtered.slice((page-1)*pageSize,page*pageSize).map(function(r){return rowToObj(headers,r);});
-  return JSON.stringify({data:pageRows,total:total,page:page,pageSize:pageSize,cols:headers});
+  var hr = getHeadersAndRows(), headers = hr.headers, rows = hr.rows;
+  var page = parseInt(params.page || 1), pageSize = 50;
+  var filtered = applyFilters(rows, buildFilterSpec(params, headers));
+  var total = filtered.length;
+  var pageRows = filtered.slice((page - 1) * pageSize, page * pageSize).map(function(r){ return rowToObj(headers, r); });
+  return JSON.stringify({data: pageRows, total: total, page: page, pageSize: pageSize, cols: headers});
 }
 
 function handleHistorial(params){
-  var dni=String(params.dni||'').trim(),apellido=String(params.apellido||'').trim();
-  if(!dni&&!apellido)return JSON.stringify({data:[]});
-  var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
-  var dniIdx=headers.indexOf('DNI'),apeIdx=headers.indexOf('Apellidos');
-  var regs=rows.filter(function(row){return dni?String(row[dniIdx]||'').trim()===dni:String(row[apeIdx]||'').trim()===apellido;}).map(function(r){return rowToObj(headers,r);});
-  return JSON.stringify({data:regs,cols:headers});
+  var dni = String(params.dni || '').trim(), ape = normName(params.apellido), nom = normName(params.nombre);
+  if(!dni && !ape) return JSON.stringify({data: []});
+  var hr = getHeadersAndRows(), headers = hr.headers, rows = hr.rows;
+  var dniIdx = headers.indexOf('DNI'), apeIdx = headers.indexOf('Apellidos'), nomIdx = headers.indexOf('Nombres');
+  var regs = rows.filter(function(row){
+    if(dni && String(row[dniIdx] || '').trim() !== dni) return false;
+    if(ape && normName(row[apeIdx]) !== ape) return false;
+    if(nom && normName(row[nomIdx]) !== nom) return false;
+    return true;
+  }).map(function(r){ return rowToObj(headers, r); });
+  return JSON.stringify({data: regs, cols: headers});
 }
 
-function handleStats(){
-  var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
-  var anoIdx=headers.indexOf('Año');
-  var anosSet={};rows.forEach(function(r){var v=String(r[anoIdx]||'').trim();if(v)anosSet[v]=1;});
-  var anos=Object.keys(anosSet).sort();
-  var dniIdx=headers.indexOf('DNI'),apIdx=headers.indexOf('Apellidos');
-  var pSet={};rows.forEach(function(r){var v=String(r[dniIdx]||r[apIdx]||'');if(v)pSet[v]=1;});
-  function countBy(src,field){var idx=headers.indexOf(field);if(idx<0)return{};var m={};src.forEach(function(r){var v=String(r[idx]||'').trim();if(v)m[v]=(m[v]||0)+1;});return m;}
-  var global={total:rows.length,personas:Object.keys(pSet).length,anos:anos,
-    porAno:countBy(rows,'Año'),porCurso:countBy(rows,'Curso'),porJerarquia:countBy(rows,'Jerarquía'),
-    porProvincia:countBy(rows,'Provincia/País'),porBecado:countBy(rows,'Becado'),
-    porFuerza:countBy(rows,'Fuerza'),porDictado:countBy(rows,'Dictado'),nota:countBy(rows,'Nota')};
-  var porAnoDetalle={};
-  anos.forEach(function(ano){
-    var subset=rows.filter(function(r){return String(r[anoIdx]||'').trim()===ano;});
-    var psub={};subset.forEach(function(r){var v=String(r[dniIdx]||r[apIdx]||'');if(v)psub[v]=1;});
-    porAnoDetalle[ano]={total:subset.length,personas:Object.keys(psub).length,
-      porCurso:countBy(subset,'Curso'),porJerarquia:countBy(subset,'Jerarquía'),
-      porProvincia:countBy(subset,'Provincia/País'),porBecado:countBy(subset,'Becado'),
-      porFuerza:countBy(subset,'Fuerza'),porDictado:countBy(subset,'Dictado'),nota:countBy(subset,'Nota')};
+function handleStats(params){
+  var ckey = cacheKey('stats2', params, ['ano','dictado','jer','escuela']);
+  var cached = cacheGet(ckey);
+  if(cached) return cached;
+  var hr = getHeadersAndRows(), headers = hr.headers, rows = hr.rows;
+  var src = applyFilters(rows, buildFilterSpec(params, headers));
+  var dniIdx = headers.indexOf('DNI'), apIdx = headers.indexOf('Apellidos');
+  var pSet = {};
+  var nomIdx = headers.indexOf('Nombres');
+  src.forEach(function(r){ var v = personKey(String(r[dniIdx] || '').trim(), r[apIdx], r[nomIdx]); if(v !== '||') pSet['k_' + v] = 1; });
+  function countBy(field){
+    var idx = headers.indexOf(field);
+    if(idx < 0) return {};
+    var m = {};
+    src.forEach(function(r){ var v = String(r[idx] === undefined ? '' : r[idx]).trim(); if(v) m[v] = (m[v] || 0) + 1; });
+    return m;
+  }
+  var out = JSON.stringify({
+    total: src.length,
+    personas: Object.keys(pSet).length,
+    porAno: countBy('Año'), porCurso: countBy('Curso'), porJerarquia: countBy('Jerarquía'), porEscuela: countBy('Escuela'),
+    porProvincia: countBy('Provincia/País'), porBecado: countBy('Becado'),
+    porFuerza: countBy('Fuerza'), porDictado: countBy('Dictado'), nota: countBy('Nota')
   });
-  global.porAnoDetalle=porAnoDetalle;
-  return JSON.stringify(global);
+  cachePut(ckey, out);
+  return out;
 }
 
 function handleDuplicados(){
-  var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
-  var dniIdx=headers.indexOf('DNI'),apeIdx=headers.indexOf('Apellidos');
-  var curIdx=headers.indexOf('Curso'),anoIdx=headers.indexOf('Año');
-  var grupos={};
+  var ckey = cacheKey('dups2', {}, []);
+  var cached = cacheGet(ckey);
+  if(cached) return cached;
+  var hr = getHeadersAndRows(), headers = hr.headers, rows = hr.rows;
+  var dniIdx = headers.indexOf('DNI'), apeIdx = headers.indexOf('Apellidos'), nomIdx = headers.indexOf('Nombres');
+  var curIdx = headers.indexOf('Curso'), anoIdx = headers.indexOf('Año');
+  var grupos = {}, porDni = {};
   rows.forEach(function(row){
-    var dni=String(row[dniIdx]||'').trim(),ape=String(row[apeIdx]||'').trim();
-    var key=(dni||ape)+'||'+String(row[curIdx]||'').trim()+'||'+String(row[anoIdx]||'').trim();
-    if(!grupos[key])grupos[key]=[];
-    grupos[key].push(rowToObj(headers,row));
+    var dni = String(row[dniIdx] || '').trim(), ape = String(row[apeIdx] || '').trim();
+    var key = (dni || ape) + '||' + String(row[curIdx] || '').trim() + '||' + String(row[anoIdx] || '').trim();
+    if(!grupos[key]) grupos[key] = [];
+    grupos[key].push(row);
+    if(dni){
+      if(!porDni[dni]) porDni[dni] = {personas: {}, filas: []};
+      porDni[dni].personas[personKey(dni, row[apeIdx], row[nomIdx])] = 1;
+      porDni[dni].filas.push(row);
+    }
   });
-  var dups=Object.keys(grupos).filter(function(k){return grupos[k].length>1;}).map(function(k){return grupos[k];});
-  return JSON.stringify({grupos:dups,cols:headers});
+  var dups = Object.keys(grupos).filter(function(k){ return grupos[k].length > 1; }).map(function(k){
+    return grupos[k].map(function(r){ return rowToObj(headers, r); });
+  });
+  var comp = [];
+  Object.keys(porDni).forEach(function(d){
+    var e = porDni[d];
+    if(Object.keys(e.personas).length > 1){
+      var objs = e.filas.map(function(r){ return rowToObj(headers, r); });
+      objs.sort(function(a, b){
+        return normName(String(a['Apellidos']) + ' ' + String(a['Nombres'])).localeCompare(normName(String(b['Apellidos']) + ' ' + String(b['Nombres'])));
+      });
+      comp.push(objs);
+    }
+  });
+  var totalComp = comp.length;
+  if(comp.length > 100) comp = comp.slice(0, 100);
+  var out = JSON.stringify({grupos: dups, compartidos: comp, compartidosTotal: totalComp, cols: headers});
+  cachePut(ckey, out);
+  return out;
 }
 
 function handleGetPage(params){
-  var page=parseInt(params.page||1),pageSize=500;
-  var hr=getHeadersAndRows(),headers=hr.headers,rows=hr.rows;
-  var total=rows.length,totalPages=Math.ceil(total/pageSize);
-  var pageRows=rows.slice((page-1)*pageSize,page*pageSize).map(function(r){return rowToObj(headers,r);});
-  return JSON.stringify({data:pageRows,total:total,totalPages:totalPages,page:page,cols:headers});
+  var page = parseInt(params.page || 1), pageSize = 500;
+  var hr = getHeadersAndRows(), headers = hr.headers, rows = hr.rows;
+  var src = applyFilters(rows, buildFilterSpec(params, headers));
+  var total = src.length, totalPages = Math.ceil(total / pageSize);
+  var pageRows = src.slice((page - 1) * pageSize, page * pageSize).map(function(r){ return rowToObj(headers, r); });
+  return JSON.stringify({data: pageRows, total: total, totalPages: totalPages, page: page, cols: headers});
 }
 
 function doPost(e){
@@ -1026,6 +1284,7 @@ function doPost(e){
     for(var j=1;j<rows.length;j++){if(String(rows[j][ordIdx])===ord2){sheet.deleteRow(j+1);break;}}
     if(idx)idx.getRange(1,1).setValue(0);
   }
+  bumpCache();
   return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
 }</textarea>
 

@@ -144,6 +144,7 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
     <button onclick="showTab('descargar',this)">Descargar</button>
     <button onclick="showTab('config',this)">Configuración</button>
   </nav>
+  <div id="script-warning" style="display:none;background:var(--errl);color:var(--err);padding:10px 1.5rem;font-size:14px;border-bottom:1px solid var(--err)"></div>
   <main>
 
     <div id="tab-alumnos">
@@ -262,6 +263,7 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
           <div class="step"><div class="snum">2</div><p>Borra todo y pega el código de abajo.</p></div>
           <div class="step"><div class="snum">3</div><p>Implementar &rarr; Nueva implementación &rarr; Aplicación web &rarr; Cualquier usuario</p></div>
           <div class="step"><div class="snum">4</div><p>Copia la URL y pégala arriba.</p></div>
+          <div class="step"><div class="snum">5</div><p>Para actualizar un script ya publicado: Implementar → Gestionar implementaciones → lápiz → Versión: Nueva versión → Implementar. La URL no cambia.</p></div>
           <code id="ascode-display"></code>
           <button class="btn" style="margin-top:8px" onclick="copyScript()">Copiar código</button>
         </div>
@@ -279,8 +281,9 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw66tzXyXlO5tGAv_M0ffrp7Mn4O_0RU9a8GmHDxVs-RmXfEG5Ps8M-nwkhVcw43KA4/exec';
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDb7P9r4H_OKrl2pNcd1-DwQCz8Q4S3jGD8Y8hetNVaO8jLkcCRZA-N9HwGkN7eqNP/exec';
 var EDITOR_PWD = 'ADMIN123';
+var SCRIPT_MIN_VERSION = 6;
 var PERSONA_COLS = ['Apellidos','Nombres','DNI','Jerarquía','Escuela','Destino','Teléfono','Mail','Provincia/País','Fuerza'];
 var COL_DNI='DNI', COL_CURSO='Curso', COL_ANO='Año', COL_NOTA='Nota', COL_NOTA_NUM='Nota numérica', COL_BECADO='Becado';
 var CLRS=['#185FA5','#3B6D11','#BA7517','#A32D2D','#1D9E75','#534AB7','#D85A30','#639922'];
@@ -421,10 +424,18 @@ function msCloseAll(){ document.querySelectorAll('.ms.open').forEach(function(el
 function msVals(id){ return MS[id] ? Object.keys(MS[id].sel) : []; }
 function msParam(id){ return msVals(id).join('|'); }
 
+function checkScriptVersion(j){
+  var el = document.getElementById('script-warning');
+  var okv = !!j && Number(j.version) >= SCRIPT_MIN_VERSION;
+  el.style.display = okv ? 'none' : 'block';
+  if(!okv) el.innerHTML = '&#9888; El Apps Script publicado está desactualizado y la app no funcionará bien (filtros, estadísticas, Escuela, personas con el mismo DNI). ' +
+    'Ve a <b>Configuración → Copiar código</b>, pégalo en Apps Script y publica una <b>Nueva versión</b>.';
+}
 function loadFilterOptions(){
   var u = getUrl(); if(!u || u==='PEGAR_URL_AQUI') return;
   jsonp(u + '?action=getoptions', function(j){
     if(!j) return;
+    checkScriptVersion(j);
     if(j.cols) cols = j.cols;
     populateSelects(j);
   });
@@ -990,6 +1001,7 @@ document.addEventListener('keydown', function(e){
 const INDEX_NAME = 'Indice';
 const INDEX_MAX_AGE_MS = 60 * 60 * 1000;
 const INDEX_VERSION = 2;
+const SCRIPT_VERSION = 6;
 
 function getSheet(){return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);}
 
@@ -1141,7 +1153,7 @@ function cachePut(key, val){
 }
 
 function handleOptions(){
-  var ckey = cacheKey('options2', {}, []);
+  var ckey = cacheKey('options3', {}, []);
   var cached = cacheGet(ckey);
   if(cached) return cached;
   var hr = getHeadersAndRows(), headers = hr.headers, rows = hr.rows;
@@ -1152,7 +1164,7 @@ function handleOptions(){
     rows.forEach(function(r){ var v = String(r[idx] === undefined ? '' : r[idx]).trim(); if(v) s[v] = 1; });
     return Object.keys(s).sort();
   }
-  var out = JSON.stringify({cols: headers, anos: uniq('Año').reverse(), cursos: uniq('Curso'), notas: uniq('Nota'), dictados: uniq('Dictado'), fuerzas: uniq('Fuerza'), jerarquias: uniq('Jerarquía'), escuelas: uniq('Escuela')});
+  var out = JSON.stringify({version: SCRIPT_VERSION, cols: headers, anos: uniq('Año').reverse(), cursos: uniq('Curso'), notas: uniq('Nota'), dictados: uniq('Dictado'), fuerzas: uniq('Fuerza'), jerarquias: uniq('Jerarquía'), escuelas: uniq('Escuela')});
   cachePut(ckey, out);
   return out;
 }

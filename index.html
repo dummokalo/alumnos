@@ -281,7 +281,7 @@ code{background:var(--bg2);padding:1rem;display:block;border-radius:var(--r);fon
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjXb1HoFb5hH3-Tm2caFQ4PilsmR12xqWWv2WC-ZupdABIiQ2oGw53QPpl2YLFFVtv/exec';
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxznLA_BlWpgmT-F8RIrvMmVOvp0spHX4IynEoGflXNzhjHrPz--4wV-Nn025fMBfBZ/exec';
 var EDITOR_PWD = 'ADMIN123';
 var SCRIPT_MIN_VERSION = 6;
 var PERSONA_COLS = ['Apellidos','Nombres','DNI','Jerarquía','Escuela','Destino','Teléfono','Mail','Provincia/País','Fuerza'];
@@ -297,7 +297,7 @@ window.onload = function() {
   msInit('ms-sano','Año'); msInit('ms-sdictado','Dictado'); msInit('ms-sescuela','Escuela');
   document.addEventListener('click', function(e){ if(!e.target.closest('.ms')) msCloseAll(); });
   document.getElementById('pwdi').addEventListener('keydown', function(e){ if(e.key==='Enter') checkPwd(); });
-  var u = localStorage.getItem('script-url') || SCRIPT_URL;
+  var u = getUrl();
   if(u && u !== 'PEGAR_URL_AQUI') {
     localStorage.setItem('script-url', u);
     document.getElementById('surl').value = u;
@@ -308,7 +308,10 @@ window.onload = function() {
   setTimeout(flushQueue, 2000);
 };
 
-function getUrl(){ return localStorage.getItem('script-url') || SCRIPT_URL; }
+function urlFixed(){ return !!SCRIPT_URL && SCRIPT_URL !== 'PEGAR_URL_AQUI'; }
+function pwdFixed(){ return !!EDITOR_PWD && EDITOR_PWD !== 'PEGAR_CONTRASENA_AQUI'; }
+function getUrl(){ return urlFixed() ? SCRIPT_URL : (localStorage.getItem('script-url') || SCRIPT_URL); }
+function getPwd(){ return pwdFixed() ? EDITOR_PWD : (localStorage.getItem('editor-pwd') || EDITOR_PWD); }
 
 function toggleRole(){
   if(isEditor){ isEditor=false; updateRoleUI(); toast('Modo solo lectura.'); return; }
@@ -318,7 +321,7 @@ function toggleRole(){
   setTimeout(function(){ document.getElementById('pwdi').focus(); }, 100);
 }
 function checkPwd(){
-  var pwd = localStorage.getItem('editor-pwd') || EDITOR_PWD;
+  var pwd = getPwd();
   if(document.getElementById('pwdi').value === pwd){
     isEditor=true; updateRoleUI(); closeLogin(); toast('Modo editor activado.');
   } else { document.getElementById('pwderr').style.display='block'; }
@@ -978,8 +981,8 @@ function startDownload(){
   downloadPaged('', 'alumnos_base.xlsx', {btn:'dl-btn', box:'dl-progress', msg:'dl-msg', fill:'dl-fill'});
 }
 
-function saveUrl(){ var v=document.getElementById('surl').value.trim(); localStorage.setItem('script-url',v); toast('URL guardada.'); }
-function changePwd(){ var v=document.getElementById('npwd').value; if(!v){toast('Ingresa una contraseña.');return;} localStorage.setItem('editor-pwd',v); toast('Contraseña actualizada.'); }
+function saveUrl(){ if(urlFixed()){ toast('Esta app usa la URL fijada en el archivo (SCRIPT_URL). Para cambiarla, edita ese archivo.'); return; } var v=document.getElementById('surl').value.trim(); localStorage.setItem('script-url',v); toast('URL guardada.'); }
+function changePwd(){ if(pwdFixed()){ toast('La contraseña se define en el archivo (EDITOR_PWD). Para cambiarla, edita ese archivo.'); return; } var v=document.getElementById('npwd').value; if(!v){toast('Ingresa una contraseña.');return;} localStorage.setItem('editor-pwd',v); toast('Contraseña actualizada.'); }
 function copyScript(){ navigator.clipboard.writeText(document.getElementById('appsscript-code').value).then(function(){ toast('Código copiado.'); }); }
 
 function showTab(n, btn){
